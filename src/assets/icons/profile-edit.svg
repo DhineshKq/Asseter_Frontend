@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40">
+  <g id="edit" transform="translate(-415 -313)">
+    <g id="spacer" transform="translate(415 313)" fill="rgba(255,255,255,0)" stroke="rgba(0,0,0,0)" stroke-width="1">
+      <rect width="40" height="40" stroke="none"/>
+      <rect x="0.5" y="0.5" width="39" height="39" fill="none"/>
+    </g>
+    <g id="edit-2" data-name="edit" transform="translate(419 317)">
+      <path id="Path_17468" data-name="Path 17468" d="M18,30H33.456" transform="translate(-2.544 -0.598)" fill=""/>
+      <path id="Path_17468_-_Outline" data-name="Path 17468 - Outline" d="M34.112,32.313H18.656a1.656,1.656,0,1,1,0-3.313H34.112a1.656,1.656,0,1,1,0,3.313Z" transform="translate(-3.2 -1.254)" fill=""/>
+      <path id="Path_17469" data-name="Path 17469" d="M27.684,5.385a3.643,3.643,0,0,1,5.152,5.152L11.369,32,4.5,33.721l1.717-6.869Z" transform="translate(-4.5 -4.319)" fill=""/>
+    </g>
+  </g>
+</svg>

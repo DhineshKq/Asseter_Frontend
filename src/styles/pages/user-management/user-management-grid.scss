@@ -1,0 +1,137 @@
+.user-management-page {
+    margin: 0px 25px;
+
+    .user-management-header {
+        min-height: 84;
+        max-height: auto;
+        width: 100%;
+        display: flex;
+        flex-wrap: wrap;
+        // position: relative;
+
+        .user-management-dropdown {
+            margin-right: 10px;
+            margin-top: 5px;
+
+        }
+
+        .user-management-buttons {
+            height: 100%;
+            width: 230px;
+            display: flex;
+            align-items: center;
+            position: relative;
+            margin-top: 38px;
+
+            .user-management-refresh {
+                right: 5px;
+                top: 1%;
+                position: absolute;
+
+            }
+        }
+
+    }
+
+    .user-management-content-page {
+        background: #FFFFFF 0% 0% no-repeat padding-box;
+        box-shadow: 10px 30px 30px #2952854D;
+        border-radius: 30px;
+        opacity: 1;
+        margin-top: 10px;
+        min-height: calc(100vh - 190px);
+        max-height: auto;
+        width: 100%;
+        padding: 20px;
+    }
+}
+.custom-header-class{
+    padding-left: 20px !important;
+}
+
+
+// multiple select dropdown
+
+.dropdown-style-usermanagement {
+    
+    width: 300px;
+    border: 1px solid #A9C3DC !important;
+    padding-right: 45px;
+    padding-left: 10px;
+    padding-top: 2px;
+    height: 39px !important;
+    border-radius: 0px !important;
+    border-color: #FFFFFF !important;
+    border-style: none !important;
+ 
+    .MuiSelect-select {
+        padding: 0px !important;
+    }
+ 
+    .dropdown-style-gst:hover {
+        border-color: #FFFFFF !important;
+    }
+ 
+    .input {
+        padding: 0px !important;
+    }
+ 
+    fieldset {
+        border-style: none !important;
+ 
+    }
+ 
+    .css-hfutr2-MuiSvgIcon-root-MuiSelect-icon {
+        border-left: 1px solid #A9C3DC;
+    }
+ 
+    .css-bpeome-MuiSvgIcon-root-MuiSelect-icon {
+        border-right: 1px solid #A9C3DC;
+    }
+ 
+    svg path {
+        color: #A9C3DC;
+    }
+}
+ 
+.css-14s5rfu-MuiFormLabel-root-MuiInputLabel-root {
+    left: -4px !important;
+    top: -8px !important;
+}
+ 
+.MuiInputLabel-outlined,
+.css-p0rm37 {
+    left: -4px !important;
+    top: -8px !important;
+}
+ 
+ 
+ 
+.css-kk1bwy-MuiButtonBase-root-MuiMenuItem-root {
+    height: 50px !important;
+}
+ 
+.main-dd-flex {
+    display: flex;
+    align-items: end;
+    gap: 15px;
+    margin-top: 25px;
+}
+ 
+.css-6hp17o-MuiList-root-MuiMenu-list {
+    left: 0px !important;
+}
+ 
+.MuiMenu-list,
+.css-r8u8y9 {
+    left: 0px !important;
+}
+ 
+.placeholder-dropdown {
+    color: #A9C3DC !important;
+}
+ 
+.css-3dzjca-MuiPaper-root-MuiPopover-paper-MuiMenu-paper {
+    height: 255px;
+    overflow-y: scroll;
+}

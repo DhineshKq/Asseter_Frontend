@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="35" height="34.995" viewBox="0 0 35 34.995">
+  <g id="dashboard" transform="translate(-26.654 -136.457)">
+    <g id="spacer" transform="translate(26.654 136.457)" fill="rgba(255,255,255,0)" stroke="rgba(0,0,0,0)" stroke-width="1">
+      <rect width="35" height="34.995" stroke="none"/>
+      <rect x="0.5" y="0.5" width="34" height="33.995" fill="none"/>
+    </g>
+    <g id="dashboard_1_" data-name="dashboard (1)" transform="translate(31.871 141.673)">
+      <g id="_11" transform="translate(0 0)">
+        <path id="Path_35" data-name="Path 35" d="M203.679.035h-5.292a3.009,3.009,0,0,0-3.007,3.008V8.335a3.009,3.009,0,0,0,3.009,3.009h5.292a3.009,3.009,0,0,0,3.009-3.008h0V3.043A3.009,3.009,0,0,0,203.681.035h0Z" transform="translate(-182.123 -0.035)"/>
+        <path id="Path_36" data-name="Path 36" d="M8.3.035H3.011A3.009,3.009,0,0,0,0,3.042H0V8.335a3.009,3.009,0,0,0,3.01,3.009H8.3a3.009,3.009,0,0,0,3.009-3.009V3.043A3.009,3.009,0,0,0,8.3.035Z" transform="translate(0 -0.035)"/>
+        <path id="Path_37" data-name="Path 37" d="M203.679,195.346h-5.292a3.009,3.009,0,0,0-3.007,3.009v5.292a3.009,3.009,0,0,0,3.007,3.008h5.292a3.009,3.009,0,0,0,3.009-3.009v-5.292a3.009,3.009,0,0,0-3.009-3.009h0Z" transform="translate(-182.123 -182.093)"/>
+        <path id="Path_38" data-name="Path 38" d="M8.332,195.365H3.039A3.009,3.009,0,0,0,.03,198.374v5.292a3.009,3.009,0,0,0,3.009,3.008H8.332a3.009,3.009,0,0,0,3.009-3.009v-5.292A3.009,3.009,0,0,0,8.332,195.365Z" transform="translate(-0.028 -182.111)"/>
+      </g>
+    </g>
+  </g>
+</svg>

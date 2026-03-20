@@ -1,0 +1,123 @@
+.freight-grid-component {
+    width: 100%;
+    height: 300px;
+    overflow-x: auto;
+}
+
+.layout-center-sidebar-open {
+    .freight-grid-component {
+        width: calc(100vw - 410px);
+        height: 300px;
+        overflow-y: auto;
+        overflow-x: auto;
+        padding-right: 10px;
+    }
+}
+
+.freight-grid-component{
+    .view-table-component {
+        width: 100%;
+        margin: 0px 0px 0px 0px;
+        position: relative;
+    
+        table {
+            width: 100%;
+    
+            .main-body-header {
+                width: 100%;
+                margin-top: 10px;
+                border: 1px solid #B3CAE1;
+            }
+    
+            thead {
+                width: 100%;
+                background: var(--unnamed-color-333333) 0% 0% no-repeat padding-box;
+                background-color: #295285;
+                opacity: 1;
+                color: #FFFFFF;
+                margin-bottom: 5px;
+                height: 50px;
+                position: sticky;
+                z-index: 0;
+                top: 0;
+    
+                tr {
+                    width: 100%;
+                    height: 50px;
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    text-align: center;
+                }
+    
+                .access {
+                    display: flex;
+                    justify-content: flex-start;
+                    width: 12.5%;
+                    padding: 0px 20px;
+                    min-width: 182px;
+                }
+            }
+    
+            tbody {
+                width: 100%;
+    
+                .main-body-header {
+                    width: 100%;
+                    margin-top: 10px;
+                    border: 1px solid #B3CAE1;    
+                }
+                tr {
+                    margin-top: 10px;
+                    border: 1px solid #B3CAE1;
+                    width: 100%;
+                    height: 50px;
+                    background: var(--unnamed-color-ffffff) 0% 0% no-repeat padding-box;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+
+                    .middle-icons {
+                        min-width: 182px;
+                        width: 12.5%;
+                        display: flex;
+                        justify-content: flex-start;
+                        align-items: center;
+                        padding: 0px 20px;
+                    }
+                }
+    
+                .edit-Icon {
+                    width: 40px;
+                    height: 40px;
+                    background: #0055D4 0% 0% no-repeat padding-box;
+                    border-radius: 5px;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    margin-right: 8px;
+                }
+    
+                .delete-Icon {
+                    width: 40px;
+                    height: 40px;
+                    background: #D60000 0% 0% no-repeat padding-box;
+                    border-radius: 5px;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    margin-right: 8px;
+                }
+            }
+        }
+    }
+}
+
+
+@media all and (min-width: 750px) and (max-width: 1200px) {
+    .layout-center {
+        .freight-grid-component {
+            width: 100%;
+        }
+    }
+}

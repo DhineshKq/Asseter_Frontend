@@ -1,0 +1,50 @@
+.my-profile-details-component {
+    width: 100%;
+    min-height: 75.5vh;
+    height: auto;
+    background: #FFFFFF 0% 0% no-repeat padding-box;
+    box-shadow: 10px 20px 30px #2952854D;
+    border-radius: 30px;
+    padding: 30px;
+    position: relative;
+    overflow: hidden;
+
+    .profile-edit {
+        background-color: #295285;
+        color: white;
+        font-size: 35px;
+        height: 60px;
+        width: 60px;
+        position: absolute;
+        right: -13px;
+        top: -13px;
+        border-radius: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 18px 20px 10px 10px;
+        cursor: pointer;
+    }
+
+    .disable-profile-edit {
+        background-color: gray;
+        color: white;
+        font-size: 35px;
+        height: 60px;
+        width: 60px;
+        position: absolute;
+        right: -13px;
+        top: -13px;
+        border-radius: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 18px 20px 10px 10px;
+        cursor: not-allowed;
+        pointer-events: none;
+    }
+
+    .profile-edit:hover {
+        background-color: #429798;
+    }
+}

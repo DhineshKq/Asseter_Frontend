@@ -1,0 +1,41 @@
+.user-profile-overview-component {
+    width: 100%;
+    padding: 30px 0px 15px 0px;
+
+    p {
+        margin: 0px;
+        font-size: 16px;
+    }
+
+    .profile-details-main {
+
+        .profile-details {
+            font-weight: bold;
+            font-size: 20px;
+            color: #295285;
+            margin: 0px 0px 10px 0px;
+        }
+
+        .list-main {
+            display: flex;
+
+            .left-header {
+                width: 30%;
+                color: #295285;
+                margin: 5px 0px;
+            }
+
+            .right-name {
+                width: 55%;
+                margin: 5px 0px;
+                word-wrap: break-word;
+
+                .time-icon {
+                    color: #295285;
+                    margin-right: 10px;
+
+                }
+            }
+        }
+    }
+}

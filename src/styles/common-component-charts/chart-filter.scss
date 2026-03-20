@@ -1,0 +1,163 @@
+.mini-container {
+    height: 165px;
+    width: 410px;
+    background-color: white;
+    box-shadow: 0px 5px 10px #004E9C4C;
+    padding: 15px;
+
+    .header-container {
+        margin-bottom: 10px;
+
+        .filter-icon {
+            font-size: 25px;
+            color: #0055D4;
+            margin-right: 10px;
+        }
+    }
+
+    .data-container {
+        height: 100px;
+        width: 100%;
+        background-color: #F1F1F1;
+        border: 1px solid #A9C3DC;
+        padding: 10px;
+        display: flex;
+        flex-direction: column;
+    }
+}
+
+.main-filter-container {
+    width: 400px;
+    height: 98vh;
+    box-shadow: 0px 20px 30px #004E9C4C;
+    background-color: #F1F1F1;
+    padding: 30px;
+
+    .heading {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+
+        .filter-icon {
+            font-size: 20px;
+            color: #0055D4;
+            margin-right: 20px;
+            background-color: #dcebf9;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+        }
+
+        .arrow-icon {
+            font-size: 30px;
+            cursor: pointer;
+        }
+
+        span {
+            display: flex;
+            align-items: center;
+        }
+    }
+
+    .searching-bar {
+        position: relative;
+        margin-bottom: 20px;
+
+        input {
+            height: 40px;
+            width: 100%;
+            padding-left: 40px;
+        }
+
+        .search-icon {
+            position: absolute;
+            font-size: 25px;
+            top: 20px;
+            left: 10px;
+            color: #0055D4;
+        }
+    }
+
+    .sub-title-dropDown {
+        height: calc(100vh - 250px);
+        overflow: auto;
+
+        .contents {
+            height: auto;
+            width: 100%;
+            border-radius: 5px;
+            background-color: white;
+            position: relative;
+            margin-bottom: 10px;
+
+            .details {
+                padding: 15px;
+                width: 300px;
+                flex-direction: column;
+                display: flex;
+
+                .card-type {
+                    overflow-x: hidden;
+                }
+            }
+
+            .downarrow-icon {
+                position: absolute;
+                right: 10px;
+                top: 30px;
+                font-size: 20px;
+                color: #DFDFDF;
+                cursor: pointer;
+            }
+
+            .dropdown-datas {
+                padding-bottom: 10px;
+                width: 92%;
+                margin: 0 auto;
+            }
+
+            .checkbox-field {
+                padding-left: 15px;
+                display: flex;
+                align-items: center;
+
+                input {
+                    margin-right: 5px;
+                }
+            }
+
+            .checkbox-field-search {
+                width: 92%;
+                margin: 0 auto;
+                height: 40px;
+
+                input {
+                    height: 100%;
+                    padding-left: 23px;
+                }
+
+                .search-icon {
+                    top: 5px;
+                    left: 5px;
+                    font-size: 19px;
+                }
+            }
+        }
+    }
+}
+
+.MuiPaper-root,
+.css-3dzjca-MuiPaper-root-MuiPopover-paper-MuiMenu-paper {
+    // top: 508px !important;
+    margin-top: 8px;
+}
+
+//date css
+
+.date-input {
+    width: 305px;
+    height: 40px;
+    margin: 0px 5px 0px 0px;
+    padding: 0px 10px 0px 10px;
+}

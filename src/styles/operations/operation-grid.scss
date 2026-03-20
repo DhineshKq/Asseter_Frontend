@@ -1,0 +1,139 @@
+.operation-grid {
+    .vessel-name-grid-child {
+        display: flex;
+        line-height: 25px;
+        flex-direction: column;
+        white-space: normal;
+        // height: 100%;
+        min-height: 250px;
+        width: 100%;
+        padding-bottom: 10px;
+
+        p {
+            margin: 0px;
+        }
+    }
+
+    .vessel-name-grid-multy-child {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .button-navigator-icon-blue {
+        color: #295285;
+        border: 1px solid #295285;
+        background: #FFFFFF 0% 0% no-repeat padding-box;
+        border-radius: 15px;
+        padding: 3px 10px;
+        margin: 5px 5px !important;
+        height: 33px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        &:hover {
+            background-color: #429798;
+            color: #FFFFFF;
+            border: 1px solid #429798;
+        }
+    }
+
+    .disabled-button-navigator-icon-blue {
+        color: #295285 !important;
+        border: 1px solid #295285 !important;
+        background: rgb(175, 177, 182) !important;
+        cursor: not-allowed !important;
+        opacity: 0.8;
+    }
+
+    .butttons-wrapper-vessel-operation {
+        display: flex;
+        align-items: center;
+    }
+
+    .vessel-operation-yellow-button {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #FFC000;
+        padding: 3px 15px;
+        margin: 5px 5px;
+        height: 30px;
+        // width: 80px;
+        border-radius: 5px;
+    }
+
+    .voyage-number-wrapper {
+        display: flex;
+        gap: 5px;
+        color: #0875C8;
+        :first-child{
+            color: black;
+        }
+
+        .operation-estimate {
+            // text-decoration: underline;
+            border: 1px solid #295285;
+            background-color: #FFFFFF;
+            border-radius: 20px;
+            height: 30px;
+            padding-right: 8px;
+            display: flex;
+            align-items: center;
+            gap: 3px;
+            span {
+
+                background-color: #B3CAE1;
+                border: 2px solid #B3CAE1;
+                padding: 3px 6px;
+                border-radius: 50%;
+                display: flex;
+                height: 28px;
+                width: 28px;
+                align-items: center;
+                justify-content: center;
+                color: #0875C8;
+            }
+
+            &:hover {
+                background-color: #429798;
+                color: #FFFFFF !important;
+                border: 1px solid #429798;
+            }
+        }
+
+        .operation-actual {
+            // text-decoration: underline;
+            border: 1px solid #295285;
+            border-radius: 20px;
+            height: 30px;
+            padding-right: 8px;
+            display: flex;
+            align-items: center;
+            background-color: #FFFFFF;
+            gap: 3px;
+
+            span {
+                color: #FFFFFF;
+                background-color: #0C7B00;
+                border: 2px solid #0C7B00;
+                padding: 3px 6px;
+                border-radius: 50%;
+                display: flex;
+                height: 28px;
+                width: 28px;
+                align-items: center;
+                justify-content: center;
+
+            }
+
+            &:hover {
+                background-color: #429798;
+                color: #FFFFFF !important;
+                border: 1px solid #429798;
+            }
+        }
+
+    }
+
+}

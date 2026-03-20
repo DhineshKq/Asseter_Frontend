@@ -1,0 +1,337 @@
+.chatPage {
+  // width: 100%; /* Adjust width as needed */
+  width: 100%;
+  /* Limit maximum width for responsiveness */
+  height: auto;
+  background-color: #ffffff;
+  margin-top: -30px;
+
+  .chat-profile {
+    // height: 60px;
+    // width: 60px;
+    // background-color: rgba(139, 147, 149, 0.549);
+    // border-radius: 50%;
+    // position: relative;
+    // left: 15px;
+
+    height: 60px;
+    width: 60px;
+    border-radius: 50%;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    //   background-image: url("../../assets/images/profile.png");
+
+    .user-face-icon {
+      /* text-align: center; */
+      height: 50px;
+      width: 50px;
+      /* padding: 10px; */
+      overflow: hidden;
+      color: rgba(51, 55, 56, 0.549);
+      border-radius: 50%;
+      // padding: 2px;
+      background: antiquewhite;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-repeat: no-repeat;
+    }
+
+    .chat-online {
+      position: absolute;
+      top: 40px;
+      height: 10px;
+      width: 10px;
+      background-color: #0c7b00;
+      right: 8px;
+      border-radius: 50%;
+    }
+
+    .chat-offline {
+      position: absolute;
+      top: 40px;
+      height: 10px;
+      width: 10px;
+      background-color: #2d2e2d;
+      right: 8px;
+      border-radius: 50%;
+    }
+  }
+
+  .backArrowBackground {
+    width: 34px;
+    display: flex;
+    height: 34px;
+    background: #e5f0fb;
+    border-radius: 49px;
+    opacity: 1;
+    cursor: pointer;
+  }
+
+  .backarrow-icon {
+    cursor: pointer;
+    margin-top: 8px;
+    height: 17px;
+    width: 19px;
+    margin-left: 5px;
+  }
+
+  .profile-box {
+    display: flex;
+    justify-content: left;
+    position: sticky;
+    gap: 5px;
+    height: 60px;
+  }
+
+  .userName {
+    color: #295285;
+    font-size: 25px;
+    font-weight: bold;
+    // margin-left: 21px;
+    // margin-top: 13px;
+    height: 30px;
+  }
+
+  .online {
+    color: green;
+    // margin-top: 43px;
+    // display: flex;
+    // margin-left: 0px;
+    // position: fixed;
+    // right: 273px;
+  }
+
+  .offline {
+    color: grey;
+  }
+
+  .chat-placeholder {
+    height: 30px;
+    background: var(--unnamed-color-ffffff) 0% 0% no-repeat padding-box;
+    opacity: 1;
+    border: none;
+    color: black;
+    font: normal normal normal 18px/23px;
+    width: 45%;
+    /* Fill available width */
+    box-sizing: border-box;
+  }
+
+  .input-container {
+    width: 88%;
+    height: 100%;
+    /* Grow to fill available space */
+  }
+
+  textarea::placeholder {
+    color: #429798;
+    font: normal normal normal 18px/23px;
+    font-size: 18px;
+  }
+
+  .chatSendingBox {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    width: 100%;
+    height: 80px;
+
+    .textarea-container {
+      resize: none;
+      height: 100%;
+      width: 100%;
+      border: none;
+      outline: none;
+      overflow-y: auto;
+    }
+  }
+
+  .sendButtonIn {
+    border: none;
+    background: none;
+    height: 50px;
+    width: 50px;
+    cursor: pointer;
+  }
+
+  .messages-container {
+    height: 73vh;
+    margin-bottom: 10px;
+    padding: 10px;
+    overflow-y: scroll;
+    scrollbar-color: rgba(141, 141, 141, 0.585) rgb(255, 255, 255);
+    scrollbar-width: thin;
+
+    .received .message-bubble-main {
+      display: flex;
+      // position: absolute;
+    }
+
+    .sent .message-bubble-main {
+      display: flex;
+      // position: absolute;
+    }
+
+    .received .message-bubble-area-main {
+      height: 20px;
+      width: 25px;
+      position: relative;
+      left: 10px;
+      top: 10px;
+    }
+
+    .sent .message-bubble-area-main {
+      height: 20px;
+      width: 25px;
+      position: relative;
+      left: 180px;
+      top: 10px;
+    }
+
+    .received .arrow-down {
+      width: 0;
+      height: 0;
+      border-left: 20px solid transparent;
+      border-right: 20px solid transparent;
+      border-top: 20px solid #295285;
+    }
+
+    .sent .arrow-down {
+      width: 0;
+      height: 0;
+      border-left: 20px solid transparent;
+      border-right: 20px solid transparent;
+      border-top: 20px solid #e5f0fb;
+    }
+  }
+
+  .message {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 10px;
+    justify-content: flex-end;
+    /* Align sent messages to the right */
+  }
+
+  .received {
+    justify-content: flex-start;
+    /* Align received messages to the left */
+  }
+
+  .sent .message-bubble {
+    background-color: #e5f0fb;
+    color: black;
+    z-index: 1;
+    width: 230px;
+  }
+
+  .received .message-bubble {
+    background-color: #295285;
+    color: white;
+    margin-top: 10px;
+    width: 260px;
+    z-index: 1;
+  }
+
+  .profile-image .user-face-icon {
+    /* text-align: center; */
+    height: 50px;
+    width: 50px;
+    /* padding: 10px; */
+    overflow: hidden;
+    color: rgba(51, 55, 56, 0.549);
+    border-radius: 50%;
+    // padding: 2px;
+    background: antiquewhite;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-repeat: no-repeat;
+  }
+
+  .profile-image img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+  }
+
+  .message-bubble {
+    max-width: 70%;
+    border-radius: 10px;
+    padding: 10px 15px;
+    word-wrap: break-word;
+    margin-bottom: 5px;
+  }
+
+  .timestamp {
+    font-size: 0.8em;
+    color: #888;
+    margin-left: 5px;
+  }
+
+  .sendButtonDivider {
+    display: flex;
+    position: fixed;
+    justify-content: space-between;
+  }
+
+  .online_status {
+    color: green;
+    font-weight: bold;
+    font-family: "normal";
+  }
+
+  .offline_status {
+    color: rgb(220, 2, 2);
+    font-weight: bold;
+    font-family: "normal";
+  }
+
+  .online-dot {
+    width: 10px;
+    height: 10px;
+    background-color: green;
+    border-radius: 50%;
+    position: absolute;
+    bottom: 5px;
+    right: 4px;
+  }
+
+  .offline-dot {
+    width: 10px;
+    height: 10px;
+    background-color: red;
+    border-radius: 50%;
+    position: absolute;
+    bottom: 5px;
+    right: 4px;
+  }
+
+  /* CSS for status indicator */
+  .status-indicator {
+    width: 10px; /* Adjust width as needed */
+    height: 10px; /* Adjust height as needed */
+    border-radius: 50%; /* Makes it circular */
+    position: absolute; /* Positions the indicator */
+    bottom: 0; /* Places it at the bottom */
+    right: 0; /* Places it at the right */
+    border: 2px solid #fff; /* Border around the indicator */
+  }
+
+  /* CSS for online status */
+  .status-indicator.online {
+    background-color: #4caf50; /* Green color for online status */
+  }
+
+  /* CSS for offline status */
+  .status-indicator.offline {
+    background-color: #f44336; /* Red color for offline status */
+  }
+
+  // .fixedDiv{
+  //   position: fixed;
+  // }
+}

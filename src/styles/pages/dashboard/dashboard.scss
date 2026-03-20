@@ -1,0 +1,329 @@
+.dashboard-main-page {
+  margin: 0 auto;
+  background: var(--main-container-bg);
+  box-shadow: 0 10px 30px rgba(41, 82, 133, 0.3);
+  border-radius: 30px;
+  width: 98%;
+  max-width: 98%;
+  padding: 30px;
+  height: 92vh;
+  background-size: cover;
+  // margin-top: 20px;
+  top: 2px;
+  display: flex;
+  flex-direction: column;
+  // justify-content: center;
+  // align-items: center;
+  opacity: 1;
+
+  *:focus {
+    /* outline: 2px solid #123d70 !important; */
+    /* outline-color: #83C4FF !important; */
+    /* outline-color: #2684ff !important; */
+    display: none;
+}
+}
+
+body {
+  overflow: hidden;
+}
+
+.pageHeader {
+  // position: sticky;
+  top: 0;
+  // z-index: 10;
+  background: #fff; // prevents charts/tables overlapping
+  padding: 12px 0;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #e5e7eb;
+  .pageHeading {
+    font-size: 20px;
+    font-weight: 600;
+    color: #111827;
+  }
+}
+
+.dashboard-card {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  margin-bottom: 24px;
+  padding: 20px;
+}
+
+/* 🔥 Make card headers sticky inside each card */
+.dashboard-card .card-header {
+  position: sticky;
+  top: 55px; // below main header
+  z-index: 15;
+  background: #fff;
+  padding-bottom: 10px;
+  margin-bottom: 16px;
+  font-weight: 600;
+  border-bottom: 1px solid #eee;
+}
+
+.loading-state {
+  text-align: center;
+  margin-top: 60px;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #6b7280;
+  animation: pulse 1.5s infinite ease-in-out;
+}
+
+.recharts-pie-labels {
+  display: none;
+}
+
+/* ------------------ Card ------------------ */
+.card {
+  background: rgba(255, 255, 255, 0.92);
+  border-radius: 16px;
+  padding: 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box; // ensures padding doesn’t push it wider
+
+  .card-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 20px;
+    color: #1f2937;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    &::before {
+      content: "◆";
+      font-size: 0.7rem;
+      color: #4f46e5;
+    }
+  }
+}
+
+
+/* ------------------ Charts Row ------------------ */
+.charts-row {
+  display: grid;
+  grid-template-columns: 1fr; /* mobile default: stacked */
+  gap: 24px;
+  margin-bottom: 24px;
+
+  @media (min-width: 1024px) { /* lg breakpoint */
+    grid-template-columns: 1fr 1fr; /* side by side */
+  }
+
+  .card {
+    flex: 1;
+  }
+}
+
+
+
+/* ------------------ Assets ------------------ */
+.asset-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.asset-card.enhanced {
+  background: linear-gradient(135deg, #eef2ff, #e0e7ff);
+  padding: 20px;
+  border-radius: 16px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  box-shadow: inset 0 0 12px rgba(79, 70, 229, 0.05);
+
+  &:hover {
+    background: linear-gradient(135deg, #dbeafe, #c7d2fe);
+    transform: translateY(-4px) scale(1.02);
+  }
+
+  .icon-circle {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #4f46e5, #6366f1);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 12px;
+    font-size: 1.4rem;
+    box-shadow: 0 4px 10px rgba(79, 70, 229, 0.35);
+  }
+
+  .asset-value {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: #4338ca;
+  }
+
+  .asset-label {
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: #6b7280;
+    margin-top: 6px;
+  }
+}
+
+/* ------------------ Subscription ------------------ */
+.subscription-card {
+  .user-info {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px;
+
+    .avatar {
+      width: 45px;
+      height: 45px;
+      border-radius: 50%;
+      background: #4f46e5;
+      color: white;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 12px;
+    }
+
+    .plan-badge {
+      margin-left: auto;
+      padding: 5px 10px;
+      border-radius: 12px;
+      font-weight: bold;
+      font-size: 0.8rem;
+      background: #ffd700;
+      color: #333;
+    }
+  }
+
+  .expiry-section {
+    margin: 12px 0;
+    padding: 10px;
+    background: #f9fafb;
+    border-radius: 8px;
+
+    .expiry-label {
+      font-weight: bold;
+      margin-right: 6px;
+    }
+
+    .expiry-badge {
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 6px;
+
+      &.success {
+        background: #dcfce7;
+        color: #166534;
+      }
+
+      &.warning {
+        background: #fef9c3;
+        color: #92400e;
+      }
+
+      &.danger {
+        background: #fee2e2;
+        color: #991b1b;
+      }
+    }
+  }
+
+  .assets-section {
+    margin-top: 12px;
+
+    .progress-bar {
+      background: #f3f4f6;
+      height: 20px;
+      border-radius: 8px;
+      overflow: hidden;
+
+      .progress-fill {
+        height: 100%;
+        text-align: center;
+        font-size: 0.75rem;
+        color: white;
+        line-height: 20px;
+
+        &.success {
+          background: #22c55e;
+        }
+
+        &.warning {
+          background: #f59e0b;
+        }
+
+        &.danger {
+          background: #ef4444;
+        }
+      }
+    }
+
+    .assets-usage-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.85rem;
+      margin-top: 5px;
+      color: #374151;
+    }
+  }
+}
+
+
+/* ------------------ Workspace ------------------ */
+.workspace-card {
+  padding: 1rem;
+
+  .workspace-overview {
+    margin-bottom: 1rem;
+    font-size: 0.95rem;
+
+    p {
+      margin: 0.2rem 0;
+    }
+  }
+
+  .workspace-table {
+    width: 100%;
+    border-collapse: collapse;
+
+    th,
+    td {
+      padding: 0.6rem;
+      text-align: left;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .default-row {
+      background: #f3f4f6; // light gray highlight
+      font-weight: bold;
+    }
+  }
+}
+
+
+
+
+/* ------------------ Animations ------------------ */
+@keyframes pulse {
+  0% {
+    opacity: 0.5;
+  }
+
+  50% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0.5;
+  }
+}

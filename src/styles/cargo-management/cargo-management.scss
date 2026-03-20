@@ -1,0 +1,371 @@
+.main-cargo-management {
+    background: #FFFFFF 0% 0% no-repeat padding-box;
+    box-shadow: 10px 30px 30px #2952854D;
+    border-radius: 30px;
+    opacity: 1;
+    margin-top: 10px;
+    height: calc(100vh - 280px);
+    max-height: auto;
+    padding: 20px;
+
+    .form-header {
+        display: flex;
+        justify-content: space-between;
+        color: #295285;
+        width: 100%;
+        height: 35px;
+        border: 1px solid #B3CAE1;
+        border-radius: 35px;
+        z-index: 12;
+
+        div {
+            width: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-left: 1px solid #B3CAE1;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        div:first-child {
+            border-left: none;
+        }
+
+        .DONE {
+            background-color: #E5F0FB;
+            overflow: hidden;
+        }
+
+        .DONE:first-child {
+            background-color: #E5F0FB;
+            overflow: hidden;
+            border-top-left-radius: 35px;
+            border-bottom-left-radius: 35px;
+        }
+
+        .DONE:last-child {
+            background-color: #E5F0FB;
+            overflow: hidden;
+            border-top-right-radius: 35px;
+            border-bottom-right-radius: 35px;
+        }
+
+        .selected-header {
+            background-color: #B3CAE1;
+            overflow: hidden;
+        }
+
+        .selected-header:first-child {
+            background-color: #B3CAE1;
+            overflow: hidden;
+            border-top-left-radius: 35px;
+            border-bottom-left-radius: 35px;
+        }
+
+        .selected-header:last-child {
+            background-color: #B3CAE1;
+            overflow: hidden;
+            border-top-right-radius: 35px;
+            border-bottom-right-radius: 35px;
+        }
+    }
+}
+
+
+//Footer Style
+.operation-main-footer-cargo-management {
+    height: 80px;
+    background: #FFFFFF 0% 0% no-repeat padding-box;
+    box-shadow: 0px -10px 30px #2952854D;
+    border-radius: 30px 30px 0px 0px;
+    opacity: 1;
+    margin: 0px 25px;
+    margin-top: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    .operation-form-footer {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+}
+
+//Grid
+.cargo-details-grid {
+    line-height: 25px;
+}
+
+.cargo-management-ag-grid {
+    border: 1px solid #B3CAE1;
+    margin-top: 10px;
+    margin-right: 10px;
+    padding: 5px;
+    background-color: white;
+    border-radius: 30px;
+    box-shadow: 10px 30px 30px rgba(41, 82, 133, 0.3019607843);
+
+    .ag-cell {
+        padding: 0px !important;
+    }
+}
+
+.shipment-details-grid {
+
+    padding: 6px;
+    border-bottom: 1px solid #B3CAE1;
+
+    .shipment-details-main {
+        display: flex;
+        gap: 10px;
+        line-height: 25px;
+    }
+
+    .status {
+        // background-color: green;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #FFC000;
+        padding: 3px 15px;
+        margin: 5px 5px;
+        height: 30px;
+        border-radius: 5px;
+    }
+
+    .status.Completed {
+        background-color: #0C7B00;
+        color: white;
+    }
+
+    .status.Open {
+        background-color: #FFC000;
+    }
+
+    .status.NYS {
+        background-color: #E5F0FB;
+    }
+
+    .cargo-details-main {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .cargo-details-sub {
+        display: flex;
+        gap: 10px;
+    }
+
+}
+
+.shipment-details-grid:last-child {
+    border-bottom: none;
+}
+
+.cargo-manag-shipment-modal {
+
+    height: 100vh;
+    width: 100%;
+    background-color: rgba(58, 60, 60, 0.6);
+    position: fixed;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    top: 0px;
+    left: 0px;
+    z-index: 20;
+    overflow: hidden;
+    user-select: none;
+
+    .overall-position-header {
+        color: #295285;
+        font-size: 22px;
+        font-weight: 600;
+    }
+
+    .overall-position-table-view {
+        margin-top: 30px;
+    }
+
+    .table-row-header {
+        background-color: #295285;
+        color: white;
+        width: 150px;
+        text-align: center;
+    }
+
+    td {
+        text-align: right;
+        min-width: 150px;
+    }
+
+    .positive {
+        color: green;
+    }
+
+    .negative {
+        color: red;
+    }
+}
+
+.cargo-manag-shipment-container {
+    height: 92vh;
+    width: 55%;
+    background-color: #FFFFFF;
+    box-shadow: 0px 20px 30px rgba(0, 85, 212, 0.3019607843);
+    border-radius: 20px;
+    padding: 20px;
+    position: relative;
+
+    .close-icon {
+        position: absolute;
+        // top: -20px;
+        // right: -20px;
+        top: 20px;
+        right: 20px;
+        height: 45px;
+        width: 45px;
+        background-color: #F40202;
+        border-radius: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 35px;
+        color: white;
+        // box-shadow: 1px 1px 5px 8px rgba(200, 27, 27, 0.5);
+
+
+        .cross-icon {
+            transition: transform .4s ease-in-out;
+            display: flex;
+        }
+
+        &:hover {
+            .cross-icon {
+                // font-size: 10px;
+                transform: rotate(180deg);
+            }
+
+            cursor: pointer;
+        }
+    }
+}
+
+.shipment-style-flex {
+    display: flex;
+    align-items: center;
+    width: 245px;
+    justify-content: space-between;
+}
+
+.Add-style-flex {
+    display: flex;
+    align-items: center;
+    width: 150px;
+    justify-content: space-between;
+}
+
+
+.cargo-manag-shipment-table-wrapper {
+    width: 100%;
+    overflow: auto;
+    height: calc(100vh - 300px);
+
+    .cargo-manag-shipment-table {
+        thead {
+            background-color: #295285;
+        }
+
+        th {
+            background-color: #295285;
+            color: white;
+            border-width: 0;
+            // text-align: center;
+            vertical-align: top;
+            min-height: 50px;
+        }
+
+        td {
+            border-width: 0;
+            vertical-align: middle;
+            padding: 8px 0px;
+        }
+
+
+
+    }
+
+    .table-striped>tbody>tr:nth-of-type(odd)>* {
+        --bs-table-color-type: none !important;
+        --bs-table-bg-type: none !important;
+    }
+
+    .table-hover>tbody>tr:hover>* {
+        --bs-table-color-state: none !important;
+        --bs-table-bg-state: none !important;
+    }
+
+    .table-striped>tbody>tr:nth-of-type(odd)>* {
+        --bs-table-color-type: none !important;
+        --bs-table-bg-type: none !important;
+    }
+
+    .table-striped>tbody>tr:nth-of-type(odd)>* {
+        --bs-table-color-type: none !important;
+        --bs-table-bg-type: none !important;
+    }
+}
+
+
+
+.shipment-status.nys {
+    background-color: #E5F0FB;
+    text-align: center;
+    background: #E5F0FB;
+    width: 100px;
+    height: 30px;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 5px;
+}
+
+.shipment-status.completed {
+    background-color: green;
+    text-align: center;
+    width: 100px;
+    height: 30px;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 5px;
+    color: white;
+}
+
+.shipment-status.open {
+    background-color: #FFC000;
+    text-align: center;
+    width: 100px;
+    height: 30px;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 5px;
+}
+
+.shipment-row-records {
+    background-color: white;
+}
+
+
+.plus-icon-cargomanagement:hover {
+    background-color: #429798 !important;
+}

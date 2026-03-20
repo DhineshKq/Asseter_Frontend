@@ -1,0 +1,17 @@
+.my-profile-page{
+    padding: 0px 30px 30px 20px;
+    .my-profile-main{
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        margin: 30px 0px 0px 0px;
+        .my-profile-main-col{
+            padding:0px;
+            padding-right: 30px;
+        }
+        .my-profile-main-col-two {
+            padding:0px;  
+             padding-left: 30px;
+        }
+    }
+}

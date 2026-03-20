@@ -1,0 +1,141 @@
+input {
+    font-size: 18px;
+    outline: none;
+    border: 1px solid #A9C3DC;
+    background-color: var(--input-bg) !important;
+    color: var(--input-text-color) !important;
+}
+
+input::placeholder {
+    color: var(--input-text-color) !important;
+    opacity: 0.4;
+}
+.input-field input:focus {
+   border: 3px solid var(--btn-hover-bg) !important;
+    // opacity: 0.4;
+}
+
+.input-main {
+    -webkit-text-security: disc;
+}
+
+.title {
+    margin-bottom: 8px;
+    color: var(--text-color);
+}
+
+.mail-icon {
+    position: absolute;
+    left: 313px;
+    top: 40px;
+    color: #A9C3DC;
+}
+
+.mail-icon-w300 {
+    position: absolute;
+    left: 265px;
+    top: 40px;
+    color: #A9C3DC;
+}
+
+.gmail-input {
+    position: relative;
+
+    input {
+        padding: 0px 25px 5px 0px;
+    }
+}
+
+.input-field {
+    position: relative;
+}
+
+.mobilenumber-input {
+    input {
+        padding: 5px 5px 5px 55px;
+    }
+
+    .country-name {
+        position: absolute;
+        bottom: 0px;
+        opacity: 0.5;
+    }
+}
+
+.tool-tip {
+    position: absolute;
+    top: -40px;
+    // right: -10px;
+    height: auto;
+    width: 16vw;
+    padding: 20px 10px;
+    border-radius: 5px;
+    box-shadow: 0px 3px 6px #004E9C4C;
+    font-size: 15px;
+    border: 1px solid #A9C3DC;
+    background-color: #ffffff;
+    // z-index: 115 !important;
+    margin-left: 15px;
+
+    .arrow {
+        position: absolute;
+        left: -20px;
+        top: 33px;
+        z-index: 1;
+    }
+
+    .tooltip-title {
+        margin-bottom: 12px;
+        color: #0055D4;
+    }
+
+    .correct-icon {
+        color: green;
+    }
+
+    .wrong-icon {
+        color: red;
+    }
+
+    li {
+        color: red;
+        list-style: none;
+    }
+}
+
+.error-mesaage {
+    // position: absolute;
+    // top:39px;
+    font-size: 14px;
+    color: red;
+}
+
+.contact-icon {
+    color: #A9C3DC;
+}
+
+
+.dollar-sign-input {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #A9C3DC;
+    border-right: none;
+    border-radius: 5px;
+    border-top-right-radius: 0px;
+    border-bottom-right-radius: 0px;
+    background-color: #FFFFFF;
+}
+
+.input-dollar {
+    input {
+        border-top-right-radius: 5px !important;
+        border-bottom-right-radius: 5px !important;
+    }
+}
+input:disabled {
+    opacity: 0.5;
+    pointer-events: none; /* Optional: prevents interaction */
+}

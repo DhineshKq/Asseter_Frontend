@@ -1,0 +1,140 @@
+.layout-component {
+    width: 100%;
+    display: flex;
+    height: 100vh;
+    background-color: #f9fafc;
+
+    .sidebar {
+        position: fixed;
+        width: 250px;
+        z-index: 10;
+    
+        transition: transform 0.3s ease-in-out;
+    }
+
+    .chat {
+        position: fixed;
+        width: 500px;
+        right: 0px;
+        z-index: 15;
+        // top: 80px;
+        transition: transform 0.3s ease-in-out;
+    }
+
+    .chat-hidden {
+        transform: translateX(145%);
+    }
+
+    .sidebar-hidden {
+        transform: translateX(-115%);
+    }
+
+    .header {
+        position: fixed;
+        // left: 300px;
+        // z-index: 10;
+    }
+
+    .layout-center {
+        width: 100%;
+        margin-top: 70px;
+        // overflow-y: auto;
+        margin-left: 0px;
+        transition: margin-left 0.3s ease-in-out;
+
+    }
+
+    .layout-center-sidebar-open {
+        margin-left: 260px;
+        transition: margin-left 0.3s ease-in-out;
+    }
+}
+
+@media only screen and (max-width: 1200px) {
+    .layout-component .sidebar {
+        width: 75px;
+    }
+
+    .layout-center {
+        width: 100%;
+        margin-top: 80px;
+        margin-left: 80px;
+        overflow-y: auto;
+
+    }
+
+    .layout-component .layout-center-sidebar-open {
+        margin-left: 80px;
+        transition: margin-left 0.3s ease-in-out;
+    }
+}
+
+// @media only screen and (max-width: 1600px) {
+//     .layout-center {
+//         width: 100%;
+//         margin-top: 80px;
+//         margin-left: 100px !important;
+//         overflow-y: auto;
+
+//     }
+
+//     // .header {
+//     //     position: fixed;
+//     //     left: 100px !important;
+//     //     z-index: 10;
+//     // }
+
+//     .video-wrapper {
+//         position: absolute !important;
+//         left: 0px !important;
+//     }
+
+//     .navigator-icon-wrapper {
+//         left: 0px !important;
+//     }
+
+//     // .sidebar {
+//     //     position: fixed;
+//     //     width: 100px;
+//     //     z-index: 14;
+//     // }
+//     .documentation-header-doc {
+//         position: fixed;
+//         left: 0px !important;
+//         width: 100% !important;
+//     }
+
+// }
+
+// @media only screen and (max-width: 1200px) {
+//     .layout-component {
+//         .sidebar {
+//             position: absolute;
+//             left: -300px;
+//             transition: transform 0.3s ease-in-out;
+
+//         }
+
+//         .layout-center-sidebar-open {
+//             margin-left: 0px;
+//             transition: margin-left 0.3s ease-in-out;
+//         }
+//     }
+
+//     // .layout-component {
+//     //     .sidebar {
+//     //         position: fixed;
+//     //         width: 0px;
+//     //         z-index: 10;
+//     //         top: 80px;
+//     //         transition: transform 0.3s ease-in-out;
+//     //         transform: translateX(-100%);
+//     //     }
+//     // }
+// }
+
+// .documentation-header-doc {
+//     position: fixed;
+//     left: 0px !important;
+//     width: 100% !important;
+// }

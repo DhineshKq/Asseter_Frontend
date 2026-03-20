@@ -1,0 +1,243 @@
+.my-profile-image-component {
+    width: 100%;
+    height: 400px;
+    background: #FFFFFF 0% 0% no-repeat padding-box;
+    box-shadow: 10px 20px 30px #0066FF33;
+    border-radius: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+
+    p {
+        margin: 0px;
+    }
+
+    .center-profile-main {
+        position: relative;
+        margin-bottom: 40px;
+
+        .profile-pic-main {
+            border-radius: 50%;
+            display: block;
+            width: 140px;
+            height: 140px;
+            background: #B3CAE1 0% 0% no-repeat padding-box;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .profile-pic {
+            display: inline-block;
+            border-radius: 50%;
+            object-fit: cover;
+            width: 140px;
+            height: 140px;
+            color: #FFFFFF;
+        }
+
+        .profile-pic-icon {
+            width: 90px !important;
+            height: 90px !important;
+            fill: #FFFFFF !important;
+        }
+
+        .icon-main-disable {
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            width: 100px;
+            height: 40px;
+            border-radius: 20px 20px 20px 20px;
+            border: 1px solid #B3CAE1;
+            position: absolute;
+            bottom: -20px;
+            left: 20px;
+            background-color: gray;
+            pointer-events: none;
+            cursor: not-allowed;
+
+            .edit {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 50%;
+                border: none;
+                border-right: 1px solid #B3CAE1;
+                cursor: pointer;
+                background: none;
+
+                .edit-icon {
+                    width: 25px;
+                    height: 25px;
+                    fill: #295285;
+                }
+            }
+
+            .edit:hover {
+                background-color: #295285;
+                color: #FFFFFF;
+                width: 50%;
+                height: 40px;
+                border-radius: 20px 0px 0px 20px;
+
+                .edit-icon {
+                    fill: #FFFFFF;
+                }
+            }
+
+            .delete {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 50%;
+                cursor: pointer;
+                background: none;
+                border: none;
+
+                .delete-icon {
+                    width: 25px;
+                    height: 25px;
+                    color: #295285;
+                }
+            }
+
+            .delete-disabled {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 50%;
+                opacity: 0.5;
+                background: none;
+                border: none;
+
+                .delete-icon {
+                    width: 25px;
+                    height: 25px;
+                    color: #295285;
+                }
+            }
+
+            .delete:hover {
+                background-color: #295285;
+                color: #FFFFFF;
+                width: 50%;
+                height: 40px;
+                border-radius: 0px 20px 20px 0px;
+
+                .delete-icon {
+                    color: #FFFFFF;
+                }
+            }
+        }
+
+        .icon-main {
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            width: 100px;
+            height: 40px;
+            border-radius: 20px 20px 20px 20px;
+            border: 1px solid #B3CAE1;
+            position: absolute;
+            bottom: -20px;
+            left: 20px;
+            background-color: #FFFFFF;
+
+            .edit {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 50%;
+                border: none;
+                border-right: 1px solid #B3CAE1;
+                cursor: pointer;
+                background: none;
+
+                .edit-icon {
+                    width: 25px;
+                    height: 25px;
+                    fill: #295285;
+                }
+            }
+
+            .edit:hover {
+                background-color: #295285;
+                color: #FFFFFF;
+                width: 50%;
+                height: 40px;
+                border-radius: 20px 0px 0px 20px;
+
+                .edit-icon {
+                    fill: #FFFFFF;
+                }
+            }
+
+            .delete {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 50%;
+                cursor: pointer;
+                background: none;
+                border: none;
+
+                .delete-icon {
+                    width: 25px;
+                    height: 25px;
+                    color: #295285;
+                }
+            }
+
+            .delete-disabled {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 50%;
+                opacity: 0.5;
+                background: none;
+                border: none;
+
+                .delete-icon {
+                    width: 25px;
+                    height: 25px;
+                    color: #295285;
+                }
+            }
+
+            .delete:hover {
+                background-color: #295285;
+                color: #FFFFFF;
+                width: 50%;
+                height: 40px;
+                border-radius: 0px 20px 20px 0px;
+
+                .delete-icon {
+                    color: #FFFFFF;
+                }
+            }
+        }
+    }
+
+    .full-name {
+        text-align: center;
+        text-wrap: wrap;
+        font-weight: bold;
+        font-size: 30px;
+        color: #295285;
+        margin-bottom: 10px;
+        margin: 0px 10px;
+    }
+
+    .employee {
+        font-size: 20px;
+        color: #333333;
+    }
+
+    @media all and (min-width: 1000px) and (max-width: 1480px) {
+        .full-name {
+            font-size: 25px;
+        }
+    }
+}

@@ -1,0 +1,162 @@
+.tab-content {
+    width: 100% !important;
+    padding: 1rem;
+    width: 30%;
+
+    .workspace-creation {
+        margin-bottom: 2rem;
+        display: flex;
+        align-items: center;
+        width: 30%;
+
+        .form-group {
+            margin-bottom: 1rem;
+
+            .form-label {
+                font-weight: 600;
+                font-size: 1rem;
+                display: block;
+                margin-bottom: 0.5rem;
+            }
+
+            .form-control {
+                width: 100%;
+                padding: 0.5rem 0.75rem;
+                border: 1px solid #ccc;
+                border-radius: 6px;
+                font-size: 1rem;
+                outline: none;
+
+                &:focus {
+                    border-color: #007bff;
+                }
+            }
+        }
+
+        .buttons {
+            margin-top: 1rem;
+            width: 33% !important;
+
+            .common-btn {
+                font-size: 1rem;
+                font-weight: 500;
+                border: none;
+                border-radius: 6px;
+                cursor: pointer;
+                transition: background-color 0.2s ease;
+            }
+        }
+    }
+
+    // 🟦 Workspace Cards Grid
+    .workspace-list-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(310px, 0fr));
+        gap: 1.5rem;
+        margin-top: 2rem;
+    }
+
+    .workspace-card {
+        background-color: #f8fafc;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        padding: 1rem 1rem 0.5rem;
+        position: relative;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        transition: box-shadow 0.3s ease;
+        // width: 280px;    // or any fixed size you prefer
+        height: 220px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between; 
+      
+        .window-header {
+          display: flex;
+          gap: 6px;
+          margin-bottom: 0.8rem;
+      
+          .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+          }
+      
+          .red {
+            background-color: #ff5f57;
+          }
+      
+          .yellow {
+            background-color: #ffbd2e;
+          }
+      
+          .green {
+            background-color: #28c840;
+          }
+        }
+      
+        .workspace-info {
+          h4 {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #2a2a2a;
+            margin: 0;
+          }
+        }
+      
+        &:hover {
+          box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+      
+          .card-actions-hover {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+          }
+        }
+      
+        .card-actions-hover {
+          margin-top: 0.8rem;
+          background-color: #eef2f7;
+          border-top: 1px solid #dbe2ea;
+          padding: 0.5rem 0.75rem;
+          border-radius: 0 0 8px 8px;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+      
+          opacity: 0;
+          transform: translateY(5px);
+          transition: all 0.3s ease;
+          pointer-events: none;
+      
+          .card-action-text {
+            font-size: 0.88rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: color 0.2s ease;
+      
+            &.delete {
+              color: #dc3545;
+              &:hover {
+                text-decoration: underline;
+              }
+            }
+      
+            &.default {
+              color: #2d6cdf;
+      
+              &.active {
+                font-weight: 600;
+                color: #28a745;
+                pointer-events: none;
+              }
+      
+              &:hover {
+                text-decoration: underline;
+              }
+            }
+          }
+        }
+      }
+
+}

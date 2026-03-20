@@ -1,0 +1,19 @@
+.text-area{
+    div{
+        margin-bottom: 10px;
+    }
+    textarea{
+        border: 1px solid #A9C3DC;
+        outline: none;
+        resize: none;
+    }
+    textarea::placeholder{
+        color: #333333;
+        opacity: 0.4;
+    }
+
+    .error-mesaage{
+        font-size: 16px;
+        color: red;
+    }
+}

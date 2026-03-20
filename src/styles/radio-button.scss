@@ -1,0 +1,36 @@
+.radio-button {
+    display: flex;
+    align-items: center;
+    font-size: 18px;
+    color:var(--input-text-color);
+
+
+    input {
+        height: 18px;
+        width: 18px;
+        margin-right: 10px;
+        cursor: pointer;    
+    }
+    input[type=checkbox] {
+        accent-color: #295285;
+      }    
+      input[type=radio] {
+        accent-color: var(--h6-fonts);
+      }    
+    input:disabled {
+        cursor: auto;
+    }
+
+    .label-cursor-pointer{
+        cursor: pointer;
+        user-select: none;
+    }
+    .label-cursor {
+        cursor: not-allowed;
+        user-select: none;
+    }
+}
+.radio-button input:focus {
+    // outline: 1px solid #A9C3DC;
+    border-radius: 5px !important;
+}

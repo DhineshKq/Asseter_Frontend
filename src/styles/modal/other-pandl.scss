@@ -1,0 +1,306 @@
+.other-pandl-modal {
+
+    height: 100vh;
+    width: 100%;
+    background-color: rgba(58, 60, 60, 0.6);
+    position: fixed;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    top: 0px;
+    left: 0px;
+    z-index: 20;
+    overflow: hidden;
+    user-select: none;
+
+    .positive {
+        color: green !important;
+    }
+
+    .negative {
+        color: red !important;
+    }
+
+    .header-list {
+        text-align: right;
+        color: white;
+        background: #295285;
+        border: none;
+    }
+
+    .overall-position-header {
+        color: #295285;
+        font-size: 22px;
+        font-weight: 600;
+    }
+
+    .overall-position-table-view {
+        margin-top: 30px;
+    }
+
+    .table-row-header {
+        background-color: #295285;
+        color: white;
+        width: 150px;
+        text-align: center;
+
+        .left-header {
+            color: #295285;
+            padding: 10px 0px;
+            margin-bottom: 0px;
+            border-bottom: 1px solid white;
+        }
+    }
+
+    .right-value-td {
+        padding: 0px;
+
+        .right-value {
+            height: 45px;
+            color: #295285;
+            padding: 10px 10px;
+            margin-bottom: 0px;
+            border-bottom: 1px solid #B3CAE1;
+        }
+    }
+
+    td {
+        text-align: right;
+        min-width: 150px;
+    }
+
+    .positive {
+        color: green;
+    }
+
+    .negative {
+        color: red;
+    }
+}
+
+.modal-derivative {
+    .access {
+        width: 10%;
+        padding: 0px 7px !important;
+    }
+
+    .middle-icons {
+        width: 10%;
+        padding: 0px 7px !important;
+    }
+}
+
+.modal-table {
+    height: 70vh !important;
+    max-height: calc(100vh - 330px) !important;
+    margin-top: 30px;
+}
+
+.realised-modal-heading {
+    font-size: 22px;
+    font-weight: bold;
+    color: #295285;
+}
+
+.other-pandl-container {
+    height: 57vh;
+    width: 30%;
+    background-color: #FFFFFF;
+    box-shadow: 0px 20px 30px rgba(0, 85, 212, 0.3019607843);
+    border-radius: 20px;
+    padding: 20px;
+    position: relative;
+
+    .close-icon {
+        position: absolute;
+        // top: -20px;
+        // right: -20px;
+        top: 20px;
+        right: 20px;
+        height: 45px;
+        width: 45px;
+        background-color: #F40202;
+        border-radius: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 35px;
+        color: white;
+        // box-shadow: 1px 1px 5px 8px rgba(200, 27, 27, 0.5);
+
+
+        .cross-icon {
+            transition: transform .4s ease-in-out;
+            display: flex;
+        }
+
+        &:hover {
+            .cross-icon {
+                // font-size: 10px;
+                transform: rotate(180deg);
+            }
+
+            cursor: pointer;
+        }
+    }
+
+    .main-heading {
+        font-size: 24px;
+        font-weight: 600;
+        color: #295285,
+    }
+
+    .details-grid {
+        display: flex;
+        flex-direction: row;
+        gap: 10px;
+        width: 100%;
+
+        .details-grid-heading {
+            font-weight: 600;
+            width: 40%;
+        }
+
+        .details-grid-values {
+            text-align: right;
+            width: 20%;
+        }
+    }
+
+
+    .other-amount-details {
+        margin-top: 30px;
+        width: 100%;
+    }
+
+
+    .other-details-sub-container {
+        display: flex;
+        // justify-content: center;
+        // align-items: center;
+        width: 100%;
+        height: 100%;
+        overflow-y: auto;
+
+
+        .table {
+            width: 100%;
+            overflow: auto;
+            border-collapse: separate;
+            border-spacing: 3px;
+            // padding: 20px 20px;
+            margin: 0px;
+            margin-top: 15px;
+            // height: calc(45vh - 90px) !important;
+            max-height: 35vh;
+            /* Adjust the gap between cells */
+
+            th,
+            td {
+                padding: 5px;
+                text-align: center;
+                border: 1px solid #b3cae1;
+                /* Add border to all cells */
+                width: 150px;
+                /* Set fixed width for all cells */
+            }
+
+            th {
+                font-weight: 600;
+                background-color: #295285 !important;
+                color: white !important;
+                height: 20px !important;
+            }
+
+            .text-right {
+                text-align: right;
+            }
+
+            .header-row th {
+                border-top: 1px solid white;
+                /* Add top border to header row */
+                border-bottom: 1px solid white;
+            }
+
+            .sub-header-row th {
+                background-color: #295285 !important;
+                color: white;
+            }
+
+            .sub-header-row th:nth-child(odd) {
+                border-right: 1px solid white;
+            }
+
+            .sub-header-row th:nth-child(even) {
+                border-left: 1px solid white;
+            }
+
+            .particulars-column {
+                text-align: left;
+                vertical-align: middle;
+                padding-left: 10px;
+            }
+
+            .estimate-out {
+                text-align: right;
+            }
+
+            .particulars {
+                text-align: left;
+                font-weight: 600;
+                padding-left: 10px;
+            }
+
+            .total-cost-row {
+                font-weight: 600;
+            }
+
+            .data-row td {
+                height: 40px;
+                border-collapse: separate;
+                /* Separate borders for data cells */
+                border-spacing: 5px;
+                /* Even gaps between cells */
+            }
+
+            .data-row-total {
+                border-collapse: separate;
+                /* Separate borders for data cells */
+                border-spacing: 5px;
+                /* Even gaps between cells */
+            }
+
+            .data-row td:first-child {
+                border-left: 1px solid #b3cae1;
+                /* Remove left border for first column data cells */
+            }
+
+            .data-row td:last-child {
+                border-right: 1px solid #b3cae1;
+                /* Remove right border for last column data cells */
+            }
+
+            .empty-row td {
+                height: 80px;
+                /* Adjust height as needed */
+                background-color: #f0f7ff;
+            }
+
+            .data-row.selected {
+                background-color: #f0f7ff;
+            }
+
+            .data-row:hover {
+                background-color: #f0f7ff;
+            }
+        }
+    }
+
+}
+
+@media only screen and (min-width: 1780px) and (max-width: 1880px) {
+    .other-pandl-container {
+        transform: scale(0.8);
+    }
+}

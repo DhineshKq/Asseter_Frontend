@@ -1,0 +1,63 @@
+@import "./styles/themes/light.scss";
+@import "./styles/themes/dark.scss";
+@import "./styles/themes/sunset.scss";
+@import "./styles/themes/pastel.scss";
+@import "./styles/themes/aqua.scss";
+@import "./styles/themes/purple.scss";
+@import "./styles/themes/midnight.scss";
+@import "./styles/themes/galaxy.scss";
+@import "./styles/themes/nord.scss";
+@import "./styles/themes/deepsea.scss";
+
+
+
+
+
+body {
+  margin: 0;
+  font-family: Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #F0F7FF !important;
+  // user-select: none;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+/* width */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  box-shadow: inset 0 0 5px grey; 
+  border-radius: 10px;
+}
+ 
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background:#545454db; 
+  border-radius: 10px;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #545454a7; 
+}
+
+*:focus {
+  /* outline: 2px solid #123d70 !important; */
+  /* outline-color: #83C4FF  !important; */
+  outline-color: #2684ff  !important;
+}
+.button-color {
+  background: var(--btn-primary-bg) !important;
+
+  &:hover {
+    background: var(--btn-hover-bg) !important;
+  }
+}

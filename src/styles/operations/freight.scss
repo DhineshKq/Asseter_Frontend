@@ -1,0 +1,63 @@
+.freight-component {
+    width: 100%;
+    height: calc(100vh - 350px);
+    overflow-y: auto;
+    padding-right: 10px;
+
+    .freight-component-seprate {
+        width: 100%;
+        display: flex;
+    }
+
+    .freight-form-main {
+        width: 90%;
+        display: flex;
+        flex-wrap: wrap;
+        margin: 20px 0px;
+        border-right: 1px solid rgb(169, 195, 220);
+    }
+
+    .input-component-main {
+        height: 100px;
+        margin-right: 15px;
+    }
+
+    .edit-profile-dropdown {
+        margin-right: 15px;
+    }
+
+    .index-main {
+        position: relative;
+        display: flex;
+        align-items: flex-end;
+        margin-right: 15px;
+
+        .input-dropdown {
+            position: absolute;
+            top: 0px;
+            right: 0px;
+            padding-top: 32.4px;
+            width: 130px;
+            height: 100px;
+        }
+    }
+
+    .add-button {
+        width: 10%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin: 0px 20px;
+    }
+}
+
+.freight-component {
+    .index-main {
+
+        input {
+            border-right: none !important;
+            border-top-right-radius: 0px !important;
+            border-bottom-right-radius: 0px !important;
+        }
+    }
+}

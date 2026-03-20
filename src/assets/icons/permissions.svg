@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="35" height="35" viewBox="0 0 35 35">
+  <g id="permissions" transform="translate(-610.728 -684.365)">
+    <g id="spacer" transform="translate(610.728 684.365)" fill="rgba(255,255,255,0)" stroke="rgba(0,0,0,0)" stroke-width="1">
+      <rect width="35" height="35" stroke="none"/>
+      <rect x="0.5" y="0.5" width="34" height="34" fill="none"/>
+    </g>
+    <g id="user" transform="translate(613.14 687.284)">
+      <path id="Path_53" data-name="Path 53" d="M329.116,261.071H328.8v-1.9a3.143,3.143,0,1,0-6.286,0v1.9H322.2a2.212,2.212,0,0,0-2.2,2.219v4.438a2.212,2.212,0,0,0,2.2,2.219h6.915a2.212,2.212,0,0,0,2.2-2.219V263.29A2.212,2.212,0,0,0,329.116,261.071Zm-4.715-1.9a1.257,1.257,0,1,1,2.514,0v1.9H324.4Zm0,0" transform="translate(-301.141 -240.785)" />
+      <path id="Path_54" data-name="Path 54" d="M16.974,263.29a4.128,4.128,0,0,1,2.515-3.8v-.317a5.047,5.047,0,0,1,.492-2.149A5.908,5.908,0,0,0,16.659,256H5.972A6,6,0,0,0,0,262.022v4.438a.947.947,0,0,0,.943.951H16.974Zm0,0" transform="translate(0 -240.785)" />
+      <path id="Path_55" data-name="Path 55" d="M97.905,6.34A6.287,6.287,0,1,1,91.619,0,6.313,6.313,0,0,1,97.905,6.34Zm0,0" transform="translate(-80.303)" />
+    </g>
+  </g>
+</svg>

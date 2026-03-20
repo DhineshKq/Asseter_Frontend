@@ -1,0 +1,83 @@
+.my-profile-modal-component {
+    width: 260px;
+    height: 205px;
+    background: #F0F7FF 0% 0% no-repeat padding-box;
+    box-shadow: 0px 20px 20px #2952854D;
+    border-radius: 0px 0px 10px 10px;
+    opacity: 1;
+    position: absolute;
+    top: 73px;
+    right: 30px;
+
+    p {
+        margin: 0px;
+    }
+
+    .profile-name-main {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        border-bottom: 1px solid #B3CAE1;
+        padding: 10px 0px;
+
+        .profile-name {
+            // width: 154px;
+            // height: 27px;
+            text-align: center;
+            font-size: 20px;
+            color: #295285;
+            margin: 3px;
+        }
+
+        .profile-email {
+            text-align: center;
+            color: #333333;
+            font-size: 16px;
+            margin: 3px;
+        }
+
+        .profile-date {
+            text-align: center;
+            color: #333333;
+            font-size: 16px;
+            margin: 3px;
+        }
+    }
+
+    .profile-name-bottom-main {
+        padding: 0px 15px 15px 15px;
+        color: #295285;
+
+        .myprofile-main {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid #B3CAE1;
+            padding: 7px;
+
+            .icon {
+                width: 25%;
+                .my-profile-icon{
+                    stroke: #295285;
+                    fill: #295285 ;
+                }
+            }
+
+            .name {
+                width: 75%;
+                font-size: 16px;
+            }
+        }
+
+        .myprofile-main:hover {
+            cursor: pointer;
+            color: #429798;
+            font-weight: bold;
+            .my-profile-icon{
+                stroke: #429798 !important;
+                fill: #429798 !important;
+            }
+        }
+    }
+}

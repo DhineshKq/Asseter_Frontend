@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40">
+  <g id="edit" transform="translate(-2980 -125)">
+    <g id="spacer" transform="translate(2980 125)" fill="rgba(255,255,255,0)" stroke="rgba(0,0,0,0)" stroke-width="1">
+      <rect width="40" height="40" stroke="none"/>
+      <rect x="0.5" y="0.5" width="39" height="39" fill="none"/>
+    </g>
+    <path id="Icon_material-mode-edit" data-name="Icon material-mode-edit" d="M4.5,26.629v5.823h5.824L27.5,15.277,21.676,9.454ZM32,10.774a1.547,1.547,0,0,0,0-2.19L28.369,4.95a1.547,1.547,0,0,0-2.19,0L23.337,7.792l5.824,5.823Z" transform="translate(2981.5 126.504)" fill="#295285"/>
+  </g>
+</svg>

@@ -1,0 +1,241 @@
+.chat-search-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+
+    .modal-content {
+        background-color: #ffffff;
+        padding: 20px;
+        border-radius: 8px;
+        max-width: 400px;
+        width: 100%;
+        height: 60vh;
+        margin-bottom: 100px;
+    }
+
+    .close-btn {
+        position: absolute;
+        top: 10px;
+        right: 15px; // Adjust as needed
+        cursor: pointer;
+        transition: transform 0.3s ease; // Add transition for smooth effect
+    }
+
+    .close-btn:hover {
+        transform: scale(1.2) rotate(45deg); // Rotate and enlarge the button on hover
+    }
+
+    .chat-search-modal-title {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    .avatar {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        margin-right: 10px;
+    }
+
+    .input {
+        padding: 10px;
+        margin-bottom: 20px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        font-size: 16px;
+        width: 85%;
+    }
+
+    .chat-user-list {
+        height: calc(89vh - 130px); // Adjusting height for input and title
+        overflow-y: auto;
+        align-items: normal;
+
+        &::-webkit-scrollbar {
+            width: 0;
+        }
+
+        .chat-user-main-list {
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 1px solid #eaeaea;
+            width: 100%;
+            cursor: pointer;
+            padding: 5px;
+
+            .close-icon {
+                margin-bottom: -2px;
+                margin-left: 90px;
+                font-size: 25px;
+                cursor: pointer;
+                width: 15%;
+                // display: none;
+
+                // Define animation
+                @keyframes shake {
+                    0% {
+                        transform: translateX(0);
+                    }
+
+                    25% {
+                        transform: translateX(-5px);
+                    }
+
+                    50% {
+                        transform: translateX(5px);
+                    }
+
+                    75% {
+                        transform: translateX(-5px);
+                    }
+
+                    100% {
+                        transform: translateX(0);
+                    }
+                }
+            }
+
+            .close-icon :hover {
+                // background-color: black;
+                animation: shake 0.5s ease; // Apply animation on hover
+            }
+
+        }
+
+        .chat-user-main-list:hover {
+            background-color: #4d4c4c14;
+            border: none;
+            border-radius: 5px;
+        }
+
+        // .chat-user-main-list:hover .close-icon {
+        //     display: block;
+        // }
+
+        .user-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            cursor: pointer;
+            width: 70%;
+            gap: 5px;
+
+            .avatar {
+                margin-right: 10px;
+                width: 50px;
+                height: 50px;
+                border-radius: 50%;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                font-size: 20px;
+                overflow: hidden;
+                color: rgba(51, 55, 56, 0.549);
+                // padding: 2px;
+                background: antiquewhite;
+                background-repeat: no-repeat;
+            }
+
+            .user-details {
+                display: flex;
+                flex-direction: column;
+                margin-left: 30px;
+
+            }
+
+            // Define animation
+            // @keyframes shake {
+            //     0% {
+            //         transform: translateX(0);
+            //     }
+
+            //     25% {
+            //         transform: translateX(-5px);
+            //     }
+
+            //     50% {
+            //         transform: translateX(5px);
+            //     }
+
+            //     75% {
+            //         transform: translateX(-5px);
+            //     }
+
+            //     100% {
+            //         transform: translateX(0);
+            //     }
+            // }
+
+            .user-name {
+                font-size: 17px;
+                font-weight: bold;
+                margin-top: 6px;
+                // color: #6e6d6d;
+                color: black;
+                cursor: pointer;
+                position: relative;
+                // transition: z-index 0.3s ease, transform 0.3s ease; 
+            }
+
+            // .user-name:hover {
+            //     color: black;
+            //     z-index: 1;
+            //     transform: translateX(3px); // Move the name slightly forward on hover
+            // }
+
+
+
+            .tapToChat {
+                font-size: 12px;
+                font-weight: bold;
+                margin-top: 6px;
+                color: #6e6d6d;
+                transition: margin-left 0.3s ease;
+                /* Add transition property */
+                cursor: pointer;
+            }
+
+            .user-img-url {
+                font-size: 14px;
+                color: #666;
+            }
+        }
+    }
+
+    .chat-search-modal-close-icon {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        height: 35px;
+        width: 35px;
+        background-color: #F40202;
+        border-radius: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 35px;
+        color: white;
+
+        .chat-search-modal-cross-icon {
+            transition: transform 0.4s ease-in-out;
+            display: flex;
+        }
+
+        &:hover {
+            .chat-search-modal-cross-icon {
+                // font-size: 10px;
+                transform: rotate(180deg);
+            }
+
+            cursor: pointer;
+        }
+    }
+}

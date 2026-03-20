@@ -1,0 +1,515 @@
+.invoice-preview-modal {
+    height: 100vh;
+    width: 100%;
+    background-color: rgba(58, 60, 60, 0.6);
+    position: fixed;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    top: 0px;
+    left: 0px;
+    z-index: 20;
+    overflow: hidden;
+    user-select: none;
+
+    .invoice-preview-container {
+        height: 900px;
+        width: 850px;
+        background-color: #FFFFFF;
+        box-shadow: 0px 20px 30px #0055D44D;
+        border-radius: 20px;
+        padding: 30px;
+        position: relative;
+
+        .invoice-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            color: #429798;
+            font-weight: 500;
+            margin-right: 100px;
+        }
+
+        .netbulk-logo {
+            width: 160px;
+            height: 45px;
+        }
+
+        .details-container {
+            height: 600px;
+            // background-color: aqua;
+            overflow: auto;
+
+            .bill-details {
+                display: flex;
+
+                .bill-from-address {
+                    /* height: 280px; */
+                    width: 395px;
+                    min-height: 280px;
+                    height: auto;
+                    border: 1px solid #B3CAE1;
+                    padding-left: 10px;
+                    padding-top: 10px;
+
+                    .bill-from-header {
+                        font-size: 20px;
+                        color: #295285;
+                        font-weight: 500;
+                        padding-bottom: 10px;
+                    }
+
+                    .bill-from-name {
+                        font-size: 18px;
+                        color: black;
+                        font-weight: 500;
+                        // padding-top: 5px;
+                    }
+
+                }
+
+                .bill-to-address {
+                    min-height: 280px;
+                    height: auto;
+                    width: 395px;
+                    border: 1px solid #B3CAE1;
+                    padding-left: 10px;
+                    padding-top: 10px;
+                    // background-color: black;
+                }
+            }
+
+            .description-amount {
+                width: 100%;
+                display: flex;
+                margin-top: 10px;
+
+                .invoice-description {
+                    height: 45px;
+                    width: 75%;
+                    background-color: #295285;
+                    /* text-align: end; */
+                    padding-left: 10px;
+                    padding-top: 8px;
+                    color: #FFFFFF;
+
+                }
+
+                .invoice-amount {
+                    height: 45px;
+                    width: 25%;
+                    background-color: #295285;
+                    text-align: end;
+                    padding-left: 10px;
+                    padding-top: 8px;
+                    border-left: 1px solid #B3CAE1;
+                    color: #FFFFFF;
+                    padding-right: 40px;
+
+                }
+
+            }
+
+            .invoice-description-value {
+                height: auto;
+                min-height: 120px;
+                border: 1px solid #B3CAE1;
+                /* margin-top: 2px; */
+                padding-left: 10px;
+                border-right: none;
+                width: 586px;
+            }
+
+            .amount-values {
+                width: 100%;
+                display: flex;
+
+                .freight-percentage {
+                    width: 75%;
+                    height: auto;
+                    // background-color: black;
+                    border: 1px solid #B3CAE1;
+                    min-height: 200px;
+
+                }
+
+                .total-amount {
+                    width: 25%;
+                    height: auto;
+                    // background-color: yellow;
+                    border: 1px solid #B3CAE1;
+                    min-height: 200px;
+
+                    .amount-flex {
+                        display: flex;
+                        flex-direction: column;
+                        align-items: flex-end;
+                        /* padding-left: 20px; */
+                        padding-right: 40px;
+                    }
+                }
+            }
+
+            .tcin-amount-values {
+                width: 100%;
+
+                .hire-period-main {
+                    display: flex;
+
+                    .hire-period-datas {
+                        height: auto;
+                        min-height: 80px;
+                        width: 586px;
+                        border: 1px solid #B3CAE1;
+                        border-bottom: none;
+                        padding-left: 10px;
+                    }
+
+                    .hire-period-total {
+                        width: 194px;
+                        display: flex;
+                        justify-content: end;
+                        padding-right: 35px;
+                        flex-direction: column;
+                        align-items: end;
+                        border: 1px solid #B3CAE1;
+                        border-bottom: none;
+                    }
+                }
+
+                .cve-period-main {
+                    display: flex;
+
+                    .cve-period-datas {
+                        height: auto;
+                        min-height: 80px;
+                        width: 586px;
+                        border: 1px solid #B3CAE1;
+                        border-bottom: none;
+                        padding-left: 10px;
+                    }
+
+                    .cve-period-total {
+                        width: 194px;
+                        display: flex;
+                        justify-content: end;
+                        padding-right: 35px;
+                        flex-direction: column;
+                        align-items: end;
+                        border: 1px solid #B3CAE1;
+                        border-bottom: none;
+                    }
+                }
+
+                .add-comm-main {
+                    display: flex;
+
+                    .add-comm-datas {
+                        height: auto;
+                        min-height: 80px;
+                        width: 586px;
+                        // border: 1px solid #B3CAE1;
+                        border-right: 1px solid #B3CAE1;
+                        border-left: 1px solid #B3CAE1;
+                        padding-left: 10px;
+                        display: flex;
+                        align-items: center;
+                    }
+
+                    .add-comm-total {
+                        width: 194px;
+                        display: flex;
+                        justify-content: end;
+                        padding-right: 35px;
+                        align-items: center;
+                        // border: 1px solid #B3CAE1;
+                        border-right: 1px solid #B3CAE1;
+                        border-left: 1px solid #B3CAE1;
+                    }
+                }
+
+                .bunker-consume-main {
+                    display: flex;
+
+                    .bunker-consume-datas {
+                        height: auto;
+                        min-height: 80px;
+                        width: 586px;
+                        border: 1px solid #B3CAE1;
+                        border-bottom: none;
+                        padding-left: 10px;
+                    }
+
+                    .bunker-consume-total {
+                        width: 194px;
+                        display: flex;
+                        justify-content: end;
+                        padding-right: 35px;
+                        flex-direction: column;
+                        align-items: end;
+                        border: 1px solid #B3CAE1;
+                        border-bottom: none;
+                    }
+                }
+
+                .other-amount-main {
+                    display: flex;
+
+                    .other-amount-datas {
+                        height: auto;
+                        min-height: 80px;
+                        width: 586px;
+                        border: 1px solid #B3CAE1;
+                        display: flex;
+                        flex-direction: column;
+                        justify-content: center;
+                        border-bottom: none;
+                        padding-left: 10px;
+                    }
+
+                    .other-amount-total {
+                        width: 194px;
+                        display: flex;
+                        justify-content: center;
+                        padding-right: 35px;
+                        flex-direction: column;
+                        align-items: end;
+                        border: 1px solid #B3CAE1;
+                        border-bottom: none;
+                    }
+                }
+            }
+
+            .invoice-total-amount {
+                width: 100%;
+                display: flex;
+
+                .total {
+                    height: 50px;
+                    width: 75%;
+                    border: 1px solid #B3CAE1;
+                    display: flex;
+                    align-items: center;
+                    justify-content: flex-end;
+                    padding-right: 20px;
+                    color: #429798;
+                    font-weight: 500;
+                }
+
+                .amount {
+                    height: 50px;
+                    width: 25%;
+                    border: 1px solid #B3CAE1;
+                    color: #429798;
+                    display: flex;
+                    align-items: center;
+                    justify-content: flex-end;
+                    /* padding-left: 20px; */
+                    padding-right: 40px;
+                    font-weight: 500;
+                }
+            }
+        }
+
+        .details-container-print {
+            height: 710px;
+            // background-color: aqua;
+            // overflow: auto;
+
+            .bill-details {
+                display: flex;
+
+                .bill-from-address {
+                    /* height: 280px; */
+                    width: 395px;
+                    min-height: 280px;
+                    height: auto;
+                    border: 1px solid #B3CAE1;
+                    padding-left: 10px;
+                    padding-top: 10px;
+
+                    .bill-from-header {
+                        font-size: 20px;
+                        color: #295285;
+                        font-weight: 500;
+                        padding-bottom: 10px;
+                    }
+
+                    .bill-from-name {
+                        font-size: 18px;
+                        color: black;
+                        font-weight: 500;
+                        // padding-top: 5px;
+                    }
+
+                }
+
+                .bill-to-address {
+                    min-height: 280px;
+                    height: auto;
+                    width: 395px;
+                    border: 1px solid #B3CAE1;
+                    padding-left: 10px;
+                    padding-top: 10px;
+                    // background-color: black;
+                }
+            }
+
+            .description-amount {
+                width: 100%;
+                display: flex;
+                margin-top: 10px;
+
+                .invoice-description {
+                    height: 45px;
+                    width: 75%;
+                    background-color: #295285;
+                    /* text-align: end; */
+                    padding-left: 10px;
+                    padding-top: 8px;
+                    color: #FFFFFF;
+
+                }
+
+                .invoice-amount {
+                    height: 45px;
+                    width: 25%;
+                    background-color: #295285;
+                    /* text-align: end; */
+                    padding-left: 10px;
+                    padding-top: 8px;
+                    border-left: 1px solid #B3CAE1;
+                    color: #FFFFFF;
+
+                }
+
+            }
+
+            .invoice-description-value {
+                height: auto;
+                // background-color: black;
+                border: 1px solid #B3CAE1;
+                margin-top: 2px;
+                padding-left: 10px;
+                min-height: 120px;
+            }
+
+            .amount-values {
+                width: 100%;
+                display: flex;
+
+                .freight-percentage {
+                    width: 75%;
+                    height: 200px;
+                    // background-color: black;
+                    border: 1px solid #B3CAE1;
+
+                }
+
+                .total-amount {
+                    width: 25%;
+                    height: 200px;
+                    // background-color: yellow;
+                    border: 1px solid #B3CAE1;
+
+                    .amount-flex {
+                        display: flex;
+                        flex-direction: column;
+                        align-items: flex-end;
+                        /* padding-left: 20px; */
+                        padding-right: 40px;
+                    }
+                }
+            }
+
+            .invoice-total-amount {
+                width: 100%;
+                display: flex;
+
+                .total {
+                    height: 50px;
+                    width: 75%;
+                    border: 1px solid #B3CAE1;
+                    display: flex;
+                    align-items: center;
+                    justify-content: flex-end;
+                    padding-right: 20px;
+                    color: #429798;
+                    font-weight: 500;
+                }
+
+                .amount {
+                    height: 50px;
+                    width: 25%;
+                    border: 1px solid #B3CAE1;
+                    color: #429798;
+                    display: flex;
+                    align-items: center;
+                    justify-content: flex-end;
+                    /* padding-left: 20px; */
+                    padding-right: 40px;
+                    font-weight: 500;
+                }
+            }
+        }
+
+        .preview-notes {
+            font-size: 18px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding-top: 10px;
+            padding-bottom: 15px;
+            font-style: italic;
+        }
+
+        .nb-email {
+            height: 40px;
+            background-color: #295285;
+            color: #FFFFFF;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding-top: 1px;
+            font-style: italic;
+        }
+
+
+
+
+    }
+
+    .invoice-form-footer {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-top: 40px;
+    }
+}
+
+@media only screen and (max-height: 860px) {
+    .invoice-preview-modal .invoice-preview-container {
+        transform: scale(0.9);
+    }
+}
+
+@media only screen and (max-height: 820px) {
+    .invoice-preview-modal .invoice-preview-container {
+        transform: scale(0.8);
+    }
+}
+
+@media only screen and (max-height: 730px) {
+    .invoice-preview-modal .invoice-preview-container {
+        transform: scale(0.7);
+    }
+}
+
+@media only screen and (max-height: 620px) {
+    .invoice-preview-modal .invoice-preview-container {
+        transform: scale(0.6);
+    }
+}

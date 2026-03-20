@@ -1,0 +1,53 @@
+.icon-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.hover:hover {
+    background-color: var(--btn-hover-bg) !important;
+    color: white !important;
+    // color: white !important; 
+}
+
+.add-icon {
+    width: 28px;
+    height: 28px;
+    font-size: 20px;
+    color: white;
+    margin: 0px 1px 2px 0px;
+}
+
+.add-icon-main {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+}
+
+.fetch-icon {
+    font-size: 16px;
+    color: white;
+    padding-right: 7px;
+}
+
+.expand-icon {
+    font-size: 16px;
+    color: white;
+    padding-right: 25px;
+}
+.refreshIconRotate{
+    animation: rotate 1.5s linear infinite;
+}
+
+@keyframes rotate {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}

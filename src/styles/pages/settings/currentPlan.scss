@@ -1,0 +1,60 @@
+.mainPage {
+  width: 100%;
+  padding: 1rem;
+
+  .plan-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+    margin-top: 2rem;
+  }
+
+  .plan-info {
+    text-align: center;
+    max-width: 500px;
+    padding: 1rem;
+  }
+
+  .premium-msg {
+    color: #2ecc71;
+    font-weight: 500;
+    font-size: 0.95rem;
+  }
+
+  .upgrade-msg {
+    color: #ffa500;
+    font-size: 0.95rem;
+    line-height: 1.4;
+    margin-bottom: 0.8rem;
+  }
+
+  .upgrade-btn {
+    background: linear-gradient(to right, #ff512f, #f09819);
+    border: none;
+    color: white;
+    padding: 0.6rem 1.2rem;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.3s ease;
+
+    &:hover {
+      background: linear-gradient(to right, #f09819, #ff512f);
+    }
+  }
+
+  .expired-msg {
+    color: #f44336;
+    font-weight: 600;
+    font-size: 1rem;
+    margin-top: 1rem;
+  }
+
+  .card-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 10px;
+    color: #03a9f4;
+  }
+}

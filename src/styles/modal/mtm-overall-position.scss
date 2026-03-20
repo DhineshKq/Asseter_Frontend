@@ -1,0 +1,200 @@
+.mtm-overall-position-modal {
+
+    height: 100vh;
+    width: 100%;
+    background-color: rgba(58, 60, 60, 0.6);
+    position: fixed;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    top: 0px;
+    left: 0px;
+    z-index: 20;
+    overflow: hidden;
+    user-select: none;
+
+    .positive {
+        color: green !important;
+    }
+
+    .negative {
+        color: red !important;
+    }
+
+    .header-list {
+        text-align: right;
+        color: white;
+        background: #295285;
+        border: none;
+    }
+
+    .overall-position-header {
+        color: #295285;
+        font-size: 22px;
+        font-weight: 600;
+    }
+
+    .overall-position-table-view {
+        margin-top: 30px;
+    }
+
+    .table-row-header {
+        background-color: #295285;
+        color: white;
+        width: 150px;
+        text-align: center;
+
+        .left-header {
+            color: #295285;
+            padding: 10px 0px;
+            margin-bottom: 0px;
+            border-bottom: 1px solid white;
+        }
+    }
+
+    .right-value-td {
+        padding: 0px;
+
+        .right-value {
+            height: 45px;
+            color: #295285;
+            padding: 10px 10px;
+            margin-bottom: 0px;
+            border-bottom: 1px solid #B3CAE1;
+        }
+    }
+
+    td {
+        text-align: right;
+        min-width: 150px;
+    }
+
+    .positive {
+        color: green;
+    }
+
+    .negative {
+        color: red;
+    }
+}
+
+.modal-derivative {
+    .access {
+        width: 10%;
+        padding: 0px 7px !important;
+    }
+
+    .middle-icons {
+        width: 10%;
+        padding: 0px 7px !important;
+    }
+}
+
+.modal-table {
+    height: 70vh !important;
+    max-height: calc(100vh - 330px) !important;
+    margin-top: 30px;
+}
+
+.realised-modal-heading {
+    font-size: 22px;
+    font-weight: bold;
+    color: #295285;
+}
+
+.mtm-overall-position-container {
+    height: 80vh;
+    width: 80%;
+    background-color: #FFFFFF;
+    box-shadow: 0px 20px 30px rgba(0, 85, 212, 0.3019607843);
+    border-radius: 20px;
+    padding: 20px;
+    position: relative;
+
+    .close-icon {
+        position: absolute;
+        // top: -20px;
+        // right: -20px;
+        top: 20px;
+        right: 20px;
+        height: 45px;
+        width: 45px;
+        background-color: #F40202;
+        border-radius: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 35px;
+        color: white;
+        // box-shadow: 1px 1px 5px 8px rgba(200, 27, 27, 0.5);
+
+
+        .cross-icon {
+            transition: transform .4s ease-in-out;
+            display: flex;
+        }
+
+        &:hover {
+            .cross-icon {
+                // font-size: 10px;
+                transform: rotate(180deg);
+            }
+
+            cursor: pointer;
+        }
+    }
+}
+
+.bottom-main {
+    margin-top: 25px;
+
+    .bottom-heading {
+        font-size: 22px;
+        font-weight: bold;
+        color: #295285;
+    }
+
+    .sub-content-value {
+        width: 100%;
+        height: 84px;
+        background: #EFF6FE 0% 0% no-repeat padding-box;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        margin-top: 25px;
+
+        .sub-name {
+            font-size: 18px;
+            font-weight: bold;
+            color: #295285;
+            border-right: 1px solid #B3CAE1;
+            padding-right: 25px;
+            margin-left: 35px;
+        }
+
+        .sub-value {
+            font-size: 18px;
+            font-weight: bold;
+            color: #295285;
+            text-align: center;
+        }
+
+        .derivatives-value {
+            margin-left: 25px;
+            width: 200px;
+        }
+
+        .sub-value-name {
+            text-align: center;
+            font-weight: 600;
+        }
+    }
+}
+
+
+@media only screen and (min-width: 1780px) and (max-width: 1880px) {
+    .mtm-overall-position-container {
+        transform: scale(0.8);
+    }
+}

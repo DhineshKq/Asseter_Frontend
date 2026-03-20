@@ -1,0 +1,218 @@
+.mtm-cargo-physical-modal {
+
+    height: 100vh;
+    width: 100%;
+    background-color: rgba(58, 60, 60, 0.6);
+    position: fixed;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    top: 0px;
+    left: 0px;
+    z-index: 20;
+    overflow: hidden;
+    user-select: none;
+}
+
+.mtm-cargo-physical-container {
+    height: 45vh;
+    width: 74%;
+    background-color: #FFFFFF;
+    box-shadow: 0px 20px 30px rgba(0, 85, 212, 0.3019607843);
+    border-radius: 20px;
+    padding: 20px;
+    position: relative;
+
+    .close-icon {
+        position: absolute;
+        // top: -20px;
+        // right: -20px;
+        top: 20px;
+        right: 20px;
+        height: 45px;
+        width: 45px;
+        background-color: #F40202;
+        border-radius: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 35px;
+        color: white;
+        // box-shadow: 1px 1px 5px 8px rgba(200, 27, 27, 0.5);
+
+
+        .cross-icon {
+            transition: transform .4s ease-in-out;
+            display: flex;
+        }
+
+        &:hover {
+            .cross-icon {
+                // font-size: 10px;
+                transform: rotate(180deg);
+            }
+
+            cursor: pointer;
+        }
+    }
+
+    .view-table-component-ch {
+        // width: 100%;
+        // margin: 10px 0px 0px 0px;
+        // position: relative;
+        height: auto !important;
+    }
+
+    .Cargo-popup-ROB {
+        // text-align: center;
+        // width: 50%;
+        // border-right: 1px solid #B3CAE1;
+        // height: 100px;
+        margin-top: 30px;
+
+        .Cargo-popup-ROB-title {
+            color: #295285;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .vessel-details {
+            // display: flex;
+            height: 80px;
+            background: #F0F7FF 0% 0% no-repeat padding-box;
+            border-radius: 10px;
+            opacity: 1;
+            justify-content: center;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            line-height: 2;
+            margin-bottom: 30px;
+
+            .vessel-details-sub-vessel-name {
+                width: 160px;
+                text-align: left;
+                margin-left: 45px;
+            }
+
+            .vessel-details-sub-name-last {
+                width: 160px;
+                text-align: right;
+                margin-right: 45px;
+            }
+
+            .vessel-details-sub {
+                display: flex;
+                justify-content: space-between;
+            }
+
+            .vessel-details-sub-name {
+                width: 160px;
+                text-align: right;
+            }
+        }
+    }
+
+    .Cargo-popup-container-table-wrapper {
+        // width: 100%;
+        // overflow: auto;
+        // display: flex;
+        // justify-content: center;
+        // padding: 0px 25px;
+        // margin-top: 10px;
+
+        .Cargo-popup-container-table {
+            thead {
+                background-color: #295285;
+            }
+
+            th {
+                background-color: #295285;
+                color: white;
+                border-width: 0;
+                // text-align: center;
+                vertical-align: top;
+                min-height: 50px;
+            }
+
+            td {
+                border-width: 0;
+                vertical-align: middle;
+                padding: 8px 0px;
+            }
+
+
+
+        }
+
+        .table-row-header {
+            background-color: #295285 !important;
+            color: white !important;
+            width: 150px;
+            text-align: center;
+        }
+
+        .table-row-header-buy {
+            background-color: #295285 !important;
+            color: white !important;
+            width: 150px;
+            /* text-align: center; */
+            height: 65px;
+            text-align: center;
+            padding: 0px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        // .buy {
+        //     background-color: #295285 !important;
+        //     color: white !important;
+        //     width: 150px;
+        //     /* text-align: center; */
+        //     height: 51px;
+        //     text-align: center;
+        //     padding: 0px;
+        //     display: flex;
+        //     align-items: center;
+        //     justify-content: center;
+        // }
+
+        .table-striped>tbody>tr:nth-of-type(odd)>* {
+            --bs-table-color-type: none !important;
+            --bs-table-bg-type: none !important;
+        }
+
+        .table-hover>tbody>tr:hover>* {
+            --bs-table-color-state: none !important;
+            --bs-table-bg-state: none !important;
+        }
+
+        .table-striped>tbody>tr:nth-of-type(odd)>* {
+            --bs-table-color-type: none !important;
+            --bs-table-bg-type: none !important;
+        }
+
+        .table-striped>tbody>tr:nth-of-type(odd)>* {
+            --bs-table-color-type: none !important;
+            --bs-table-bg-type: none !important;
+        }
+    }
+
+
+
+    .mtm-cargo-booking-content {
+        height: 125px;
+        width: 380px;
+        border: 1px solid #B3CAE1;
+        padding-left: 10px;
+    }
+
+    .mtm-cargo-booking-footer {
+        margin-right: 20px;
+        display: flex;
+        justify-content: center;
+        margin-top: 20px;
+    }
+}

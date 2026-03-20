@@ -1,0 +1,217 @@
+.add-modal {
+    height: 100vh;
+    width: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.3s ease-in-out;
+
+    .container_user {
+        width: 100%;
+        max-width: 750px;
+        background-color: var(--body-bg, #ffffff);
+        padding: 40px 30px;
+        border-radius: 20px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+        display: flex;
+        flex-direction: column;
+        animation: scaleIn 0.3s ease;
+        overflow-y: auto;
+        max-height: 90vh;
+
+        @keyframes scaleIn {
+            from {
+                transform: scale(0.95);
+                opacity: 0;
+            }
+
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .pageHeading {
+            font-size: 28px;
+            font-weight: 700;
+            width: 100%;
+            margin-bottom: 20px !important;
+            text-align: center;
+            color: var(--heading-fonts, #2c3e50);
+            margin-bottom: 10px;
+        }
+
+        .heading-line {
+            height: 3px;
+            background: linear-gradient(to right, #42a5f5, #1e88e5);
+            margin: 0px auto 10px auto;
+            width: 100%;
+            border-radius: 2px;
+        }
+
+        .formSpace_user {
+            display: grid;
+            grid-template-columns: 1fr 1fr; 
+            gap: 20px 30px;
+            padding: 25px 10px;
+            background-color: #f8fafd;
+            border-radius: 12px;
+
+            /* Scoped inside .inputfield or .formSpace */
+            .custom-dropdown {
+
+                // Base control (input appearance)
+                .css-13cymwt-control,
+                .css-1s2u09g-control {
+                    background-color: var(--input-bg, #ffffff);
+                    border: 1px solid var(--input-border-color, #dcdcdc);
+                    border-radius: 10px;
+                    min-height: 45px;
+                    font-size: 15px;
+                    padding-left: 8px;
+                    transition: all 0.2s ease;
+
+                    &:hover {
+                        border-color: var(--input-hover-border, #9d7bdb);
+                    }
+                }
+
+                // Focused control (active state)
+                .css-1pahdxg-control {
+                    border-color: var(--input-focus-border, #42a5f5);
+                    box-shadow: 0 0 0 3px rgba(66, 165, 245, 0.2);
+                }
+
+                // Options list
+                .css-26l3qy-menu {
+                    border-radius: 10px;
+                    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+                    margin-top: 4px;
+                    padding: 0;
+                    background-color: var(--input-bg, #ffffff);
+                    z-index: 10;
+                }
+                .css-1dimb5e-singleValue{
+                    color: var(--input-text-color, #333) !important;
+                    margin-left: 6px;
+                }
+
+                .css-t3ipsp-control{
+                    background-color: var(--input-bg) !important;
+                }
+                // Option style (default)
+                .css-1n7v3ny-option {
+                    background-color: var(--input-bg, #ffffff);
+                    color: var(--input-text-color, #333);
+                    padding: 10px 12px;
+                    font-size: 14px;
+                    cursor: pointer;
+
+                    &:hover {
+                        background-color: var(--input-focus-border, #42a5f5);
+                        color: #ffffff;
+                    }
+                }
+
+                // Selected/active option
+                .css-d7l1ni-option,
+                .css-tr4s17-option,
+                .css-9g7j0m-option {
+                    background-color: var(--btn-primary-bg, #7f5fc2) !important;
+                    color: #ffffff !important;
+                }
+
+                // Indicators (arrow, separator)
+                .css-1okebmr-indicatorSeparator {
+                    display: none;
+                }
+
+                .css-tlfecz-indicatorContainer {
+                    color: var(--btn-primary-bg, #7f5fc2);
+                }
+
+                // Value container and layout
+                .css-1fdsijx-ValueContainer,
+                .css-319lph-ValueContainer {
+                    padding: 8px 10px;
+                }
+
+                .css-1hb7zxy-IndicatorsContainer {
+                    padding-right: 6px;
+                }
+            }
+
+
+
+            @media (max-width: 700px) {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .inputfield {
+            display: flex;
+            flex-direction: column;
+
+            input {
+                padding: 12px 14px;
+                font-size: 15px;
+                border: 1px solid #dcdcdc;
+                border-radius: 10px;
+                transition: all 0.2s ease;
+                background-color: white;
+
+                &:focus {
+                    border-color: #42a5f5;
+                    outline: none;
+                }
+
+                &.is-invalid {
+                    border-color: #e53935;
+                    background-color: #fff5f5;
+                }
+            }
+
+            .fieldLabel {
+                font-size: 14px;
+                font-weight: 600;
+                margin-bottom: 8px;
+                color: var(--input-text-color, #333);
+            }
+
+            .invalid-feedback {
+                color: #e53935;
+                font-size: 12px;
+                margin-top: 4px;
+            }
+        }
+
+        .buttons {
+            grid-column: 1 / -1;
+            display: flex;
+            justify-content: center;
+            gap: 25px;
+            margin-top: 35px;
+
+            .common-btn,
+            .cancel {
+                border-radius: 10px !important;
+                font-weight: 600;
+                font-size: 15px;
+                transition: all 0.2s ease;
+
+                &:hover {
+                    transform: translateY(-2px);
+                    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+                }
+            }
+        }
+    }
+.alert-warp{
+    z-index: 9999 !important;
+}
+}

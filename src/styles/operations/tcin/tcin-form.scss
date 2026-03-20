@@ -1,0 +1,14 @@
+.main-form-header {
+    background: #FFFFFF 0% 0% no-repeat padding-box;
+    box-shadow: 10px 30px 30px #2952854D;
+    border-radius: 30px;
+    opacity: 1;
+    margin-top: 10px;
+    height: calc(100vh - 280px);
+    max-height: auto;
+    padding: 20px;
+}
+
+.checking-btn:focus{
+background-color: red;
+}

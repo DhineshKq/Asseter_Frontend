@@ -1,0 +1,60 @@
+.noon-report-operation {
+
+    .noon-report-grid {
+        border: 1px solid #B3CAE1;
+        margin-top: 10px;
+        margin-right: 10px;
+        padding: 5px;
+        background-color: white;
+        border-radius: 30px;
+        // height: 76vh;
+        box-shadow: 10px 30px 30px #2952854D;
+
+        .ag-header-cell-label {
+            // overflow: auto !important;
+            text-overflow: unset !important;
+        }
+        .ag-header-cell-text {
+            // overflow: auto !important;
+            text-overflow: unset !important;
+        }
+        .ag-header-container, .ag-floating-top-container, .ag-floating-bottom-container, .ag-sticky-top-container{
+            white-space: normal !important;
+
+        }
+        .header-center-align{
+            justify-content: center;
+            
+        }
+        .noon-report-header {
+            height: 100px;
+            display: flex;
+            flex-wrap: wrap;
+            position: relative;
+            border-bottom: 1px solid #8f9cad;
+        }
+
+        .Ag-grid-image-view-photos {
+            background-image: url(../../assets/images/vesselimagePlaceholder.svg);
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center center;
+            height: 70px;
+            cursor: pointer;
+            width: 70px;
+            margin-top: 20px;
+        }
+
+        .status-display {
+            height: 30px;
+            width: 100px;
+            background-color: rgb(25, 135, 84);
+            margin-top: 10px;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+    }
+}

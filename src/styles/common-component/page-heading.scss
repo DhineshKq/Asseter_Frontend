@@ -1,0 +1,29 @@
+.pageHeading {
+    color: var(--heading-fonts);
+    margin: 0;
+    font-size: 20px;  /* adjust as needed */
+    font-weight: 600;
+    white-space: nowrap; /* keeps it on one line */
+  }
+
+.heading-line {
+    height: 2px;
+    opacity: 80%;
+    width: 98%;
+    background-color: var(--heading-fonts);
+}
+
+.Breadcrumb {
+    display: flex;
+    align-items: flex-start;
+    height: 80px;
+    width:200px;
+}
+.Breadcrumb h2 {  
+    margin: 0;  
+    // font-size: 24px;  
+    // font-weight: 600;  
+    color: var(--heading-fonts);
+}
+
+

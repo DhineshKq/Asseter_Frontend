@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40">
+  <g id="eye" transform="translate(-2897 -125)">
+    <g id="spacer" transform="translate(2897 125)" fill="rgba(255,255,255,0)" stroke="rgba(0,0,0,0)" stroke-width="1">
+      <rect width="40" height="40" stroke="none"/>
+      <rect x="0.5" y="0.5" width="39" height="39" fill="none"/>
+    </g>
+    <path id="Icon_ionic-md-eye" data-name="Icon ionic-md-eye" d="M18.77,7.383A17.764,17.764,0,0,0,2.25,18.519a17.821,17.821,0,0,0,33.04,0A17.764,17.764,0,0,0,18.77,7.383Zm0,18.563a7.427,7.427,0,1,1,7.508-7.426A7.488,7.488,0,0,1,18.77,25.945Zm0-11.881a4.455,4.455,0,1,0,4.506,4.454A4.495,4.495,0,0,0,18.77,14.064Z" transform="translate(2898.355 126.678)" fill="#295285"/>
+  </g>
+</svg>

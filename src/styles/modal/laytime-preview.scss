@@ -1,0 +1,221 @@
+.laytime-preview-modal {
+    height: 100vh;
+    width: 100%;
+    background-color: rgba(58, 60, 60, 0.6);
+    position: fixed;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    top: 0px;
+    left: 0px;
+    z-index: 20;
+    overflow: hidden;
+    user-select: none;
+}
+
+.laytime-preview-container {
+    height: 900px;
+    width: 944px;
+    background-color: #FFFFFF;
+    box-shadow: 0px 20px 30px #0055D44D;
+    border-radius: 20px;
+    padding: 30px;
+    position: relative;
+}
+
+.laytime-header {
+    // display: flex;
+    // align-items: center;
+    // justify-content: center;
+    // font-size: 40px;
+    // color: #429798;
+    // font-weight: 500;
+    margin-top: 20px;
+}
+
+.port-details-laytime {
+    display: flex;
+    flex-direction: column;
+    align-items: end;
+}
+
+.laytime-netbulk-log {
+    width: 160px;
+}
+
+.laytime-border-line {
+    border: 1px solid black;
+    margin-left: 170px;
+}
+
+.voyage-information-main {
+    height: 422px;
+    width: 410px;
+    border: 1px solid black;
+
+    .Voyage-heading {
+        display: flex;
+        align-items: center;
+        background-color: #002656;
+        height: 35px;
+        color: #ffff;
+        text-align: center;
+        padding-left: 10px;
+    }
+
+    .voyageinfo-details {
+        display: flex;
+        margin-left: 20px;
+
+        .rightside-details {
+            p {
+                width: 155px;
+            }
+        }
+    }
+
+    .Cargo-details {
+        display: flex;
+        margin-left: 20px;
+
+        .rightside-details {
+            p {
+                width: 175px;
+                margin-bottom: 0px;
+            }
+        }
+    }
+}
+
+.deductions-preview {
+    display: flex;
+    align-items: center;
+    padding-left: 10px;
+    background: #002656;
+    color: #ffff;
+    height: 35px;
+    margin-top: 15px;
+}
+
+
+
+
+.laytime-content {
+    margin-bottom: 0px;
+}
+
+.bottom-details {
+    p {
+
+        width: 180px;
+        margin-bottom: 0px;
+    }
+}
+
+.laytime-dedutions-preview {
+    // padding: 20px 0px;
+
+    .laytime-dedutions-preview-sub {
+        background-color: white;
+        width: 100%;
+        border-radius: 20px;
+        // padding: 10px;
+        // gap: 2px;
+
+        .laytime-dedutions-preview-table-wrapper {
+            width: 100%;
+            overflow: auto;
+            padding-left: 0px;
+            padding-right: 0px;
+
+            .laytime-dedutions-preview-table {
+                thead {
+                    // background-color: #295285;
+                    border-bottom: 1px solid black;
+
+                    .heading-name {
+                        border-top: none;
+
+                    }
+                }
+
+                th {
+                    // background-color: #295285;
+                    color: black;
+                    border-width: 0;
+                    // text-align: center;
+                    vertical-align: top;
+                    min-height: 50px;
+                }
+
+                td {
+                    border-width: 0;
+                    vertical-align: middle;
+                    padding: 8px 0px;
+                }
+
+
+
+            }
+
+            .table-striped>tbody>tr:nth-of-type(odd)>* {
+                --bs-table-color-type: none !important;
+                --bs-table-bg-type: none !important;
+            }
+
+            .table-hover>tbody>tr:hover>* {
+                --bs-table-color-state: none !important;
+                --bs-table-bg-state: none !important;
+            }
+
+            .table-striped>tbody>tr:nth-of-type(odd)>* {
+                --bs-table-color-type: none !important;
+                --bs-table-bg-type: none !important;
+            }
+
+            .table-striped>tbody>tr:nth-of-type(odd)>* {
+                --bs-table-color-type: none !important;
+                --bs-table-bg-type: none !important;
+            }
+        }
+    }
+}
+
+
+.layTime-preview-footer {
+    display: flex;
+    justify-content: center;
+}
+
+@media only screen and (max-height: 890px) {
+    .laytime-preview-modal {
+        .laytime-preview-container {
+            transform: scale(0.9);
+        }
+    }
+}
+
+@media only screen and (max-height: 820px) {
+    .laytime-preview-modal {
+        .laytime-preview-container {
+            transform: scale(0.8);
+        }
+    }
+}
+
+@media only screen and (max-height: 740px) {
+    .laytime-preview-modal {
+        .laytime-preview-container {
+            transform: scale(0.7);
+        }
+    }
+}
+
+@media only screen and (max-height: 650px) {
+    .laytime-preview-modal {
+        .laytime-preview-container {
+            transform: scale(0.6);
+        }
+    }
+}

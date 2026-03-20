@@ -1,0 +1,66 @@
+.grid-filter {
+    background-color: #FFFFFF;
+    height: auto;
+    width: 555px;
+    padding: 15px;
+    font-size: 18px;
+    box-shadow: 0px 10px 20px #0055D44D;
+    border-radius: 10px;
+
+    .filter-type {
+        display: flex;
+
+        .dropdown {
+            height: 50px;
+            width: 200px;
+        }
+
+        .add-button {
+            width: 90px;
+            margin-left: 10px;
+        }
+    }
+
+    .column-filter {
+        display: flex;
+        justify-content: space-around;
+        margin-bottom: 15px;
+
+        .dropdown {
+            height: 50px;
+            width: 150px;
+        }
+
+        .searching-input {
+            width: 150px;
+            height: 40px;
+
+            input {
+                height: 100%;
+                width: 100%;
+            }
+
+        }
+
+        .close-button {
+            width: 40px;
+            height: 40px;
+            background-color: #f1f1f1;
+            border-radius: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 500;
+            color: red;
+            cursor: pointer;
+        }
+    }
+
+    .buttons {
+        width: 65%;
+        margin: 0 auto;
+        display: flex;
+        justify-content: space-around;
+    }
+
+}

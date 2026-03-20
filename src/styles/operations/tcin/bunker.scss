@@ -1,0 +1,56 @@
+.disabled-input {
+    .inputButton {
+        opacity: 0.5;
+    }
+}
+
+.add-icon-differ {
+    .hover:hover {
+        background-color: #429798;
+    }
+}
+
+.main-body-header-bunker {
+    width: 100%;
+    margin-top: 5px;
+    border: 1px solid #b3cae1;
+
+    tr {
+        width: 100%;
+        height: 50px;
+        background: var(--unnamed-color-ffffff) 0% 0% no-repeat padding-box;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+}
+
+.set-error-bunker {
+    height: 80px;
+    width: 170px;
+    // margin-right: 60px;
+    // margin-bottom: 30px;
+
+    .css-13cymwt-control {
+        border-color: red !important;
+        border-radius: 0px;
+        outline: none !important;
+    }
+
+    .css-1u9des2-indicatorSeparator {
+        background-color: #A9C3DC !important;
+    }
+
+    .css-1xc3v61-indicatorContainer {
+        color: #A9C3DC !important;
+    }
+}
+.total-quantity{
+    display: flex;
+    gap: 10px;
+    height: 50px;
+    width: 100%;
+    background-color: #EFF6FE;
+    align-items: center;
+    padding-left: 10px;
+}

@@ -1,0 +1,40 @@
+.remark-modal {
+
+    height: 100vh;
+    width: 100%;
+    background-color: rgba(58, 60, 60, 0.6);
+    position: fixed;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    top: 0px;
+    left: 0px;
+    z-index: 20;
+    overflow: hidden;
+    user-select: none;
+}
+
+.remark-container {
+    height: 270px;
+    width: 420px;
+    background-color: #FFFFFF;
+    box-shadow: 0px 20px 30px rgba(0, 85, 212, 0.3019607843);
+    border-radius: 20px;
+    padding: 20px;
+    position: relative;
+
+    .remark-content {
+        height: 125px;
+        width: 380px;
+        border: 1px solid #B3CAE1;
+        padding-left: 10px;
+    }
+
+    .remark-footer {
+        margin-right: 20px;
+        display: flex;
+        justify-content: center;
+        margin-top: 20px;
+    }
+}

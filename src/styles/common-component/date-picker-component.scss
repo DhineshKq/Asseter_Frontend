@@ -1,0 +1,99 @@
+.date-picker-component {
+    // z-index: 10;
+    position: relative;
+}
+
+.icon-calender {
+    position: absolute;
+    top: 46%;
+    right: 5px;
+    transform: translateY(-50%);
+    color: red;
+}
+
+.inputButton {
+    width: 100%;
+    min-width: 150px;
+    display: flex;
+    align-items: center;
+    border: 1px solid #B3CAE1;
+    background-color: #FFFFFF;
+    text-align: left;
+    border-radius: 5px;
+}
+
+
+.react-datepicker__tab-loop {
+    position: fixed;
+    width: 360px !important;
+    z-index: 10;
+}
+
+.react-datepicker-wrapper {
+    width: 100% !important;
+}
+
+
+.datepicker-error-mesaage {
+    // position: absolute;
+    // top:39px;
+    font-size: 14px;
+    color: red;
+}
+
+.clear-button {
+    color: rgb(57 156 255);
+    border: none;
+    outline: none;
+    width: 25px;
+    height: 39px;
+    margin-right: -4px;
+    margin-top: 3px;
+    border-radius: 5px;
+    background: rgb(214 226 239);
+}
+
+.date-picker-component {
+  .title {
+    font-size: 16px;
+    margin-bottom: 5px;
+  }
+
+  .inputContainer {
+    display: flex;
+    align-items: center;
+    border: 1px solid rgb(169, 195, 220);
+    border-radius: 4px;
+    padding: 5px;
+    cursor: pointer;
+
+    &:focus-within {
+      border-color: #80bdff;
+      outline: 0;
+      box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    }
+  }
+
+  .inputField {
+    flex-grow: 1;
+    font-size: 14px;
+    background-color: transparent;
+    border: none;
+    outline: none;
+    cursor: inherit;
+  }
+
+  .icon-calender {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 8px;
+    cursor: pointer;
+  }
+
+  .datepicker-error-mesaage {
+    color: red;
+    margin-top: 5px;
+    font-size: 12px;
+  }
+}

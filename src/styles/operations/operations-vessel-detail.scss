@@ -1,0 +1,133 @@
+.operation-vessel-detail-main {
+    background: #FFFFFF 0% 0% no-repeat padding-box;
+    box-shadow: 10px 30px 30px #2952854D;
+    border-radius: 30px;
+    opacity: 1;
+    margin-top: 10px;
+    min-height: calc(100vh - 280px);
+    max-height: auto;
+    position: relative;
+    overflow: hidden;
+
+    .scroll {
+        height: calc(100vh - 280px);
+        overflow: auto;
+    }
+
+    .previous-btn,
+    .next-btn {
+        height: 40px;
+        width: 40px;
+        background-color: #29528580;
+        border-radius: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 25px;
+        position: absolute;
+        top: 50%;
+        cursor: pointer;
+    }
+
+    .disabled {
+        opacity: 0.6;
+        cursor: default;
+    }
+
+    .previous-btn {
+        left: -17px;
+        justify-content: flex-end;
+    }
+
+    .next-btn {
+        transform: rotate(180deg);
+        justify-content: flex-end;
+        right: -17px;
+    }
+
+    .vessel-navigation {
+        height: 40px;
+        width: 100%;
+        // background-color: #295285;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .flag-status {
+        height: 170px;
+        width: 100%;
+        padding: 20px;
+        border-bottom: 1px solid #B3CAE1;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+
+        .flag {
+            height: 65px;
+            width: 120px;
+            background-color: #F0F7FF;
+        }
+
+        .vessel-name {
+            height: 30px;
+            // width: 120px;
+            text-align: center;
+            color: #295285;
+            font-weight: 700;
+            font-size: 20px;
+            margin: 5px 0px;
+        }
+
+        .status {
+            padding: 1px 20px;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            color: white;
+            background-color: green;
+            border-radius: 40px;
+        }
+
+        .status-inactive {
+            background-color: grey;
+        }
+
+        .no-choosed {
+            height: 20px;
+            width: 120px;
+            margin-top: 5px;
+            background-color: #F0F7FF;
+        }
+    }
+
+    .flag-detail {
+        padding: 20px 30px;
+
+        .flag-detail-datas {
+            display: flex;
+            height: "10px";
+
+            .title {
+                width: 60%;
+                font-weight: 600;
+                font-size: 16px;
+            }
+
+            .specifications {
+                width: 65%;
+            }
+
+            .value {
+                width: 40%;
+                font-size: 16px;
+                word-wrap: break-word;
+            }
+
+            .specifications-val {
+                width: 35%;
+            }
+        }
+    }
+}
