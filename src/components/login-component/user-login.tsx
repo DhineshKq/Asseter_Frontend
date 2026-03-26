@@ -49,7 +49,7 @@ export default function UserLogin({ handleclick }: propsType) {
         setIsLoading(true)
         try {
             const ip = await getPublicIP();
-            const res = await axiosPrivate.post('user/login', { "email": userValues.email, "password": userValues.password, ipAddress: ip })
+            const res = await axiosPrivate.post('/user/login', { "email": userValues.email, "password": userValues.password, ipAddress: ip })
             if (res.status === 200) {
 
                 setCurrentLoggedUserData((prevData: any) => ({
@@ -83,88 +83,115 @@ export default function UserLogin({ handleclick }: propsType) {
 
         <>
             <div className='loginPage'>
-                <div className='login-container'>
-                    <div className='login-box'>
-                        <div className='login-box-header'>
-                            Sign In
+                <div className='login-shell'>
+                    <section className='login-hero-panel'>
+                        <div className='login-hero-badge'>Asseter Platform</div>
+                        <h1>Professional asset operations, from intake to ownership.</h1>
+                        <p>
+                            Bring assets, locations, assignments, and users into one reliable admin workflow
+                            with a cleaner operational control surface.
+                        </p>
+                        <div className='login-hero-points'>
+                            <div className='login-hero-point'>
+                                <strong>Unified Inventory</strong>
+                                <span>Track physical assets, ownership, and deployment context in one place.</span>
+                            </div>
+                            <div className='login-hero-point'>
+                                <strong>Operational Clarity</strong>
+                                <span>Review status, mapped responsibility, and location visibility without switching tools.</span>
+                            </div>
+                            <div className='login-hero-point'>
+                                <strong>Admin Ready</strong>
+                                <span>Built for structured management workflows rather than simple list storage.</span>
+                            </div>
                         </div>
-                        <div className='login-box-copy'>
-                            Asseter helps IT admins manage assets, locations, mappings, and user ownership from one workspace.
-                        </div>
+                    </section>
 
-                        <div className='inputs-align'>
-                            <div className="formSpace">
-                                <input
-                                    type="email"
-                                    className="inputField"
-                                    placeholder="Email"
-                                    value={userValues.email}
-                                    autoFocus={true}
-                                    onChange={(e) => {
-                                        const val = e.target.value.replace(/[^A-Za-z0-9@_+-.]/g, "");
-                                        setUserValues({ ...userValues, email: val });
-                                    }}
-                                    onKeyPress={(e) => {
-                                        if (e.key === ' ' || e.key === ",") {
-                                            e.preventDefault();
-                                        }
-                                    }}
-                                />
+                    <div className='login-container'>
+                        <div className='login-box'>
+                            <div className='login-box-header'>
+                                <span className='login-box-kicker'>Welcome Back</span>
+                                <h2>Sign In</h2>
+                                <p>Use your Asseter credentials to access the admin workspace.</p>
                             </div>
 
-                            <div className="formSpace password-field-wrapper">
-                                <input
-                                    type={showPassword ? "text" : "password"}
-                                    value={userValues.password}
-                                    className="inputField passwordInput"
-                                    placeholder="Password"
-                                    onChange={(e) => {
-                                        setUserValues({ ...userValues, password: e.target.value });
-                                    }}
-                                    onKeyPress={(e) => {
-                                        if (e.key === ' ') e.preventDefault();
-                                    }}
-                                    onKeyDown={(e) => {
-                                        if (userValues.password !== "" && e.key === 'Enter') loginData();
-                                    }}
-                                />
+                            <div className='inputs-align'>
+                                <div className="formSpace">
+                                    <label className='login-label'>Email</label>
+                                    <input
+                                        type="email"
+                                        className="inputField"
+                                        placeholder="Enter your email"
+                                        value={userValues.email}
+                                        autoFocus={true}
+                                        onChange={(e) => {
+                                            const val = e.target.value.replace(/[^A-Za-z0-9@_+-.]/g, "");
+                                            setUserValues({ ...userValues, email: val });
+                                        }}
+                                        onKeyPress={(e) => {
+                                            if (e.key === ' ' || e.key === ",") {
+                                                e.preventDefault();
+                                            }
+                                        }}
+                                    />
+                                </div>
 
-                                <div className="eyeIconWrapper">
-                                    {showPassword ? (
-                                        <FaEyeSlash
-                                            className={`eyeIconEnhanced ${userValues.password === "" ? 'disabled' : ''}`}
-                                            onClick={userValues.password !== "" ? toggleShowPassword : undefined}
-                                        />
-                                    ) : (
-                                        <FaEye
-                                            className={`eyeIconEnhanced ${userValues.password === "" ? 'disabled' : ''}`}
-                                            onClick={userValues.password !== "" ? toggleShowPassword : undefined}
-                                        />
-                                    )}
+                                <div className="formSpace password-field-wrapper">
+                                    <label className='login-label'>Password</label>
+                                    <input
+                                        type={showPassword ? "text" : "password"}
+                                        value={userValues.password}
+                                        className="inputField passwordInput"
+                                        placeholder="Enter your password"
+                                        onChange={(e) => {
+                                            setUserValues({ ...userValues, password: e.target.value });
+                                        }}
+                                        onKeyPress={(e) => {
+                                            if (e.key === ' ') e.preventDefault();
+                                        }}
+                                        onKeyDown={(e) => {
+                                            if (userValues.password !== "" && e.key === 'Enter') loginData();
+                                        }}
+                                    />
+
+                                    <div className="eyeIconWrapper">
+                                        {showPassword ? (
+                                            <FaEyeSlash
+                                                className={`eyeIconEnhanced ${userValues.password === "" ? 'disabled' : ''}`}
+                                                onClick={userValues.password !== "" ? toggleShowPassword : undefined}
+                                            />
+                                        ) : (
+                                            <FaEye
+                                                className={`eyeIconEnhanced ${userValues.password === "" ? 'disabled' : ''}`}
+                                                onClick={userValues.password !== "" ? toggleShowPassword : undefined}
+                                            />
+                                        )}
+                                    </div>
+                                </div>
+
+                                <div className="formSpace btnArea">
+                                    <button
+                                        type="submit"
+                                        className="loginBtnActive"
+                                        onClick={() => {
+                                            if (!buttonDisabled) loginData()
+                                        }}>
+                                        Sign In
+                                    </button>
+                                </div>
+
+                                <div className="linkArea">
+                                    <p tabIndex={0} onClick={() => handleclick('forgotPassword')}>
+                                        Forgot password?
+                                    </p>
                                 </div>
                             </div>
-
-                            <div className="formSpace btnArea">
-                                <button
-                                    type="submit"
-                                    className="loginBtnActive"
-                                    onClick={() => {
-                                        if (!buttonDisabled) loginData()
-                                    }}>
-                                    SUBMIT
-                                </button>
-                            </div>
-
-                            <div className="linkArea">
-                                <p tabIndex={0} onClick={() => handleclick('forgotPassword')}>
-                                    Forget password ?
-                                </p>
-                            </div>
                         </div>
-                    </div>
-                    <div className="footer">
-                        <span>Version 1.0</span> &nbsp;
-                        <span>&copy; KnowledgeQ Interactive Consultancy Services Pvt Ltd</span>
+
+                        <div className="footer">
+                            <span>Version 1.0</span> &nbsp;
+                            <span>&copy; KnowledgeQ Interactive Consultancy Services Pvt Ltd</span>
+                        </div>
                     </div>
                 </div>
             </div >

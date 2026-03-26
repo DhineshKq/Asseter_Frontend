@@ -1,184 +1,200 @@
 .side-main-navbar {
     height: 100vh;
     width: 260px;
-    background: #ffffff;
-    color: #333;
+    background:
+        radial-gradient(circle at top, rgba(16, 185, 129, 0.12), transparent 32%),
+        linear-gradient(180deg, #08111f 0%, #0f172a 48%, #111827 100%);
+    color: #e2e8f0;
     font-size: 16px;
-    padding: 20px 10px;
+    padding: 18px 14px;
     transition: all 0.3s ease-in-out;
     position: fixed;
     top: 74px;
     left: 0;
-    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.05);
+    box-shadow: 10px 0 35px rgba(2, 6, 23, 0.18);
     overflow-y: auto;
     scrollbar-width: none;
-    border-right: 1px solid #e0e0e0;
+    border-right: 1px solid rgba(148, 163, 184, 0.12);
 
     &::-webkit-scrollbar {
         display: none;
     }
 
     .vessel-management-sidebar {
-        position: relative;
-        height: 94%;
-        padding-bottom: 60px;
+        display: flex;
+        flex-direction: column;
+        min-height: calc(100vh - 120px);
+        gap: 18px;
+    }
 
+    .sidebar-top {
+        flex-shrink: 0;
+    }
 
-        .menu-items-wrapper {
-            overflow-y: auto;
-            max-height: calc(100vh - 60px); // adjust scrollable area
+    .sidebar-brand-card {
+        padding: 18px;
+        border-radius: 22px;
+        background: linear-gradient(135deg, rgba(15, 118, 110, 0.88) 0%, rgba(22, 78, 99, 0.92) 100%);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+
+        h2 {
+            margin: 6px 0;
+            font-size: 1.45rem;
+            font-weight: 700;
+            color: #f8fafc;
         }
 
-        .red-bottom-box {
-            position: absolute;
-            bottom: 15px;
-            left: 0;
-            width: 100%;
-            height: 50px;
-            background: linear-gradient(135deg, #6b6b6b, #545454af);
-            display: flex;
-            align-items: center;
-            justify-content: flex-start;
-            padding: 0 20px;
-            border-top: 1px solid #777;
-            box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
-
-            .username {
-                color: #ffffff;
-                font-weight: 600;
-                font-size: 15px;
-                letter-spacing: 0.5px;
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
-            }
-
-            .user-icon {
-                background-image: url("../../assets/web-icons/man.svg");
-                background-size: cover;
-                background-position: center;
-                background-repeat: no-repeat;
-                width: 32px;
-                height: 32px;
-                border-radius: 50%;
-                margin-right: 12px;
-                flex-shrink: 0;
-                // border: 2px solid #fff;
-              }
-        }
-
-        .titles,
-        .title {
-            height: 50px;
-            display: flex;
-            align-items: center;
-            padding: 0 16px;
-            margin-bottom: 8px;
-            cursor: pointer;
-            border-radius: 8px;
-            font-weight: 500;
-            font-size: 15px;
-            color: #333;
-            background-color: transparent;
-            transition: all 0.25s ease-in-out;
-            position: relative;
-
-            .icon {
-                height: 24px;
-                width: 24px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                margin-right: 12px;
-                transition: all 0.3s ease;
-
-                svg {
-                    width: 100%;
-                    height: 100%;
-                    fill: #5c5c5c;
-                    transition: fill 0.3s ease;
-                }
-            }
-
-
-            &:hover {
-                background: rgba(0, 81, 162, 0.08);
-                color: #0051a2;
-
-                .icon svg {
-                    fill: #0051a2;
-                }
-            }
-
-            &.active {
-                background: #e6f0ff;
-                color: #0051a2;
-                font-weight: 600;
-                border-left: 4px solid #0051a2;
-                padding-left: 12px;
-
-                .icon svg {
-                    fill: #0051a2;
-                }
-            }
-        }
-
-        .vesselmanagement-submenu {
-            list-style: none;
-            padding-left: 20px;
-            margin-top: 6px;
-
-            li {
-                padding: 8px 0 8px 10px;
-                cursor: pointer;
-                font-size: 14px;
-                color: #555;
-                border-radius: 6px;
-                transition: all 0.2s ease-in-out;
-
-                &:hover {
-                    background-color: #f0f4ff;
-                    color: #0051a2;
-                }
-            }
+        span {
+            display: inline-flex;
+            padding: 6px 10px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.14);
+            color: #d1fae5;
+            font-size: 0.76rem;
+            font-weight: 600;
+            letter-spacing: 0.04em;
         }
     }
 
-    .collapsed {
-        display: none;
+    .sidebar-eyebrow {
+        margin: 0;
+        color: #ccfbf1;
+        font-size: 0.75rem;
+        font-weight: 700;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
     }
 
-    .background-img {
-        position: absolute;
-        bottom: 60px;
-        left: 15px;
-        width: 85%;
-        height: 180px;
-        z-index: 1;
-        opacity: 0.1;
+    .menu-items-wrapper {
+        flex: 1;
+        overflow-y: auto;
+        padding-right: 4px;
     }
 
+    .sidebar-section-label {
+        margin: 8px 0 12px;
+        padding: 0 8px;
+        color: #94a3b8;
+        font-size: 0.76rem;
+        font-weight: 700;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+    }
+
+    .sidebar-nav-item {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 12px 14px;
+        margin-bottom: 10px;
+        cursor: pointer;
+        border: 1px solid transparent;
+        border-radius: 18px;
+        font-weight: 500;
+        font-size: 15px;
+        color: #e2e8f0;
+        background: rgba(255, 255, 255, 0.03);
+        transition: all 0.25s ease-in-out;
+        text-align: left;
+
+        &:hover {
+            transform: translateY(-1px);
+            background: rgba(148, 163, 184, 0.1);
+            border-color: rgba(148, 163, 184, 0.16);
+        }
+    }
+
+    .sidebar-nav-item-active {
+        background: var(--sidebar-selected-bg);
+        color: #ffffff;
+        box-shadow: 0 12px 24px rgba(15, 23, 42, 0.18);
+
+        .sidebar-nav-icon {
+            background: rgba(255, 255, 255, 0.16);
+        }
+
+        .sidebar-nav-copy small {
+            color: rgba(255, 255, 255, 0.82);
+        }
+    }
+
+    .sidebar-nav-item-logout {
+        margin-top: 18px;
+        border-color: rgba(248, 113, 113, 0.14);
+
+        &:hover {
+            background: rgba(248, 113, 113, 0.08);
+            border-color: rgba(248, 113, 113, 0.18);
+        }
+    }
+
+    .sidebar-nav-icon {
+        width: 42px;
+        height: 42px;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        background: rgba(255, 255, 255, 0.08);
+        transition: all 0.3s ease;
+
+        svg {
+            width: 20px;
+            height: 20px;
+            fill: #e2e8f0;
+            transition: fill 0.3s ease;
+        }
+    }
+
+    .sidebar-nav-copy {
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+
+        span {
+            color: inherit;
+            font-weight: 700;
+        }
+
+        small {
+            color: #94a3b8;
+            font-size: 0.78rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+    }
 
 }
 
 @media screen and (max-width: 1200px) {
     .side-main-navbar {
         width: 85px !important;
+        padding: 14px 10px;
 
-        .vessel-management-sidebar {
+        .sidebar-brand-card {
+            padding: 16px 12px;
 
-            .titles,
-            .title {
-                justify-content: center;
-
-                .icon {
-                    margin-right: 0;
-                }
-
-                div:not(.icon) {
-                    display: none;
-                }
+            h2,
+            span {
+                display: none;
             }
+        }
+
+        .sidebar-section-label {
+            display: none;
+        }
+
+        .sidebar-nav-item {
+            justify-content: center;
+            padding: 10px;
+        }
+
+        .sidebar-nav-copy,
+        .sidebar-top .sidebar-brand-card h2 {
+            display: none;
         }
     }
 }

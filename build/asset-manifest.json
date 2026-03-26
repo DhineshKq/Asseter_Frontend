@@ -1,28 +1,24 @@
 {
   "files": {
-    "main.css": "./static/css/main.667773a0.css",
-    "main.js": "./static/js/main.73f439a3.js",
-    "static/media/bg.png": "./static/media/bg.67aa7e5301eccfb3ceb5.png",
+    "main.css": "./static/css/main.e934552e.css",
+    "main.js": "./static/js/main.787d37bd.js",
     "static/media/email.gif": "./static/media/email.746b9582531bea5c8a4b.gif",
     "static/media/delete.gif": "./static/media/delete.957385b69a263b9541b9.gif",
     "static/media/signout.gif": "./static/media/signout.23c3c1ea2f0ec9385413.gif",
-    "static/media/man.svg": "./static/media/man.e17e5ee64b2df7c9f4fc.svg",
-    "static/media/KQ_Logo.svg": "./static/media/KQ_Logo.c2a2967bd74e02da51d1f13b01ea3357.svg",
     "static/media/Scans.svg": "./static/media/Scans.05fa4166e0242c36f4e8755fa3016b28.svg",
     "static/media/captures.svg": "./static/media/captures.4c4750cc799f6839e776c42b10983cf8.svg",
     "static/media/Users.svg": "./static/media/Users.59c32a9af4fbad330d45cf98ccfb9275.svg",
-    "static/media/Setting.svg": "./static/media/Setting.14ba7afc74751f00eaf9d3987ac72f5a.svg",
     "static/media/assets.svg": "./static/media/assets.44db88e72baeca907a987e610e4bacee.svg",
     "static/media/left-box-arrow.svg": "./static/media/left-box-arrow.883622bbfb01f0f348c9f1bf59918b1d.svg",
     "static/media/Logout.svg": "./static/media/Logout.97c0577271620fb6991b46801d1de4ca.svg",
     "static/media/hamburger-menu.svg": "./static/media/hamburger-menu.9c284ebac1050d1ee046541cefe8191d.svg",
     "static/media/dashboard.svg": "./static/media/dashboard.c1fae90a2ac7b307b365aec074835ce3.svg",
     "index.html": "./index.html",
-    "main.667773a0.css.map": "./static/css/main.667773a0.css.map",
-    "main.73f439a3.js.map": "./static/js/main.73f439a3.js.map"
+    "main.e934552e.css.map": "./static/css/main.e934552e.css.map",
+    "main.787d37bd.js.map": "./static/js/main.787d37bd.js.map"
   },
   "entrypoints": [
-    "static/css/main.667773a0.css",
-    "static/js/main.73f439a3.js"
+    "static/css/main.e934552e.css",
+    "static/js/main.787d37bd.js"
   ]
 }

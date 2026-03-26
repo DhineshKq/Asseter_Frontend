@@ -8,7 +8,6 @@ import Assets from '../pages/Assets/assets'
 import AssetLocations from '../pages/asset-locations/asset-locations'
 import Users from '../pages/user-management/user-management'
 import AssetMapping from '../pages/asset-mapping/asset-mapping';
-import Settings from '../pages/Settings/settings';
 
 function PageRoutes() {
     const { auth } = useAuth()
@@ -33,7 +32,6 @@ function PageRoutes() {
                     <Route path="/asset-locations" element={<AssetLocations />} />
                     <Route path="/users" element={<Users />} />
                     <Route path="/asset-mapping" element={<AssetMapping />} />
-                    <Route path="/settings" element={<Settings />} />
 
                 </Route>
             </Routes>
