@@ -55,11 +55,11 @@ export default function ForgotPassword({ handleclick }: propsType) {
         <div className="forgotPassword-container">
           <div className="forgotPassword-box">
             <div className="inputs-align">
-              <div className="forgotPassword-kicker">Password Recovery</div>
+              <div className="forgotPassword-kicker">InfraPilot 360 Recovery</div>
               <div className="forgotPassword-title">Forgot Password</div>
 
               <p className="contents">
-                Enter your registered email address and we will send a new password to that inbox.
+                Enter your registered InfraPilot 360 email address and we will send a new password to that inbox.
               </p>
 
               <div className="formSpace">

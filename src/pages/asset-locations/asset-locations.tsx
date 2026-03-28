@@ -1,37 +1,84 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import AdminModulePage from "../../components/asset-admin/admin-module-page";
-import { LocationRecord, locations } from "../../data/asset-admin-data";
+import useAxiosPrivate from "../../services/hooks/useaxios-private";
+
+interface AssetLocationRecord {
+  id: number | null;
+  locationCode: string;
+  locationName: string;
+}
 
 export default function AssetLocationsPage() {
-  const [rows, setRows] = useState<LocationRecord[]>(locations);
+  const axiosPrivate = useAxiosPrivate();
+  const [rows, setRows] = useState<AssetLocationRecord[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [formData, setFormData] = useState({
-    code: "",
-    name: "",
+    locationCode: "",
+    locationName: "",
   });
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [loadError, setLoadError] = useState("");
+  const [submitError, setSubmitError] = useState("");
 
   const metrics = useMemo(
     () => [
-      { label: "Locations", value: rows.length, helper: "Configured places" },
-      { label: "Latest Code", value: rows.at(-1)?.code ?? "-", helper: "Most recently added code" },
-      { label: "Latest Location", value: rows.at(-1)?.name ?? "-", helper: "Most recently added location" },
+      { label: "Locations", value: rows.length, helper: "Configured places from backend" },
+      { label: "Latest Code", value: rows.at(-1)?.locationCode ?? "-", helper: "Most recently listed code" },
+      { label: "Latest Location", value: rows.at(-1)?.locationName ?? "-", helper: "Most recently listed location" },
     ],
     [rows]
   );
 
-  const resetForm = () => {
+  const resetForm = useCallback(() => {
     setFormData({
-      code: "",
-      name: "",
+      locationCode: "",
+      locationName: "",
     });
-  };
+    setSubmitError("");
+  }, []);
 
-  const closeModal = () => {
+  const closeModal = useCallback(() => {
+    if (isSaving) {
+      return;
+    }
     setIsModalOpen(false);
     setEditingIndex(null);
     resetForm();
-  };
+  }, [isSaving, resetForm]);
+
+  const mapLocationRecord = useCallback((location: any): AssetLocationRecord => ({
+    id: typeof location?.id === "number" ? location.id : null,
+    locationCode: location?.locationCode ?? "",
+    locationName: location?.locationName ?? "",
+  }), []);
+
+  const fetchLocations = useCallback(async () => {
+    setIsLoading(true);
+    setLoadError("");
+
+    try {
+      const response = await axiosPrivate.get("/assets/locations");
+      const payload = Array.isArray(response.data?.data)
+        ? response.data.data
+        : Array.isArray(response.data)
+          ? response.data
+          : [];
+
+      setRows(payload.map(mapLocationRecord));
+    } catch (error: any) {
+      setRows([]);
+      setLoadError(error?.response?.data?.message || "Failed to fetch asset locations. Check the API and try again.");
+      console.error("Failed to fetch asset locations:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [axiosPrivate, mapLocationRecord]);
+
+  useEffect(() => {
+    fetchLocations();
+  }, [fetchLocations]);
 
   useEffect(() => {
     if (!isModalOpen) {
@@ -40,28 +87,33 @@ export default function AssetLocationsPage() {
 
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
-        setIsModalOpen(false);
-        setEditingIndex(null);
-        resetForm();
+        closeModal();
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isModalOpen]);
+  }, [closeModal, isModalOpen]);
 
   const openAddModal = () => {
+    if (isSaving) {
+      return;
+    }
     setEditingIndex(null);
     resetForm();
     setIsModalOpen(true);
   };
 
-  const openEditModal = (row: LocationRecord, index: number) => {
+  const openEditModal = (row: AssetLocationRecord, index: number) => {
+    if (isSaving) {
+      return;
+    }
     setEditingIndex(index);
     setFormData({
-      code: row.code,
-      name: row.name,
+      locationCode: row.locationCode,
+      locationName: row.locationName,
     });
+    setSubmitError("");
     setIsModalOpen(true);
   };
 
@@ -73,27 +125,44 @@ export default function AssetLocationsPage() {
     }));
   };
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setRows((current) =>
-      editingIndex === null
-        ? [
-            ...current,
-            {
-              code: formData.code,
-              name: formData.name,
-            },
-          ]
-        : current.map((row, index) =>
-            index === editingIndex
-              ? {
-                  code: formData.code,
-                  name: formData.name,
-                }
-              : row
-          )
-    );
-    closeModal();
+
+    const nextRow: AssetLocationRecord = {
+      id: editingIndex === null ? null : rows[editingIndex]?.id ?? null,
+      locationCode: formData.locationCode.trim(),
+      locationName: formData.locationName.trim(),
+    };
+
+    if (editingIndex !== null) {
+      setRows((current) =>
+        current.map((row, index) => (index === editingIndex ? nextRow : row))
+      );
+      closeModal();
+      return;
+    }
+
+    setIsSaving(true);
+    setSubmitError("");
+
+    try {
+      // axios baseURL already includes `/v1`, so this hits `POST /v1/assets/locations`.
+      await axiosPrivate.post("/assets/locations", {
+        locationCode: nextRow.locationCode,
+        locationName: nextRow.locationName,
+      });
+
+      await fetchLocations();
+      setIsModalOpen(false);
+      setEditingIndex(null);
+      resetForm();
+    } catch (error: any) {
+      setSubmitError(
+        error?.response?.data?.message || "Failed to add location. Check the API and try again."
+      );
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const isSubmitDisabled = Object.values(formData).some((value) => value.trim() === "");
@@ -107,10 +176,18 @@ export default function AssetLocationsPage() {
       onEditRow={openEditModal}
       metrics={metrics}
       columns={[
-        { key: "code", label: "Location Code" },
-        { key: "name", label: "Location Name" },
+        { key: "locationCode", label: "Location Code" },
+        { key: "locationName", label: "Location Name" },
       ]}
       rows={rows}
+      emptyState={{
+        title: isLoading ? "Loading locations" : loadError ? "Unable to load locations" : "No locations available",
+        description: isLoading
+          ? "Fetching asset locations from the backend."
+          : loadError
+            ? loadError
+            : "No location records were returned from the backend yet.",
+      }}
     >
       {isModalOpen && (
         <div className="asset-admin-modal-backdrop" onClick={closeModal}>
@@ -136,9 +213,9 @@ export default function AssetLocationsPage() {
                 <label className="asset-admin-field">
                   <span>Location Code</span>
                   <input
-                    name="code"
+                    name="locationCode"
                     type="text"
-                    value={formData.code}
+                    value={formData.locationCode}
                     onChange={handleInputChange}
                     placeholder="Enter location code"
                   />
@@ -147,21 +224,23 @@ export default function AssetLocationsPage() {
                 <label className="asset-admin-field">
                   <span>Location Name</span>
                   <input
-                    name="name"
+                    name="locationName"
                     type="text"
-                    value={formData.name}
+                    value={formData.locationName}
                     onChange={handleInputChange}
                     placeholder="Enter location name"
                   />
                 </label>
               </div>
 
+              {submitError && <p className="asset-admin-form-error">{submitError}</p>}
+
               <div className="asset-admin-form-actions">
                 <button type="button" className="asset-admin-secondary-btn" onClick={closeModal}>
                   Cancel
                 </button>
-                <button type="submit" className="asset-admin-primary-btn" disabled={isSubmitDisabled}>
-                  {editingIndex === null ? "Save Location" : "Update Location"}
+                <button type="submit" className="asset-admin-primary-btn" disabled={isSubmitDisabled || isSaving}>
+                  {isSaving ? "Saving..." : editingIndex === null ? "Save Location" : "Update Location"}
                 </button>
               </div>
             </form>

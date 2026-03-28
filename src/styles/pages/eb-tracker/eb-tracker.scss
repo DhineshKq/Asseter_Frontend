@@ -1,0 +1,135 @@
+.eb-tracker-page {
+  .eb-tracker-hero {
+    align-items: stretch;
+  }
+
+  .eb-tracker-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.65fr) minmax(320px, 0.85fr);
+    gap: 22px;
+    margin-bottom: 24px;
+  }
+
+  .eb-tracker-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .eb-tracker-section {
+    display: grid;
+    grid-template-columns: minmax(220px, 320px);
+    gap: 16px;
+  }
+
+  .eb-tracker-reading-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+  }
+
+  .eb-tracker-reading-card {
+    padding: 20px;
+    border-radius: 22px;
+    background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+    border: 1px solid rgba(148, 163, 184, 0.18);
+  }
+
+  .eb-tracker-reading-header {
+    margin-bottom: 18px;
+
+    h4 {
+      margin: 0 0 6px;
+      color: #0f172a;
+      font-size: 1.05rem;
+      font-weight: 700;
+    }
+
+    p {
+      margin: 0;
+      color: #64748b;
+      line-height: 1.5;
+    }
+  }
+
+  .eb-tracker-input-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+  }
+
+  .eb-tracker-form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .eb-tracker-summary-card {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  .eb-tracker-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+  }
+
+  .eb-tracker-summary-item {
+    padding: 18px;
+    border-radius: 20px;
+    background: linear-gradient(180deg, rgba(236, 253, 245, 0.95) 0%, rgba(240, 249, 255, 0.95) 100%);
+    border: 1px solid rgba(16, 185, 129, 0.14);
+
+    span {
+      display: block;
+      color: #0f766e;
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    strong {
+      display: block;
+      margin-top: 10px;
+      color: #0f172a;
+      font-size: 1.7rem;
+      letter-spacing: -0.03em;
+    }
+  }
+
+  .eb-tracker-rule-note {
+    margin-top: auto;
+    padding: 18px;
+    border-radius: 20px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+
+    p {
+      margin: 0;
+      color: #475569;
+      line-height: 1.6;
+    }
+
+    p + p {
+      margin-top: 10px;
+    }
+  }
+}
+
+@media only screen and (max-width: 1200px) {
+  .eb-tracker-page {
+    .eb-tracker-grid,
+    .eb-tracker-reading-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .eb-tracker-summary-grid,
+    .eb-tracker-input-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+}

@@ -28,6 +28,8 @@ export default function Header({ filterClick, filterIconStatus }: Props) {
         "/assets": "Assets",
         "/asset-locations": "Asset Locations",
         "/asset-mapping": "Asset Mapping",
+        "/ip-mapping": "IP Mapping",
+        "/credential-manager": "Credential Manager",
         "/users": "Employees",
     }[location.pathname] || "Workspace";
 
@@ -42,9 +44,9 @@ export default function Header({ filterClick, filterIconStatus }: Props) {
                         <img src={Logo} alt={"Logo"} draggable={false} className={"kq-logo-image"} />
                     </div>
                     <div className="header-title-block">
-                        <span className="header-kicker">Asseter Workspace</span>
+                        <span className="header-kicker">InfraPilot 360</span>
                         <strong>{currentPageTitle}</strong>
-                        <small>Manage assets, employee records, and assignment ownership from one control layer.</small>
+                        <small>Manage infrastructure, asset records, and assignment ownership from one control layer.</small>
                     </div>
                 </div>
             </div>

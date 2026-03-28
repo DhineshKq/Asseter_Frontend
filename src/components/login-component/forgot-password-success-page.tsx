@@ -15,7 +15,7 @@ export default function ForgotPasswordEmailSent({ handleclick }: propsType) {
           <div className="success-icon-wrap">
             <img className="emailLogo formSpace1" draggable={false} src={emailGif} alt="Email sent" />
           </div>
-          <div className="forgotPassword-kicker">Password Recovery</div>
+          <div className="forgotPassword-kicker">InfraPilot 360 Recovery</div>
           <div className="forgotPassword-title">Check Your Email</div>
           <div>
             <p className="contents">

@@ -54,6 +54,10 @@ export default function AdminModulePage<T extends object>({
       return <span className="asset-admin-cell-muted">Not set</span>;
     }
 
+    if (React.isValidElement(value)) {
+      return value;
+    }
+
     if (typeof value === "number") {
       return value.toLocaleString();
     }

@@ -9,7 +9,7 @@ export default function TabTitle({ title }: propsType) {
 
         document.title = title;
         return () => {
-            document.title = 'IT Asseter';
+            document.title = 'InfraPilot 360';
         };
     }, []);
     return (
@@ -18,4 +18,3 @@ export default function TabTitle({ title }: propsType) {
         </div>
     );
 };
-

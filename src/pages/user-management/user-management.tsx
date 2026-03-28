@@ -1,28 +1,92 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import AdminModulePage from "../../components/asset-admin/admin-module-page";
-import { UserRecord, users } from "../../data/asset-admin-data";
+import useAxiosPrivate from "../../services/hooks/useaxios-private";
+
+interface EmployeeRecord {
+  id: number | null;
+  employeeId: string;
+  name: string;
+  email: string;
+  phone: string;
+  role: string;
+  team: string;
+  status: string;
+}
+
+interface EmployeeFormState {
+  employeeId: string;
+  name: string;
+  email: string;
+  phone: string;
+  role: string;
+  team: string;
+  status: string;
+}
+
+const emptyFormState: EmployeeFormState = {
+  employeeId: "",
+  name: "",
+  email: "",
+  phone: "",
+  role: "",
+  team: "",
+  status: "Active",
+};
 
 export default function UserManagementPage() {
-  const [rows, setRows] = useState<UserRecord[]>(users);
+  const axiosPrivate = useAxiosPrivate();
+  const [rows, setRows] = useState<EmployeeRecord[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingIndex, setEditingIndex] = useState<number | null>(null);
+  const [editingEmployeeId, setEditingEmployeeId] = useState<number | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("All Status");
   const [teamFilter, setTeamFilter] = useState("All Teams");
   const [validationError, setValidationError] = useState("");
-  const [formData, setFormData] = useState<UserRecord>({
-    employeeId: "",
-    name: "",
-    email: "",
-    phone: "",
-    role: "",
-    team: "",
-    status: "Active",
-  });
+  const [isLoading, setIsLoading] = useState(true);
+  const [isFetchingEmployee, setIsFetchingEmployee] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isDeletingId, setIsDeletingId] = useState<number | null>(null);
+  const [formData, setFormData] = useState<EmployeeFormState>(emptyFormState);
 
   const roleOptions = ["IT Admin", "Support Engineer", "Network Engineer", "QA Lead", "Asset Custodian"];
   const statusOptions = ["Active", "On Leave", "Inactive"];
-  const availableTeams = useMemo(() => Array.from(new Set(rows.map((item) => item.team))), [rows]);
+
+  const normalizeStatus = useCallback((status: string | undefined) => {
+    const normalized = `${status ?? ""}`.trim().toLowerCase();
+
+    switch (normalized) {
+      case "active":
+        return "Active";
+      case "on leave":
+      case "on_leave":
+        return "On Leave";
+      case "inactive":
+        return "Inactive";
+      default:
+        return "Active";
+    }
+  }, []);
+
+  const mapEmployeeRecord = useCallback(
+    (employee: any): EmployeeRecord => ({
+      id:
+        typeof employee?.id === "number"
+          ? employee.id
+          : typeof employee?.employeeIdPk === "number"
+            ? employee.employeeIdPk
+            : null,
+      employeeId: employee?.employeeId ?? "",
+      name: employee?.name ?? "",
+      email: employee?.email ?? "",
+      phone: employee?.phoneNumber ?? employee?.phone ?? "",
+      role: employee?.role ?? "",
+      team: employee?.team ?? "",
+      status: normalizeStatus(employee?.status),
+    }),
+    [normalizeStatus]
+  );
+
+  const availableTeams = useMemo(() => Array.from(new Set(rows.map((item) => item.team).filter(Boolean))), [rows]);
 
   const filteredRows = useMemo(() => {
     const normalizedSearch = searchTerm.trim().toLowerCase();
@@ -44,32 +108,55 @@ export default function UserManagementPage() {
 
   const metrics = useMemo(
     () => [
-      { label: "Users", value: rows.length, helper: "Current sample records" },
-      { label: "IT Admins", value: rows.filter((item) => item.role === "IT Admin").length, helper: "Administrative access" },
+      { label: "Users", value: rows.length, helper: "Loaded from active employee records" },
+      { label: "Teams", value: new Set(rows.map((item) => item.team).filter(Boolean)).size, helper: "Represented business units" },
       { label: "Active Status", value: rows.filter((item) => item.status === "Active").length, helper: "Currently active users" },
-      { label: "Teams", value: new Set(rows.map((item) => item.team)).size, helper: "Represented business units" },
+      { label: "Inactive Users", value: rows.filter((item) => item.status === "Inactive").length, helper: "Currently inactive users" },
     ],
     [rows]
   );
 
   const resetForm = useCallback(() => {
-    setFormData({
-      employeeId: "",
-      name: "",
-      email: "",
-      phone: "",
-      role: "",
-      team: "",
-      status: "Active",
-    });
+    setFormData(emptyFormState);
     setValidationError("");
   }, []);
 
+  const fetchEmployees = useCallback(async () => {
+    setIsLoading(true);
+
+    try {
+      // axios baseURL already includes `/v1`, so this hits `GET /v1/employees`.
+      const response = await axiosPrivate.get("/employees");
+      const payload = Array.isArray(response.data?.data)
+        ? response.data.data
+        : Array.isArray(response.data?.employees)
+          ? response.data.employees
+          : Array.isArray(response.data)
+            ? response.data
+            : [];
+
+      setRows(payload.map(mapEmployeeRecord));
+    } catch (error) {
+      console.error("Failed to fetch employees:", error);
+      setRows([]);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [axiosPrivate, mapEmployeeRecord]);
+
   const closeModal = useCallback(() => {
+    if (isSaving || isFetchingEmployee) {
+      return;
+    }
+
     setIsModalOpen(false);
-    setEditingIndex(null);
+    setEditingEmployeeId(null);
     resetForm();
-  }, [resetForm]);
+  }, [isFetchingEmployee, isSaving, resetForm]);
+
+  useEffect(() => {
+    fetchEmployees();
+  }, [fetchEmployees]);
 
   useEffect(() => {
     if (!isModalOpen) {
@@ -87,16 +174,52 @@ export default function UserManagementPage() {
   }, [closeModal, isModalOpen]);
 
   const openAddModal = () => {
-    setEditingIndex(null);
+    if (isSaving || isFetchingEmployee || isDeletingId !== null) {
+      return;
+    }
+
+    setEditingEmployeeId(null);
     resetForm();
     setIsModalOpen(true);
   };
 
-  const openEditModal = (row: UserRecord, index: number) => {
-    setEditingIndex(index);
-    setFormData(row);
+  const openEditModal = async (row: EmployeeRecord) => {
+    if (isSaving || isFetchingEmployee || isDeletingId !== null) {
+      return;
+    }
+
+    if (!row.id) {
+      setValidationError("Employee ID is missing. Refresh the page and try again.");
+      return;
+    }
+
+    setIsFetchingEmployee(true);
     setValidationError("");
-    setIsModalOpen(true);
+
+    try {
+      // axios baseURL already includes `/v1`, so this hits `GET /v1/employees/:id`.
+      const response = await axiosPrivate.get(`/employees/${row.id}`);
+      const employee = response.data?.data ?? response.data?.employee ?? response.data;
+      const mappedEmployee = mapEmployeeRecord(employee);
+
+      setEditingEmployeeId(row.id);
+      setFormData({
+        employeeId: mappedEmployee.employeeId,
+        name: mappedEmployee.name,
+        email: mappedEmployee.email,
+        phone: mappedEmployee.phone,
+        role: mappedEmployee.role,
+        team: mappedEmployee.team,
+        status: mappedEmployee.status,
+      });
+      setIsModalOpen(true);
+    } catch (error: any) {
+      setValidationError(
+        error?.response?.data?.message || "Failed to fetch employee details. Check the API and try again."
+      );
+    } finally {
+      setIsFetchingEmployee(false);
+    }
   };
 
   const handleInputChange = (
@@ -109,13 +232,23 @@ export default function UserManagementPage() {
     }));
   };
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    const normalizedEmail = formData.email.trim().toLowerCase();
-    const normalizedEmployeeId = formData.employeeId.trim().toLowerCase();
-    const hasDuplicate = rows.some((row, index) => {
-      if (editingIndex !== null && index === editingIndex) {
+    const trimmedFormData: EmployeeFormState = {
+      employeeId: formData.employeeId.trim(),
+      name: formData.name.trim(),
+      email: formData.email.trim(),
+      phone: formData.phone.trim(),
+      role: formData.role.trim(),
+      team: formData.team.trim(),
+      status: formData.status.trim(),
+    };
+
+    const normalizedEmail = trimmedFormData.email.toLowerCase();
+    const normalizedEmployeeId = trimmedFormData.employeeId.toLowerCase();
+    const hasDuplicate = rows.some((row) => {
+      if (editingEmployeeId !== null && row.id === editingEmployeeId) {
         return false;
       }
 
@@ -130,21 +263,64 @@ export default function UserManagementPage() {
       return;
     }
 
-    setRows((current) =>
-      editingIndex === null
-        ? [...current, formData]
-        : current.map((row, index) => (index === editingIndex ? formData : row))
-    );
-    closeModal();
+    const payload = {
+      employeeId: trimmedFormData.employeeId,
+      name: trimmedFormData.name,
+      email: trimmedFormData.email,
+      phoneNumber: trimmedFormData.phone,
+      role: trimmedFormData.role,
+      team: trimmedFormData.team,
+      status: trimmedFormData.status.toLowerCase(),
+    };
+
+    setIsSaving(true);
+    setValidationError("");
+
+    try {
+      if (editingEmployeeId !== null) {
+        // axios baseURL already includes `/v1`, so this hits `PUT /v1/employees/:id`.
+        await axiosPrivate.put(`/employees/${editingEmployeeId}`, payload);
+      } else {
+        // axios baseURL already includes `/v1`, so this hits `POST /v1/employees`.
+        await axiosPrivate.post("/employees", payload);
+      }
+
+      await fetchEmployees();
+      setIsModalOpen(false);
+      setEditingEmployeeId(null);
+      resetForm();
+    } catch (error: any) {
+      setValidationError(
+        error?.response?.data?.message ||
+          `Failed to ${editingEmployeeId !== null ? "update" : "create"} employee. Check the API and try again.`
+      );
+    } finally {
+      setIsSaving(false);
+    }
   };
 
-  const handleDeleteUser = (indexToDelete: number) => {
-    const userName = rows[indexToDelete]?.name ?? "this user";
-    if (!window.confirm(`Delete ${userName} from the users module?`)) {
+  const handleDeleteUser = async (row: EmployeeRecord) => {
+    if (isSaving || isFetchingEmployee || !row.id) {
       return;
     }
 
-    setRows((current) => current.filter((_, index) => index !== indexToDelete));
+    if (!window.confirm(`Delete ${row.name || "this user"} from the users module?`)) {
+      return;
+    }
+
+    setIsDeletingId(row.id);
+
+    try {
+      // axios baseURL already includes `/v1`, so this hits `DELETE /v1/employees/:id`.
+      await axiosPrivate.delete(`/employees/${row.id}`);
+      await fetchEmployees();
+    } catch (error: any) {
+      setValidationError(
+        error?.response?.data?.message || "Failed to delete employee. Check the API and try again."
+      );
+    } finally {
+      setIsDeletingId(null);
+    }
   };
 
   const clearFilters = () => {
@@ -161,14 +337,17 @@ export default function UserManagementPage() {
       subtitle="Maintain employee records used by the admin to assign and track assets against the right person or team."
       actionLabel="Add Employee"
       onActionClick={openAddModal}
-      onEditRow={openEditModal}
-      renderRowActions={(_, index) => (
+      onEditRow={(row) => openEditModal(row as EmployeeRecord)}
+      renderRowActions={(row) => (
         <button
           type="button"
           className="asset-admin-danger-btn"
-          onClick={() => handleDeleteUser(index)}
+          onClick={() => handleDeleteUser(row as EmployeeRecord)}
+          disabled={isDeletingId === (row as EmployeeRecord).id || !(row as EmployeeRecord).id}
+          aria-disabled={isDeletingId === (row as EmployeeRecord).id || !(row as EmployeeRecord).id}
+          title={!(row as EmployeeRecord).id ? "Cannot delete an employee without an ID" : "Delete employee"}
         >
-          Delete
+          {isDeletingId === (row as EmployeeRecord).id ? "Deleting..." : "Delete"}
         </button>
       )}
       metrics={metrics}
@@ -222,8 +401,10 @@ export default function UserManagementPage() {
         </>
       }
       emptyState={{
-        title: "No employees match the current filters",
-        description: "Clear the filters or add a new employee record to repopulate the module.",
+        title: isLoading ? "Loading employees" : "No employees match the current filters",
+        description: isLoading
+          ? "Fetching active employee records from the backend."
+          : "Clear the filters or add a new employee record to repopulate the module.",
       }}
     >
       {isModalOpen && (
@@ -237,8 +418,8 @@ export default function UserManagementPage() {
           >
             <div className="asset-admin-modal-header">
               <div>
-                <p className="asset-admin-modal-kicker">{editingIndex === null ? "New Employee" : "Edit Employee"}</p>
-                <h3 id="user-admin-modal-title">{editingIndex === null ? "Add Employee" : "Edit Employee"}</h3>
+                <p className="asset-admin-modal-kicker">{editingEmployeeId === null ? "New Employee" : "Edit Employee"}</p>
+                <h3 id="user-admin-modal-title">{editingEmployeeId === null ? "Add Employee" : "Edit Employee"}</h3>
               </div>
               <button type="button" className="asset-admin-modal-close" onClick={closeModal} aria-label="Close add employee popup">
                 x
@@ -343,8 +524,8 @@ export default function UserManagementPage() {
                 <button type="button" className="asset-admin-secondary-btn" onClick={closeModal}>
                   Cancel
                 </button>
-                <button type="submit" className="asset-admin-primary-btn" disabled={isSubmitDisabled}>
-                  {editingIndex === null ? "Save Employee" : "Update Employee"}
+                <button type="submit" className="asset-admin-primary-btn" disabled={isSubmitDisabled || isSaving || isFetchingEmployee}>
+                  {isSaving ? "Saving..." : editingEmployeeId === null ? "Save Employee" : "Update Employee"}
                 </button>
               </div>
             </form>

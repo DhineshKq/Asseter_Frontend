@@ -1,18 +1,52 @@
-import React, { useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import AdminModulePage from "../../components/asset-admin/admin-module-page";
-import { assets, locations, mappings, MappingRecord, users } from "../../data/asset-admin-data";
+import useAxiosPrivate from "../../services/hooks/useaxios-private";
+import { MappingRecord } from "../../data/asset-admin-data";
+
+interface AssetOption {
+  id: number;
+  assetName: string;
+  deviceId: string;
+  serialNumber: string;
+}
+
+interface EmployeeOption {
+  id: number;
+  employeeId: string;
+  name: string;
+  team: string;
+}
+
+interface LocationOption {
+  id: number;
+  locationName: string;
+}
+
+const emptyFormState: MappingRecord = {
+  assetName: "",
+  deviceId: "",
+  serialNumber: "",
+  employeeId: "",
+  assignedTo: "",
+  department: "",
+  location: "",
+  assignedOn: "",
+};
 
 export default function AssetMappingPage() {
-  const [rows, setRows] = useState<MappingRecord[]>(mappings);
+  const axiosPrivate = useAxiosPrivate();
+  const [rows, setRows] = useState<MappingRecord[]>([]);
   const [isMapModalOpen, setIsMapModalOpen] = useState(false);
-  const [formData, setFormData] = useState<MappingRecord>({
-    assetName: "",
-    deviceId: "",
-    assignedTo: "",
-    department: "",
-    location: "",
-    assignedOn: "",
-  });
+  const [formData, setFormData] = useState<MappingRecord>(emptyFormState);
+  const [assetOptions, setAssetOptions] = useState<AssetOption[]>([]);
+  const [userOptions, setUserOptions] = useState<EmployeeOption[]>([]);
+  const [locationOptions, setLocationOptions] = useState<LocationOption[]>([]);
+  const [isLoadingMappings, setIsLoadingMappings] = useState(true);
+  const [isLoadingOptions, setIsLoadingOptions] = useState(true);
+  const [loadError, setLoadError] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
+  const [optionsError, setOptionsError] = useState("");
+  const [submitError, setSubmitError] = useState("");
 
   const metrics = useMemo(() => {
     const latestMapping = rows.reduce<string>((latest, current) => {
@@ -22,37 +56,191 @@ export default function AssetMappingPage() {
 
     return [
       { label: "Mapped Assets", value: rows.length, helper: "Assigned with responsibility" },
-      { label: "Departments", value: new Set(rows.map((item) => item.department)).size, helper: "Teams with mappings" },
+      { label: "Departments", value: new Set(rows.map((item) => item.department).filter(Boolean)).size, helper: "Teams with mappings" },
       { label: "Latest Mapping", value: latestMapping || "-", helper: "Most recent assignment date" },
     ];
   }, [rows]);
 
-  const assetOptions = assets.map((item) => ({
-    assetName: item.assetName,
-    deviceId: item.deviceId,
-    location: item.location,
-  }));
-  const userOptions = users.map((item) => ({
-    name: item.name,
-    team: item.team,
-  }));
-  const locationOptions = locations.map((item) => item.name);
+  const resetForm = useCallback(() => {
+    setFormData(emptyFormState);
+    setSubmitError("");
+  }, []);
 
-  const resetForm = () => {
-    setFormData({
-      assetName: "",
-      deviceId: "",
-      assignedTo: "",
-      department: "",
-      location: "",
-      assignedOn: "",
-    });
-  };
-
-  const closeModal = () => {
+  const closeModal = useCallback(() => {
+    if (isSaving) {
+      return;
+    }
     setIsMapModalOpen(false);
     resetForm();
-  };
+  }, [isSaving, resetForm]);
+
+  const normalizeDate = useCallback((value: unknown) => {
+    if (typeof value !== "string" || value.trim() === "") {
+      return "";
+    }
+
+    const trimmedValue = value.trim();
+
+    if (/^\d{4}-\d{2}-\d{2}$/.test(trimmedValue)) {
+      return trimmedValue;
+    }
+
+    const parsedDate = new Date(trimmedValue);
+
+    if (Number.isNaN(parsedDate.getTime())) {
+      return "";
+    }
+
+    return parsedDate.toISOString().slice(0, 10);
+  }, []);
+
+  const mapMappingRecord = useCallback(
+    (mapping: any): MappingRecord => {
+      const fullUserName = `${mapping?.user?.firstName ?? ""} ${mapping?.user?.lastName ?? ""}`.trim();
+
+      return {
+        assetName:
+          mapping?.asset?.assetName ??
+          mapping?.assetDetails?.assetName ??
+          mapping?.assetName ??
+          "",
+        deviceId:
+          mapping?.asset?.deviceId ??
+          mapping?.assetDetails?.deviceId ??
+          mapping?.deviceId ??
+          "",
+        serialNumber:
+          mapping?.asset?.serialNumber ??
+          mapping?.assetDetails?.serialNumber ??
+          mapping?.serialNumber ??
+          "",
+        employeeId:
+          mapping?.employeeId ??
+          mapping?.employee?.employeeId ??
+          mapping?.user?.employeeId ??
+          "",
+        assignedTo:
+          mapping?.responsibilityUser ??
+          mapping?.employee?.name ??
+          (fullUserName || undefined) ??
+          mapping?.user?.name ??
+          mapping?.assignedTo ??
+          "",
+        department:
+          mapping?.employee?.team ??
+          mapping?.user?.team ??
+          mapping?.department ??
+          "",
+        location:
+          mapping?.location?.locationName ??
+          mapping?.location?.name ??
+          mapping?.locationName ??
+          mapping?.location ??
+          "",
+        assignedOn: normalizeDate(
+          mapping?.assignedDate ??
+          mapping?.assignedOn ??
+          mapping?.mappingDate ??
+          mapping?.createdAt
+        ),
+      };
+    },
+    [normalizeDate]
+  );
+
+  const fetchMappings = useCallback(async () => {
+    setIsLoadingMappings(true);
+    setLoadError("");
+
+    try {
+      // axios baseURL already includes `/v1`, so this hits `GET /v1/assets/mappings`.
+      const response = await axiosPrivate.get("/assets/mappings");
+      const payload = Array.isArray(response.data?.data)
+        ? response.data.data
+        : Array.isArray(response.data?.mappings)
+          ? response.data.mappings
+          : Array.isArray(response.data)
+            ? response.data
+            : [];
+
+      setRows(payload.map(mapMappingRecord));
+    } catch (error: any) {
+      setRows([]);
+      setLoadError(
+        error?.response?.data?.message || "Failed to fetch asset mappings. Check the API and try again."
+      );
+      console.error("Failed to fetch asset mappings:", error);
+    } finally {
+      setIsLoadingMappings(false);
+    }
+  }, [axiosPrivate, mapMappingRecord]);
+
+  const fetchMappingOptions = useCallback(async () => {
+    setIsLoadingOptions(true);
+    setOptionsError("");
+
+    try {
+      const [assetsResponse, locationsResponse, employeesResponse] = await Promise.all([
+        axiosPrivate.get("/assets"),
+        axiosPrivate.get("/assets/locations"),
+        axiosPrivate.get("/employees"),
+      ]);
+
+      const assetsPayload = Array.isArray(assetsResponse.data?.data)
+        ? assetsResponse.data.data
+        : Array.isArray(assetsResponse.data)
+          ? assetsResponse.data
+          : [];
+      const locationsPayload = Array.isArray(locationsResponse.data?.data)
+        ? locationsResponse.data.data
+        : Array.isArray(locationsResponse.data)
+          ? locationsResponse.data
+          : [];
+      const employeesPayload = Array.isArray(employeesResponse.data?.data)
+        ? employeesResponse.data.data
+        : Array.isArray(employeesResponse.data)
+          ? employeesResponse.data
+          : [];
+
+      setAssetOptions(
+        assetsPayload.map((asset: any) => ({
+          id: asset.id,
+          assetName: asset.assetName ?? "",
+          deviceId: asset.deviceId ?? "",
+          serialNumber: asset.serialNumber ?? "",
+        }))
+      );
+      setLocationOptions(
+        locationsPayload.map((location: any) => ({
+          id: location.id,
+          locationName: location.locationName ?? "",
+        }))
+      );
+      setUserOptions(
+        employeesPayload.map((employee: any) => ({
+          id: employee.id,
+          employeeId: employee.employeeId ?? "",
+          name: employee.name ?? "",
+          team: employee.team ?? "",
+        }))
+      );
+    } catch (error: any) {
+      setAssetOptions([]);
+      setLocationOptions([]);
+      setUserOptions([]);
+      setOptionsError(
+        error?.response?.data?.message || "Failed to load assets, locations, or employees for mapping."
+      );
+      console.error("Failed to load mapping options:", error);
+    } finally {
+      setIsLoadingOptions(false);
+    }
+  }, [axiosPrivate]);
+
+  useEffect(() => {
+    fetchMappings();
+    fetchMappingOptions();
+  }, [fetchMappingOptions, fetchMappings]);
 
   const handleInputChange = (
     event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -61,11 +249,12 @@ export default function AssetMappingPage() {
 
     if (name === "assetName") {
       const selectedAsset = assetOptions.find((item) => item.assetName === value);
+
       setFormData((current) => ({
         ...current,
         assetName: value,
         deviceId: selectedAsset?.deviceId ?? "",
-        location: selectedAsset?.location ?? current.location,
+        serialNumber: selectedAsset?.serialNumber ?? "",
       }));
       return;
     }
@@ -75,7 +264,8 @@ export default function AssetMappingPage() {
       setFormData((current) => ({
         ...current,
         assignedTo: value,
-        department: selectedUser?.team ?? current.department,
+        employeeId: selectedUser?.employeeId ?? "",
+        department: selectedUser?.team ?? "",
       }));
       return;
     }
@@ -86,10 +276,41 @@ export default function AssetMappingPage() {
     }));
   };
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setRows((current) => [...current, formData]);
-    closeModal();
+
+    const selectedAsset = assetOptions.find((item) => item.assetName === formData.assetName);
+    const selectedUser = userOptions.find((item) => item.name === formData.assignedTo);
+    const selectedLocation = locationOptions.find((item) => item.locationName === formData.location);
+
+    if (!selectedAsset?.id || !selectedUser?.id || !selectedLocation?.id) {
+      setSubmitError("Select a valid asset, responsible user, and location before saving the mapping.");
+      return;
+    }
+
+    setIsSaving(true);
+    setSubmitError("");
+
+    try {
+      // axios baseURL already includes `/v1`, so this hits `POST /v1/assets/mappings`.
+      await axiosPrivate.post("/assets/mappings", {
+        assetId: selectedAsset.id,
+        locationId: selectedLocation.id,
+        userId: selectedUser.id,
+        responsibilityUser: formData.assignedTo,
+        assignedDate: new Date(formData.assignedOn).toISOString(),
+      });
+
+      await fetchMappings();
+      setIsMapModalOpen(false);
+      resetForm();
+    } catch (error: any) {
+      setSubmitError(
+        error?.response?.data?.message || "Failed to save asset mapping. Check the API and try again."
+      );
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const isSubmitDisabled = Object.values(formData).some((value) => value.trim() === "");
@@ -104,12 +325,26 @@ export default function AssetMappingPage() {
       columns={[
         { key: "assetName", label: "Asset Name" },
         { key: "deviceId", label: "Device ID" },
+        { key: "serialNumber", label: "S/N No" },
+        { key: "employeeId", label: "Employee ID" },
         { key: "assignedTo", label: "Responsible User" },
         { key: "department", label: "Department" },
         { key: "location", label: "Location" },
         { key: "assignedOn", label: "Assigned On" },
       ]}
       rows={rows}
+      emptyState={{
+        title: isLoadingMappings
+          ? "Loading asset mappings"
+          : loadError
+            ? "Unable to load asset mappings"
+            : "No mapped assets yet",
+        description: isLoadingMappings
+          ? "Fetching mapped asset details from the backend."
+          : loadError
+            ? loadError
+            : "Create a new asset mapping to populate this module.",
+      }}
     >
       {isMapModalOpen && (
         <div className="asset-admin-modal-backdrop" onClick={closeModal}>
@@ -134,10 +369,10 @@ export default function AssetMappingPage() {
               <div className="asset-admin-form-grid">
                 <label className="asset-admin-field">
                   <span>Asset Name</span>
-                  <select name="assetName" value={formData.assetName} onChange={handleInputChange}>
-                    <option value="">Select asset</option>
+                  <select name="assetName" value={formData.assetName} onChange={handleInputChange} disabled={isLoadingOptions}>
+                    <option value="">{isLoadingOptions ? "Loading assets..." : "Select asset"}</option>
                     {assetOptions.map((option) => (
-                      <option key={option.deviceId} value={option.assetName}>
+                      <option key={option.id} value={option.assetName}>
                         {option.assetName}
                       </option>
                     ))}
@@ -150,17 +385,30 @@ export default function AssetMappingPage() {
                     name="deviceId"
                     type="text"
                     value={formData.deviceId}
-                    onChange={handleInputChange}
-                    placeholder="Enter device ID"
+                    readOnly
+                    disabled
+                    placeholder="Auto-filled from asset"
+                  />
+                </label>
+
+                <label className="asset-admin-field">
+                  <span>Serial Number</span>
+                  <input
+                    name="serialNumber"
+                    type="text"
+                    value={formData.serialNumber}
+                    readOnly
+                    disabled
+                    placeholder="Auto-filled from asset"
                   />
                 </label>
 
                 <label className="asset-admin-field">
                   <span>Responsible User</span>
-                  <select name="assignedTo" value={formData.assignedTo} onChange={handleInputChange}>
-                    <option value="">Select user</option>
+                  <select name="assignedTo" value={formData.assignedTo} onChange={handleInputChange} disabled={isLoadingOptions}>
+                    <option value="">{isLoadingOptions ? "Loading users..." : "Select user"}</option>
                     {userOptions.map((option) => (
-                      <option key={option.name} value={option.name}>
+                      <option key={option.id} value={option.name}>
                         {option.name}
                       </option>
                     ))}
@@ -173,18 +421,19 @@ export default function AssetMappingPage() {
                     name="department"
                     type="text"
                     value={formData.department}
-                    onChange={handleInputChange}
-                    placeholder="Enter department"
+                    readOnly
+                    disabled
+                    placeholder="Auto-filled from user"
                   />
                 </label>
 
                 <label className="asset-admin-field">
                   <span>Location</span>
-                  <select name="location" value={formData.location} onChange={handleInputChange}>
-                    <option value="">Select location</option>
+                  <select name="location" value={formData.location} onChange={handleInputChange} disabled={isLoadingOptions}>
+                    <option value="">{isLoadingOptions ? "Loading locations..." : "Select location"}</option>
                     {locationOptions.map((option) => (
-                      <option key={option} value={option}>
-                        {option}
+                      <option key={option.id} value={option.locationName}>
+                        {option.locationName}
                       </option>
                     ))}
                   </select>
@@ -201,12 +450,14 @@ export default function AssetMappingPage() {
                 </label>
               </div>
 
+              {(optionsError || submitError) && <p className="asset-admin-form-error">{submitError || optionsError}</p>}
+
               <div className="asset-admin-form-actions">
                 <button type="button" className="asset-admin-secondary-btn" onClick={closeModal}>
                   Cancel
                 </button>
-                <button type="submit" className="asset-admin-primary-btn" disabled={isSubmitDisabled}>
-                  Save Mapping
+                <button type="submit" className="asset-admin-primary-btn" disabled={isSubmitDisabled || isLoadingOptions || isSaving}>
+                  {isSaving ? "Saving..." : "Save Mapping"}
                 </button>
               </div>
             </form>

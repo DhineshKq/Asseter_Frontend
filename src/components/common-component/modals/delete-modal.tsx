@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { BsArrowRight } from 'react-icons/bs';
 import { RxCross1 } from 'react-icons/rx';
 import ButtonComponent from '../form-elements/button-component';
 import InputComponent from '../form-elements/input-component';
@@ -207,27 +206,47 @@ export default function DeleteModal({
       }
       {
         modelType === "signOut" &&
-        <div className={"singout-container"}>
-          <div className='signout-image-main'>
-            <img className="signout-image" src={signout}></img>
+        <div className={"signout-shell"}>
+          <button
+            type="button"
+            className="signout-close"
+            onClick={() => clearValue(false)}
+            aria-label="Close sign out dialog"
+          >
+            <RxCross1 />
+          </button>
+          <div className="signout-topline">Secure Session</div>
+          <div className="signout-hero">
+            <div className='signout-image-main'>
+              <img className="signout-image" src={signout} alt="Sign out illustration" />
+            </div>
+            <div className="signout-copy">
+              <div className={"signout-content"}>{"Ready to leave InfraPilot 360?"}</div>
+              <div className="signout-subtext">
+                {"You will be signed out of the current workspace and will need to log in again to continue."}
+              </div>
+            </div>
           </div>
-          <div className={"signout-content"}>{"Are you sure you want to log out?"}</div>
-          <div className={"buttons"}>
+          <div className="signout-note">
+            <strong>Current action</strong>
+            <span>Your active admin session will end on this browser.</span>
+          </div>
+          <div className={"buttons signout-actions"}>
             <ButtonComponent
-              title={"Cancel"}
-              height={"50px"}
-              width={"150px"}
-              backgroundColor={"#888888"}
-              color={"white"}
+              title={"Stay Signed In"}
+              height={"52px"}
+              width={"190px"}
+              backgroundColor={"#E8EEF5"}
+              color={"#17324D"}
               margin={"0px"}
               className={"button-component-hover cancel"}
               handleClick={() => clearValue(false)}
             />
             <ButtonComponent
-              title={"Log Out"}
-              height={"50px"}
-              width={"150px"}
-              backgroundColor={"var(--btn-primary-bg)"}
+              title={"Log Out Now"}
+              height={"52px"}
+              width={"190px"}
+              backgroundColor={"#C94F3D"}
               color={"white"}
               margin={"0px"}
               className={'button-component common-btn'}
@@ -242,7 +261,7 @@ export default function DeleteModal({
         modelType === "profilPictureDelete" &&
         <div className={"profil-picture-container"}>
           <div className='signout-image-main'>
-            <img className="profile-delete-image" src={Delete}></img>
+            <img className="profile-delete-image" src={Delete} alt="Delete profile illustration" />
           </div>
           <div className={"title-head"}>{"Are you sure?"}</div>
           <div className={"content"}>{"Do you want to delete the profile picture? This process cannot be undone."}</div>
@@ -275,6 +294,3 @@ export default function DeleteModal({
     </div>
   )
 }
-
-
-

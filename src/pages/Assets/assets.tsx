@@ -241,6 +241,9 @@ export default function AssetsPage() {
     event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const { name, value } = event.target;
+    if (submitError) {
+      setSubmitError("");
+    }
     setFormData((current) => ({
       ...current,
       [name]: value,
@@ -254,6 +257,11 @@ export default function AssetsPage() {
 
     if (!Number.isInteger(locationId) || locationId <= 0) {
       setSubmitError("Select a valid location before saving the asset.");
+      return;
+    }
+
+    if (formData.deviceId.trim() === "" && formData.serialNumber.trim() === "") {
+      setSubmitError("Enter either a device ID or a serial number before saving the asset.");
       return;
     }
 
@@ -305,8 +313,6 @@ export default function AssetsPage() {
   };
 
   const isSubmitDisabled = [
-    formData.deviceId,
-    formData.serialNumber,
     formData.assetName,
     formData.type,
     formData.status,
@@ -380,6 +386,7 @@ export default function AssetsPage() {
                     onChange={handleInputChange}
                     placeholder="Enter device ID"
                   />
+                  <small>Enter device ID or serial number.</small>
                 </label>
 
                 <label className="asset-admin-field">
@@ -391,6 +398,7 @@ export default function AssetsPage() {
                     onChange={handleInputChange}
                     placeholder="Enter serial number"
                   />
+                  <small>At least one identifier is required.</small>
                 </label>
 
                 <label className="asset-admin-field">

@@ -20,6 +20,8 @@ export interface LocationRecord {
 export interface MappingRecord {
   assetName: string;
   deviceId: string;
+  serialNumber: string;
+  employeeId: string;
   assignedTo: string;
   department: string;
   location: string;

@@ -37,11 +37,11 @@ function SidebarItem({
       type="button"
       className={`sidebar-nav-item ${isActive ? "sidebar-nav-item-active" : ""}`}
       onClick={() => navConfirmation(title, route)}
+      title={`${title} - ${caption}`}
     >
       <div className="sidebar-nav-icon">{icon}</div>
       <div className="sidebar-nav-copy">
         <span>{title}</span>
-        <small>{caption}</small>
       </div>
     </button>
   );
@@ -65,6 +65,9 @@ export default function SideBar() {
       "/assets": "Assets",
       "/asset-locations": "Asset Locations",
       "/asset-mapping": "Asset Mapping",
+      "/ip-mapping": "IP Mapping",
+      "/credential-manager": "Credential Manager",
+      "/eb-tracker": "EB Tracker",
       "/users": "Users"
     };
     setSelectedTitle(pathMap[location.pathname] || "");
@@ -126,6 +129,9 @@ export default function SideBar() {
     { title: "Assets", route: "/assets", icon: <AssestsIcon />, caption: "Inventory records", selectedTitle, navConfirmation },
     { title: "Asset Locations", route: "/asset-locations", icon: <ScansIcon />, caption: "Teams and places", selectedTitle, navConfirmation },
     { title: "Asset Mapping", route: "/asset-mapping", icon: <CapturesIcon />, caption: "Ownership mapping", selectedTitle, navConfirmation },
+    { title: "IP Mapping", route: "/ip-mapping", icon: <ScansIcon />, caption: "Subnet ownership", selectedTitle, navConfirmation },
+    { title: "Credential Manager", route: "/credential-manager", icon: <UserIcon />, caption: "Access vault", selectedTitle, navConfirmation },
+    { title: "EB Tracker", route: "/eb-tracker", icon: <CapturesIcon />, caption: "Energy readings and units", selectedTitle, navConfirmation },
     { title: "Employees", route: "/users", icon: <UserIcon />, caption: "People for asset mapping", selectedTitle, navConfirmation },
   ];
 
@@ -134,17 +140,22 @@ export default function SideBar() {
       <div className="vessel-management-sidebar expanded">
         <div className="sidebar-top">
           <div className="sidebar-brand-card">
-            <p className="sidebar-eyebrow">Asseter Console</p>
-            <h2>Operations Hub</h2>
+            <p className="sidebar-eyebrow">InfraPilot 360</p>
+            <div className="sidebar-brand-title-row">
+              <h2>Command Center</h2>
+              <small>{menuItems.length} Modules</small>
+            </div>
             <span>{isAdmin ? "Administrator Access" : "Workspace Access"}</span>
           </div>
         </div>
 
         <div className="menu-items-wrapper">
           <div className="sidebar-section-label">Navigation</div>
-          {menuItems.map((item) => (
-            <SidebarItem key={item.title} {...item} />
-          ))}
+          <div className="sidebar-nav-list">
+            {menuItems.map((item) => (
+              <SidebarItem key={item.title} {...item} />
+            ))}
+          </div>
           <button
             type="button"
             className="sidebar-nav-item sidebar-nav-item-logout"

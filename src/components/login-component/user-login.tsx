@@ -85,24 +85,24 @@ export default function UserLogin({ handleclick }: propsType) {
             <div className='loginPage'>
                 <div className='login-shell'>
                     <section className='login-hero-panel'>
-                        <div className='login-hero-badge'>Asseter Platform</div>
-                        <h1>Professional asset operations, from intake to ownership.</h1>
+                        <div className='login-hero-badge'>InfraPilot 360</div>
+                        <h1>Infrastructure operations, asset control, and ownership in one place.</h1>
                         <p>
-                            Bring assets, locations, assignments, and users into one reliable admin workflow
-                            with a cleaner operational control surface.
+                            Bring assets, IP mappings, locations, assignments, and users into one reliable
+                            operational workspace with a cleaner control surface.
                         </p>
                         <div className='login-hero-points'>
                             <div className='login-hero-point'>
-                                <strong>Unified Inventory</strong>
-                                <span>Track physical assets, ownership, and deployment context in one place.</span>
+                                <strong>Unified Infrastructure</strong>
+                                <span>Track assets, IP ownership, and operational context in one command layer.</span>
                             </div>
                             <div className='login-hero-point'>
                                 <strong>Operational Clarity</strong>
-                                <span>Review status, mapped responsibility, and location visibility without switching tools.</span>
+                                <span>Review status, assignment ownership, and location visibility without switching tools.</span>
                             </div>
                             <div className='login-hero-point'>
-                                <strong>Admin Ready</strong>
-                                <span>Built for structured management workflows rather than simple list storage.</span>
+                                <strong>Built For Control</strong>
+                                <span>Designed for structured admin workflows across people, devices, and network resources.</span>
                             </div>
                         </div>
                     </section>
@@ -112,7 +112,7 @@ export default function UserLogin({ handleclick }: propsType) {
                             <div className='login-box-header'>
                                 <span className='login-box-kicker'>Welcome Back</span>
                                 <h2>Sign In</h2>
-                                <p>Use your Asseter credentials to access the admin workspace.</p>
+                                <p>Use your InfraPilot 360 credentials to access the operations workspace.</p>
                             </div>
 
                             <div className='inputs-align'>

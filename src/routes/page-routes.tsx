@@ -8,6 +8,9 @@ import Assets from '../pages/Assets/assets'
 import AssetLocations from '../pages/asset-locations/asset-locations'
 import Users from '../pages/user-management/user-management'
 import AssetMapping from '../pages/asset-mapping/asset-mapping';
+import IpMapping from '../pages/ip-mapping/ip-mapping';
+import CredentialManager from '../pages/credential-manager/credential-manager';
+import EbTrackerPage from '../pages/eb-tracker/eb-tracker';
 
 function PageRoutes() {
     const { auth } = useAuth()
@@ -32,6 +35,9 @@ function PageRoutes() {
                     <Route path="/asset-locations" element={<AssetLocations />} />
                     <Route path="/users" element={<Users />} />
                     <Route path="/asset-mapping" element={<AssetMapping />} />
+                    <Route path="/ip-mapping" element={<IpMapping />} />
+                    <Route path="/credential-manager" element={<CredentialManager />} />
+                    <Route path="/eb-tracker" element={<EbTrackerPage />} />
 
                 </Route>
             </Routes>
