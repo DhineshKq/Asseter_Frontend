@@ -49,15 +49,18 @@ const initialFormState: EbFormState = {
   endDgReading: "",
 };
 
+const autoMultiplyReadingFields = new Set<keyof EbFormState>([
+  "startKqReading",
+  "startBleReading",
+  "startDgReading",
+  "endKqReading",
+  "endBleReading",
+  "endDgReading",
+]);
+
 const parseReading = (value: string) => {
   const parsedValue = Number(value);
   return Number.isFinite(parsedValue) ? parsedValue : 0;
-};
-
-const addOneDay = (dateValue: string) => {
-  const parsedDate = new Date(`${dateValue}T00:00:00`);
-  parsedDate.setDate(parsedDate.getDate() + 1);
-  return parsedDate.toISOString().slice(0, 10);
 };
 
 const sortEntriesByDate = (records: EbEntryRecord[]) =>
@@ -76,6 +79,7 @@ const formatUnits = (value: number) =>
 export default function EbTrackerPage() {
   const [formData, setFormData] = useState<EbFormState>(initialFormState);
   const [entries, setEntries] = useState<EbEntryRecord[]>([]);
+  const [formattedFields, setFormattedFields] = useState<Partial<Record<keyof EbFormState, boolean>>>({});
 
   const calculations = useMemo(() => {
     const startKq = parseReading(formData.startKqReading);
@@ -101,19 +105,27 @@ export default function EbTrackerPage() {
     formData.startDgReading,
     formData.startKqReading,
   ]);
-
+  const addDays = (dateValue: string, days: number) => {
+    const parsedDate = new Date(`${dateValue}T00:00:00`);
+    parsedDate.setDate(parsedDate.getDate() + days);
+    return parsedDate.toISOString().slice(0, 10);
+  };
   const displayEntries = useMemo<EbDisplayEntryRecord[]>(() => {
     const sortedEntries = sortEntriesByDate(entries);
 
     return sortedEntries.map((entry) => {
-      const nextDayEntry = sortedEntries.find(
-        (candidate) => candidate.entryDate === addOneDay(entry.entryDate)
+      const previousDayEntry = sortedEntries.find(
+        (candidate) => candidate.entryDate === addDays(entry.entryDate, -1)
       );
 
       return {
         ...entry,
-        intraUnitKq: nextDayEntry ? entry.endKqReading - nextDayEntry.startKqReading : null,
-        intraUnitBle: nextDayEntry ? entry.endBleReading - nextDayEntry.startBleReading : null,
+        intraUnitKq: previousDayEntry
+          ? entry.startKqReading - previousDayEntry.endKqReading
+          : null,
+        intraUnitBle: previousDayEntry
+          ? entry.startBleReading - previousDayEntry.endBleReading
+          : null,
       };
     });
   }, [entries]);
@@ -130,19 +142,19 @@ export default function EbTrackerPage() {
 
   const isSaveDisabled = !isCalculationReady || formData.entryDate.trim() === "";
 
-  const nextDayForCurrentEntry = useMemo(
-    () => entries.find((entry) => entry.entryDate === addOneDay(formData.entryDate)),
+  const previousDayForCurrentEntry = useMemo(
+    () => entries.find((entry) => entry.entryDate === addDays(formData.entryDate, -1)),
     [entries, formData.entryDate]
   );
 
   const currentIntraUnitKq =
-    isCalculationReady && nextDayForCurrentEntry
-      ? parseReading(formData.endKqReading) - nextDayForCurrentEntry.startKqReading
-      : null;
+  isCalculationReady && previousDayForCurrentEntry
+    ? parseReading(formData.startKqReading) - previousDayForCurrentEntry.endKqReading
+    : null;
 
-  const currentIntraUnitBle =
-    isCalculationReady && nextDayForCurrentEntry
-      ? parseReading(formData.endBleReading) - nextDayForCurrentEntry.startBleReading
+    const currentIntraUnitBle =
+    isCalculationReady && previousDayForCurrentEntry
+      ? parseReading(formData.startBleReading) - previousDayForCurrentEntry.endBleReading
       : null;
 
   const metrics = [
@@ -166,11 +178,67 @@ export default function EbTrackerPage() {
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
+    const fieldName = name as keyof EbFormState;
 
     setFormData((current) => ({
       ...current,
-      [name]: value,
+      [fieldName]: value,
     }));
+
+    if (autoMultiplyReadingFields.has(fieldName)) {
+      setFormattedFields((current) => ({
+        ...current,
+        [fieldName]: false,
+      }));
+    }
+  };
+
+  const applyReadingMultiplier = (fieldName: keyof EbFormState) => {
+    if (!autoMultiplyReadingFields.has(fieldName) || formattedFields[fieldName]) {
+      return;
+    }
+
+    setFormData((current) => {
+      const rawValue = current[fieldName].trim();
+
+      if (rawValue === "") {
+        return current;
+      }
+
+      const parsedValue = Number(rawValue);
+
+      if (!Number.isFinite(parsedValue)) {
+        return current;
+      }
+
+      return {
+        ...current,
+        [fieldName]: (parsedValue * 1000).toFixed(2),
+      };
+    });
+
+    setFormattedFields((current) => ({
+      ...current,
+      [fieldName]: true,
+    }));
+  };
+
+  const handleReadingKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key !== "Enter" && event.key !== "Tab") {
+      return;
+    }
+
+    const fieldName = event.currentTarget.name as keyof EbFormState;
+
+    if (!autoMultiplyReadingFields.has(fieldName)) {
+      return;
+    }
+
+    if (event.key === "Enter") {
+      event.preventDefault();
+    }
+
+    applyReadingMultiplier(fieldName);
   };
 
   const handleReset = () => {
@@ -178,6 +246,7 @@ export default function EbTrackerPage() {
       ...initialFormState,
       entryDate: formData.entryDate || today,
     });
+    setFormattedFields({});
   };
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
@@ -208,6 +277,7 @@ export default function EbTrackerPage() {
       ...initialFormState,
       entryDate: current.entryDate,
     }));
+    setFormattedFields({});
   };
 
   return (
@@ -291,6 +361,7 @@ export default function EbTrackerPage() {
                         name="startKqReading"
                         value={formData.startKqReading}
                         onChange={handleInputChange}
+                        onKeyDown={handleReadingKeyDown}
                         placeholder="Enter KQ start"
                       />
                     </label>
@@ -303,6 +374,7 @@ export default function EbTrackerPage() {
                         name="startBleReading"
                         value={formData.startBleReading}
                         onChange={handleInputChange}
+                        onKeyDown={handleReadingKeyDown}
                         placeholder="Enter BLE start"
                       />
                     </label>
@@ -315,6 +387,7 @@ export default function EbTrackerPage() {
                         name="startDgReading"
                         value={formData.startDgReading}
                         onChange={handleInputChange}
+                        onKeyDown={handleReadingKeyDown}
                         placeholder="Enter DG start"
                       />
                     </label>
@@ -345,6 +418,7 @@ export default function EbTrackerPage() {
                         name="endKqReading"
                         value={formData.endKqReading}
                         onChange={handleInputChange}
+                        onKeyDown={handleReadingKeyDown}
                         placeholder="Enter KQ end"
                       />
                     </label>
@@ -357,6 +431,7 @@ export default function EbTrackerPage() {
                         name="endBleReading"
                         value={formData.endBleReading}
                         onChange={handleInputChange}
+                        onKeyDown={handleReadingKeyDown}
                         placeholder="Enter BLE end"
                       />
                     </label>
@@ -369,6 +444,7 @@ export default function EbTrackerPage() {
                         name="endDgReading"
                         value={formData.endDgReading}
                         onChange={handleInputChange}
+                        onKeyDown={handleReadingKeyDown}
                         placeholder="Enter DG end"
                       />
                     </label>

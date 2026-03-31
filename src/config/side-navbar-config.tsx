@@ -131,7 +131,7 @@ export default function SideBar() {
     { title: "Asset Mapping", route: "/asset-mapping", icon: <CapturesIcon />, caption: "Ownership mapping", selectedTitle, navConfirmation },
     { title: "IP Mapping", route: "/ip-mapping", icon: <ScansIcon />, caption: "Subnet ownership", selectedTitle, navConfirmation },
     { title: "Credential Manager", route: "/credential-manager", icon: <UserIcon />, caption: "Access vault", selectedTitle, navConfirmation },
-    { title: "EB Tracker", route: "/eb-tracker", icon: <CapturesIcon />, caption: "Energy readings and units", selectedTitle, navConfirmation },
+    // { title: "EB Tracker", route: "/eb-tracker", icon: <CapturesIcon />, caption: "Energy readings and units", selectedTitle, navConfirmation },
     { title: "Employees", route: "/users", icon: <UserIcon />, caption: "People for asset mapping", selectedTitle, navConfirmation },
   ];
 
