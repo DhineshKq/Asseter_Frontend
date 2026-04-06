@@ -22,6 +22,13 @@ interface LocationOption {
   locationName: string;
 }
 
+interface AssetMappingRow extends MappingRecord {
+  id: number | null;
+  assetId: number | null;
+  userId: number | null;
+  locationId: number | null;
+}
+
 const emptyFormState: MappingRecord = {
   assetName: "",
   deviceId: "",
@@ -35,8 +42,9 @@ const emptyFormState: MappingRecord = {
 
 export default function AssetMappingPage() {
   const axiosPrivate = useAxiosPrivate();
-  const [rows, setRows] = useState<MappingRecord[]>([]);
+  const [rows, setRows] = useState<AssetMappingRow[]>([]);
   const [isMapModalOpen, setIsMapModalOpen] = useState(false);
+  const [editingMappingId, setEditingMappingId] = useState<number | null>(null);
   const [formData, setFormData] = useState<MappingRecord>(emptyFormState);
   const [assetOptions, setAssetOptions] = useState<AssetOption[]>([]);
   const [userOptions, setUserOptions] = useState<EmployeeOption[]>([]);
@@ -71,6 +79,7 @@ export default function AssetMappingPage() {
       return;
     }
     setIsMapModalOpen(false);
+    setEditingMappingId(null);
     resetForm();
   }, [isSaving, resetForm]);
 
@@ -102,7 +111,7 @@ export default function AssetMappingPage() {
         usersById: Map<number, EmployeeOption>;
         locationsById: Map<number, LocationOption>;
       }
-    ): MappingRecord => {
+    ): AssetMappingRow => {
       const assetId = typeof mapping?.assetId === "number" ? mapping.assetId : null;
       const userId = typeof mapping?.userId === "number" ? mapping.userId : null;
       const locationId = typeof mapping?.locationId === "number" ? mapping.locationId : null;
@@ -112,6 +121,15 @@ export default function AssetMappingPage() {
       const fullUserName = `${mapping?.user?.firstName ?? ""} ${mapping?.user?.lastName ?? ""}`.trim();
 
       return {
+        id:
+          typeof mapping?.id === "number"
+            ? mapping.id
+            : typeof mapping?.mappingId === "number"
+              ? mapping.mappingId
+              : null,
+        assetId,
+        userId,
+        locationId,
         assetName:
           mapping?.asset?.assetName ??
           mapping?.assetDetails?.assetName ??
@@ -332,6 +350,36 @@ export default function AssetMappingPage() {
     fetchMappingOptions();
   }, [fetchMappingOptions, fetchMappings]);
 
+  const openAddModal = useCallback(() => {
+    if (isSaving) {
+      return;
+    }
+
+    setEditingMappingId(null);
+    resetForm();
+    setIsMapModalOpen(true);
+  }, [isSaving, resetForm]);
+
+  const openEditModal = useCallback((row: AssetMappingRow) => {
+    if (isSaving) {
+      return;
+    }
+
+    setEditingMappingId(row.id);
+    setFormData({
+      assetName: row.assetName,
+      deviceId: row.deviceId,
+      serialNumber: row.serialNumber,
+      employeeId: row.employeeId,
+      assignedTo: row.assignedTo,
+      department: row.department,
+      location: row.location,
+      assignedOn: row.assignedOn,
+    });
+    setSubmitError("");
+    setIsMapModalOpen(true);
+  }, [isSaving]);
+
   const handleInputChange = (
     event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
@@ -372,9 +420,16 @@ export default function AssetMappingPage() {
     const selectedAsset = assetOptions.find((item) => item.assetName === formData.assetName);
     const selectedUser = userOptions.find((item) => item.name === formData.assignedTo);
     const selectedLocation = locationOptions.find((item) => item.locationName === formData.location);
+    const hasAssetIdentifier =
+      formData.deviceId.trim() !== "" || formData.serialNumber.trim() !== "";
 
     if (!selectedAsset?.id || !selectedUser?.id || !selectedLocation?.id) {
       setSubmitError("Select a valid asset, responsible user, and location before saving the mapping.");
+      return;
+    }
+
+    if (!hasAssetIdentifier) {
+      setSubmitError("The selected asset must have either a Device ID or a Serial Number before saving the mapping.");
       return;
     }
 
@@ -382,16 +437,21 @@ export default function AssetMappingPage() {
     setSubmitError("");
 
     try {
-      // axios baseURL already includes `/v1`, so this hits `POST /v1/assets/mappings`.
-      await axiosPrivate.post("/assets/mappings", {
+      const payload = {
+        ...(editingMappingId ? { id: editingMappingId, mappingId: editingMappingId } : {}),
         assetId: selectedAsset.id,
         locationId: selectedLocation.id,
         userId: selectedUser.id,
         assignedDate: formData.assignedOn,
-      });
+      };
+
+      // axios baseURL already includes `/v1`, so this hits `POST /v1/assets/mappings`
+      // for both create and edit flows. When editing, we also pass the mapping id.
+      await axiosPrivate.post("/assets/mappings", payload);
 
       await fetchMappings();
       setIsMapModalOpen(false);
+      setEditingMappingId(null);
       resetForm();
     } catch (error: any) {
       setSubmitError(
@@ -404,7 +464,7 @@ export default function AssetMappingPage() {
 
   const isSubmitDisabled =
     formData.assetName.trim() === "" ||
-    formData.deviceId.trim() === "" ||
+    (formData.deviceId.trim() === "" && formData.serialNumber.trim() === "") ||
     formData.assignedTo.trim() === "" ||
     formData.employeeId.trim() === "" ||
     formData.department.trim() === "" ||
@@ -416,7 +476,8 @@ export default function AssetMappingPage() {
       title="Asset Mapping"
       subtitle="Track which employee or team is responsible for each asset. This module gives the admin a single place to review ownership."
       actionLabel="Map Asset"
-      onActionClick={() => setIsMapModalOpen(true)}
+      onActionClick={openAddModal}
+      onEditRow={(row) => openEditModal(row as AssetMappingRow)}
       metrics={metrics}
       columns={[
         { key: "assetName", label: "Asset Name" },
@@ -453,8 +514,8 @@ export default function AssetMappingPage() {
           >
             <div className="asset-admin-modal-header">
               <div>
-                <p className="asset-admin-modal-kicker">New Mapping</p>
-                <h3 id="map-asset-modal-title">Map Asset</h3>
+                <p className="asset-admin-modal-kicker">{editingMappingId ? "Edit Mapping" : "New Mapping"}</p>
+                <h3 id="map-asset-modal-title">{editingMappingId ? "Edit Asset Mapping" : "Map Asset"}</h3>
               </div>
               <button type="button" className="asset-admin-modal-close" onClick={closeModal} aria-label="Close map asset popup">
                 x
@@ -553,7 +614,7 @@ export default function AssetMappingPage() {
                   Cancel
                 </button>
                 <button type="submit" className="asset-admin-primary-btn" disabled={isSubmitDisabled || isLoadingOptions || isSaving}>
-                  {isSaving ? "Saving..." : "Save Mapping"}
+                  {isSaving ? "Saving..." : editingMappingId ? "Update Mapping" : "Save Mapping"}
                 </button>
               </div>
             </form>

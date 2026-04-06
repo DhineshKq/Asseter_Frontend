@@ -179,16 +179,29 @@ export default function CredentialManagerPage() {
   }, [categoryFilter, rows, searchTerm]);
 
   const handleCopy = useCallback(async (value: string, label: string) => {
-    if (!value.trim()) {
-      return;
-    }
+    if (!value.trim()) return;
 
     try {
-      await navigator.clipboard.writeText(value);
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(value);
+      } else {
+        // Fallback for HTTP / unsupported environments
+        const textArea = document.createElement("textarea");
+        textArea.value = value;
+        textArea.style.position = "fixed"; // avoid scrolling
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+
+        document.execCommand("copy");
+        document.body.removeChild(textArea);
+      }
+
       setCopiedValue(label);
-      window.setTimeout(() => {
+      setTimeout(() => {
         setCopiedValue((current) => (current === label ? "" : current));
       }, 1600);
+
     } catch (error) {
       console.error("Failed to copy credential value:", error);
     }
