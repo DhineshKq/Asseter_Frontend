@@ -194,7 +194,7 @@ export default function AssetsGridView({ setPlanType, setassetsPageView, setEdit
 
 
     const CustomEllipsisRendererName: React.FC<any> = ({ value }) => {
-        const maxLength = 15;
+        const maxLength = 10;
         const displayValue = value?.length > maxLength ? `${value.substring(0, maxLength)}...` : value;
 
         const cellStyle: React.CSSProperties = {

@@ -34,6 +34,14 @@ export interface AgGridRef {
 
 }
 
+const truncateGridValue = (value: any) => {
+    if (value === null || value === undefined) return '';
+    if (typeof value !== 'string' && typeof value !== 'number') return value;
+
+    const normalizedValue = String(value);
+    return normalizedValue.length > 10 ? `${normalizedValue.slice(0, 10)}...` : normalizedValue;
+};
+
 
 const InvoiceAgGrid = forwardRef(({
     tabelRowData,
@@ -219,6 +227,19 @@ const InvoiceAgGrid = forwardRef(({
             sortable: true,
             filter: true,
             resizable: true,
+            tooltipValueGetter: (params: any) => {
+                if (params.value === null || params.value === undefined) return '';
+                return typeof params.value === 'string' || typeof params.value === 'number'
+                    ? String(params.value)
+                    : '';
+            },
+            cellRenderer: (params: any) => {
+                if (params.value === null || params.value === undefined) return '';
+                if (typeof params.value !== 'string' && typeof params.value !== 'number') return params.value;
+
+                const fullValue = String(params.value);
+                return <span className="grid-cell-truncate" title={fullValue}>{truncateGridValue(fullValue)}</span>;
+            },
         };
     }, []);
 

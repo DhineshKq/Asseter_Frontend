@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { RxCross1 } from 'react-icons/rx';
 import ButtonComponent from '../form-elements/button-component';
 import InputComponent from '../form-elements/input-component';
-import signout from '../../../assets/gif/signout.gif';
 import Delete from "../../../assets/gif/delete.gif";
+import { createPortal } from "react-dom";
 import '../../../styles/modal/delete-modal.scss';
 interface Styles {
   clearValue: (val: any) => void;
@@ -206,56 +206,57 @@ export default function DeleteModal({
       }
       {
         modelType === "signOut" &&
-        <div className={"signout-shell"}>
-          <button
-            type="button"
-            className="signout-close"
-            onClick={() => clearValue(false)}
-            aria-label="Close sign out dialog"
-          >
-            <RxCross1 />
-          </button>
-          <div className="signout-topline">Secure Session</div>
-          <div className="signout-hero">
-            <div className='signout-image-main'>
-              <img className="signout-image" src={signout} alt="Sign out illustration" />
-            </div>
-            <div className="signout-copy">
-              <div className={"signout-content"}>{"Ready to leave InfraPilot 360?"}</div>
-              <div className="signout-subtext">
-                {"You will be signed out of the current workspace and will need to log in again to continue."}
+        createPortal(
+          <div className="delete-modal">
+            <div className="signout-shell">
+              <button
+                type="button"
+                className="signout-close"
+                onClick={() => clearValue(false)}
+                aria-label="Close sign out dialog"
+              >
+                <RxCross1 />
+              </button>
+
+              <div className="signout-copy">
+                <div className="signout-label">Logout</div>
+                <div className="signout-content">
+                  Are you sure you want to log out?
+                </div>
+                <div className="signout-subtext">
+                  You will need to sign in again to access the workspace.
+                </div>
+              </div>
+
+              <div className="buttons signout-actions">
+                <ButtonComponent
+                  title="Cancel"
+                  height="48px"
+                  width="160px"
+                  backgroundColor="#E5E7EB"
+                  color="#0F172A"
+                  margin="0px"
+                  className="button-component-hover cancel"
+                  handleClick={() => clearValue(false)}
+                />
+
+                <ButtonComponent
+                  title="Logout"
+                  height="48px"
+                  width="160px"
+                  backgroundColor="#DC2626"
+                  color="white"
+                  margin="0px"
+                  className="button-component common-btn"
+                  handleClick={() => {
+                    handleSignOut && handleSignOut();
+                  }}
+                />
               </div>
             </div>
-          </div>
-          <div className="signout-note">
-            <strong>Current action</strong>
-            <span>Your active admin session will end on this browser.</span>
-          </div>
-          <div className={"buttons signout-actions"}>
-            <ButtonComponent
-              title={"Stay Signed In"}
-              height={"52px"}
-              width={"190px"}
-              backgroundColor={"#E8EEF5"}
-              color={"#17324D"}
-              margin={"0px"}
-              className={"button-component-hover cancel"}
-              handleClick={() => clearValue(false)}
-            />
-            <ButtonComponent
-              title={"Log Out Now"}
-              height={"52px"}
-              width={"190px"}
-              backgroundColor={"#C94F3D"}
-              color={"white"}
-              margin={"0px"}
-              className={'button-component common-btn'}
-              handleClick={() => {
-                handleSignOut && handleSignOut();
-              }}
-            />
-          </div>
-        </div>
+          </div>,
+          document.body
+        )
       }
       {
         modelType === "profilPictureDelete" &&

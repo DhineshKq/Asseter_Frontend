@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import useAxiosPrivate from "../../services/hooks/useaxios-private";
 import "../../styles/pages/ip-mapping/ip-mapping.scss";
 
@@ -29,24 +29,87 @@ const SUBNET_CONFIG = [
 
 const ASSIGNMENT_TYPES: AssignmentType[] = ["Employee", "Device"];
 
-const generateIpPool = (): IpMappingRecord[] =>
-  SUBNET_CONFIG.flatMap((subnet) =>
-    Array.from({ length: 255 }, (_, index) => ({
+const normalizeAssignmentType = (value: unknown): AssignmentType => {
+  if (typeof value !== "string") {
+    return "";
+  }
+
+  const normalizedValue = value.trim().toLowerCase();
+
+  if (normalizedValue === "employee") {
+    return "Employee";
+  }
+
+  if (normalizedValue === "device") {
+    return "Device";
+  }
+
+  return "";
+};
+
+const deriveSubnetLabel = (ipAddress: string, fallback: unknown): string => {
+  if (typeof fallback === "string" && fallback.trim() !== "") {
+    return fallback.trim();
+  }
+
+  const octets = ipAddress.split(".");
+
+  if (octets.length >= 3) {
+    return `${octets[0]}.${octets[1]}.${octets[2]}.x`;
+  }
+
+  return "Unknown subnet";
+};
+
+const buildSubnetRangeLabel = (subnetLabel: string): string => {
+  const base = subnetLabel.replace(/\.x$/i, "");
+
+  return /^\d{1,3}(?:\.\d{1,3}){2}$/.test(base) ? `${base}.1 - ${base}.255` : subnetLabel;
+};
+
+const getEmployeeOptionLabel = (employee: EmployeeOption): string =>
+  `${employee.name}${employee.employeeId ? ` (${employee.employeeId})` : ""}`;
+
+const getAssignmentPreview = (row: IpMappingRecord): string => {
+  if (!row.assignmentType || !row.assignedTo) {
+    return "This IP is currently open and ready to be assigned.";
+  }
+
+  if (row.assignmentType === "Employee") {
+    return `Currently linked to ${row.assignedTo}${row.referenceId ? ` (${row.referenceId})` : ""}.`;
+  }
+
+  return `Currently reserved for device ${row.assignedTo}.`;
+};
+
+const generateIpPool = (subnetLabels: string[]): IpMappingRecord[] =>
+  subnetLabels.flatMap((subnetLabel) => {
+    const matchingSubnet = SUBNET_CONFIG.find((subnet) => subnet.label === subnetLabel);
+    const derivedBase =
+      matchingSubnet?.base ?? subnetLabel.replace(/\.x$/i, "");
+
+    if (!/^\d{1,3}(?:\.\d{1,3}){2}$/.test(derivedBase)) {
+      return [];
+    }
+
+    return Array.from({ length: 255 }, (_, index) => ({
       id: null,
-      ipAddress: `${subnet.base}.${index + 1}`,
-      subnet: subnet.label,
+      ipAddress: `${derivedBase}.${index + 1}`,
+      subnet: subnetLabel,
       assignmentType: "" as AssignmentType,
       assignedTo: "",
       referenceId: "",
       context: "",
       sourceId: "",
-    }))
-  );
+    }));
+  });
 
 export default function IpMappingPage() {
   const axiosPrivate = useAxiosPrivate();
-  const [rows, setRows] = useState<IpMappingRecord[]>(() => generateIpPool());
+  const employeeComboboxRef = useRef<HTMLDivElement | null>(null);
+  const [rows, setRows] = useState<IpMappingRecord[]>([]);
   const [employees, setEmployees] = useState<EmployeeOption[]>([]);
+  const [isLoadingMappings, setIsLoadingMappings] = useState(true);
   const [isLoadingOptions, setIsLoadingOptions] = useState(true);
   const [loadError, setLoadError] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
@@ -55,10 +118,123 @@ export default function IpMappingPage() {
   const [selectedIp, setSelectedIp] = useState<IpMappingRecord | null>(null);
   const [selectedAssignmentType, setSelectedAssignmentType] = useState<AssignmentType>("Employee");
   const [selectedSourceId, setSelectedSourceId] = useState("");
+  const [employeeQuery, setEmployeeQuery] = useState("");
+  const [isEmployeeDropdownOpen, setIsEmployeeDropdownOpen] = useState(false);
   const [deviceNameInput, setDeviceNameInput] = useState("");
   const [isSaving, setIsSaving] = useState(false);
   const [submitError, setSubmitError] = useState("");
   const [actionError, setActionError] = useState("");
+
+  const mapIpMappingRecord = useCallback((mapping: any): IpMappingRecord => {
+    const ipAddress =
+      mapping?.ipAddress ??
+      mapping?.ip ??
+      mapping?.ip_address ??
+      mapping?.address ??
+      "";
+    const assignmentType = normalizeAssignmentType(
+      mapping?.type ??
+      mapping?.assignmentType ??
+      mapping?.mappingType
+    );
+
+    return {
+      id:
+        typeof mapping?.id === "number"
+          ? mapping.id
+          : typeof mapping?.mappingId === "number"
+            ? mapping.mappingId
+            : null,
+      ipAddress,
+      subnet: deriveSubnetLabel(ipAddress, mapping?.subnet ?? mapping?.subnetName ?? mapping?.network),
+      assignmentType,
+      assignedTo:
+        mapping?.assignedTo ??
+        mapping?.assignedToName ??
+        mapping?.employee?.name ??
+        mapping?.user?.name ??
+        mapping?.device?.name ??
+        mapping?.deviceName ??
+        "",
+      referenceId:
+        mapping?.referenceId ??
+        mapping?.employee?.employeeId ??
+        mapping?.user?.employeeId ??
+        mapping?.device?.deviceId ??
+        mapping?.deviceId ??
+        "",
+      context:
+        mapping?.context ??
+        mapping?.employee?.team ??
+        mapping?.user?.team ??
+        mapping?.department ??
+        "",
+      sourceId:
+        mapping?.sourceId != null
+          ? String(mapping.sourceId)
+          : typeof mapping?.employee?.id === "number"
+            ? String(mapping.employee.id)
+            : typeof mapping?.user?.id === "number"
+              ? String(mapping.user.id)
+              : assignmentType === "Device"
+                ? String(
+                    mapping?.device?.name ??
+                    mapping?.deviceName ??
+                    mapping?.assignedTo ??
+                    ""
+                  )
+                : "",
+    };
+  }, []);
+
+  const fetchMappings = useCallback(async () => {
+    setIsLoadingMappings(true);
+    setActionError("");
+
+    try {
+      const response = await axiosPrivate.get("/ip-mappings");
+      const payload = Array.isArray(response.data?.data)
+        ? response.data.data
+        : Array.isArray(response.data?.ipMappings)
+          ? response.data.ipMappings
+          : Array.isArray(response.data?.mappings)
+            ? response.data.mappings
+            : Array.isArray(response.data)
+              ? response.data
+              : [];
+
+      const mappedRows = payload
+        .filter((mapping: any) => !mapping?.isDeleted)
+        .map(mapIpMappingRecord)
+        .filter((row: IpMappingRecord) => row.ipAddress.trim() !== "");
+
+      const subnetLabels = Array.from(
+        new Set([
+          ...SUBNET_CONFIG.map((subnet) => subnet.label),
+          ...mappedRows
+            .map((row: IpMappingRecord) => row.subnet)
+            .filter((subnet: string) => subnet.trim() !== ""),
+        ])
+      );
+
+      const basePool = generateIpPool(subnetLabels);
+      const mappedRowsByIp = new Map<string, IpMappingRecord>(
+        mappedRows.map((row: IpMappingRecord) => [row.ipAddress, row] as const)
+      );
+
+      setRows(
+        basePool.map((row: IpMappingRecord) => mappedRowsByIp.get(row.ipAddress) ?? row)
+      );
+    } catch (error: any) {
+      setRows([]);
+      setActionError(
+        error?.response?.data?.message || "Failed to fetch IP mappings. Check the API and try again."
+      );
+      console.error("Failed to fetch IP mappings:", error);
+    } finally {
+      setIsLoadingMappings(false);
+    }
+  }, [axiosPrivate, mapIpMappingRecord]);
 
   const fetchAssignmentOptions = useCallback(async () => {
     setIsLoadingOptions(true);
@@ -98,8 +274,35 @@ export default function IpMappingPage() {
   }, [axiosPrivate]);
 
   useEffect(() => {
+    fetchMappings();
     fetchAssignmentOptions();
-  }, [fetchAssignmentOptions]);
+  }, [fetchAssignmentOptions, fetchMappings]);
+
+  useEffect(() => {
+    if (!isEmployeeDropdownOpen) {
+      return;
+    }
+
+    const handleOutsideClick = (event: MouseEvent) => {
+      if (!employeeComboboxRef.current?.contains(event.target as Node)) {
+        setIsEmployeeDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleOutsideClick);
+
+    return () => {
+      document.removeEventListener("mousedown", handleOutsideClick);
+    };
+  }, [isEmployeeDropdownOpen]);
+
+  const subnetOptions = useMemo(
+    () =>
+      Array.from(new Set(rows.map((row) => row.subnet).filter((subnet) => subnet.trim() !== ""))).sort((left, right) =>
+        left.localeCompare(right)
+      ),
+    [rows]
+  );
 
   const filteredRows = useMemo(() => {
     const normalizedSearch = searchTerm.trim().toLowerCase();
@@ -124,17 +327,19 @@ export default function IpMappingPage() {
 
   const subnetCards = useMemo(
     () =>
-      SUBNET_CONFIG.map((subnet) => {
-        const subnetRows = rows.filter((row) => row.subnet === subnet.label);
+      subnetOptions.map((subnetLabel) => {
+        const subnetRows = rows.filter((row) => row.subnet === subnetLabel);
         const mappedCount = subnetRows.filter((row) => row.assignmentType !== "").length;
+        const configuredSubnet = SUBNET_CONFIG.find((subnet) => subnet.label === subnetLabel);
 
         return {
-          ...subnet,
+          label: subnetLabel,
+          rangeLabel: configuredSubnet?.rangeLabel ?? buildSubnetRangeLabel(subnetLabel),
           mappedCount,
           freeCount: subnetRows.length - mappedCount,
         };
       }),
-    [rows]
+    [rows, subnetOptions]
   );
 
   const recentAssignments = useMemo(
@@ -153,9 +358,25 @@ export default function IpMappingPage() {
   );
 
   const openAssignModal = (row: IpMappingRecord) => {
+    const matchedEmployee =
+      row.assignmentType === "Employee"
+        ? employees.find(
+            (employee) =>
+              String(employee.id) === row.sourceId ||
+              employee.employeeId === row.referenceId ||
+              employee.name === row.assignedTo
+          )
+        : undefined;
+
     setSelectedIp(row);
     setSelectedAssignmentType(row.assignmentType || "Employee");
-    setSelectedSourceId(row.sourceId);
+    setSelectedSourceId(matchedEmployee ? String(matchedEmployee.id) : row.sourceId);
+    setEmployeeQuery(
+      matchedEmployee
+        ? getEmployeeOptionLabel(matchedEmployee)
+        : row.assignedTo ?? ""
+    );
+    setIsEmployeeDropdownOpen(false);
     setDeviceNameInput(row.assignmentType === "Device" ? row.assignedTo : "");
     setSubmitError("");
     setActionError("");
@@ -168,9 +389,31 @@ export default function IpMappingPage() {
     setSelectedIp(null);
     setSelectedAssignmentType("Employee");
     setSelectedSourceId("");
+    setEmployeeQuery("");
+    setIsEmployeeDropdownOpen(false);
     setDeviceNameInput("");
     setSubmitError("");
   };
+
+  const filteredEmployees = useMemo(() => {
+    const normalizedSearch = employeeQuery.trim().toLowerCase();
+
+    if (normalizedSearch === "") {
+      return employees;
+    }
+
+    return employees.filter((employee) =>
+      [employee.name, employee.employeeId, employee.team, getEmployeeOptionLabel(employee)]
+        .join(" ")
+        .toLowerCase()
+        .includes(normalizedSearch)
+    );
+  }, [employeeQuery, employees]);
+
+  const selectedEmployee = useMemo(
+    () => employees.find((employee) => String(employee.id) === selectedSourceId) ?? null,
+    [employees, selectedSourceId]
+  );
 
   const handleAssign = async () => {
     if (!selectedIp) {
@@ -294,8 +537,9 @@ export default function IpMappingPage() {
           <p className="ip-mapping-kicker">Network Ownership Layer</p>
           <h2>IP Mapping</h2>
           <p>
-            Assign IPs against either employees or devices across the managed subnets. This view is built for
-            network ownership clarity, where responsibility can belong to a person or directly to a machine.
+            Review backend IP mappings and assign ownership against employees or devices across the managed
+            subnets. This view is built for network ownership clarity, where responsibility can belong to a
+            person or directly to a machine.
           </p>
         </div>
         <div className="ip-mapping-hero-panel">
@@ -333,30 +577,8 @@ export default function IpMappingPage() {
               ))}
             </div>
           </div>
-
-          <div className="ip-mapping-panel">
-            <div className="ip-mapping-panel-head">
-              <h3>Recent Assignments</h3>
-              <p>Latest employee or device mappings in this session.</p>
-            </div>
-            {recentAssignments.length > 0 ? (
-              <div className="ip-mapping-activity-list">
-                {recentAssignments.map((row) => (
-                  <div key={row.ipAddress} className="ip-mapping-activity-item">
-                    <strong>{row.ipAddress}</strong>
-                    <span>{row.assignedTo}</span>
-                    <small>{row.assignmentType} {row.referenceId ? `• ${row.referenceId}` : ""}</small>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="ip-mapping-empty-state">
-                <h4>No assignments yet</h4>
-                <p>Assign an employee or device to an IP to start building the network ownership board.</p>
-              </div>
-            )}
-          </div>
         </div>
+
 
         <div className="ip-mapping-main">
           <div className="ip-mapping-panel ip-mapping-table-panel">
@@ -380,9 +602,9 @@ export default function IpMappingPage() {
                     <span>Subnet</span>
                     <select value={subnetFilter} onChange={(event) => setSubnetFilter(event.target.value)}>
                       <option>All Subnets</option>
-                      {SUBNET_CONFIG.map((subnet) => (
-                        <option key={subnet.label} value={subnet.label}>
-                          {subnet.label}
+                      {subnetOptions.map((subnet) => (
+                        <option key={subnet} value={subnet}>
+                          {subnet}
                         </option>
                       ))}
                     </select>
@@ -424,49 +646,55 @@ export default function IpMappingPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredRows.map((row) => (
-                    <tr key={row.ipAddress}>
-                      <td>
-                        <div className="ip-mapping-ip-cell">
-                          <strong>{row.ipAddress}</strong>
-                        </div>
-                      </td>
-                      <td>{row.assignedTo || "Unassigned"}</td>
-                      <td>
-                        {row.assignmentType ? (
-                          <span className={`ip-mapping-type-pill type-${row.assignmentType.toLowerCase()}`}>
-                            {row.assignmentType}
-                          </span>
-                        ) : (
-                          "Not mapped"
-                        )}
-                      </td>
-                      <td>
-                        <div className="ip-mapping-row-actions">
-                          <button type="button" className="ip-mapping-assign-btn" onClick={() => openAssignModal(row)}>
-                            {row.assignmentType ? "Reassign" : "Assign"}
-                          </button>
-                          {row.assignmentType && (
-                            <button
-                              type="button"
-                              className="ip-mapping-clear-btn"
-                              onClick={() => handleUnassign(row.ipAddress)}
-                            >
-                              Clear
-                            </button>
-                          )}
-                        </div>
-                      </td>
+                  {isLoadingMappings ? (
+                    <tr>
+                      <td colSpan={4}>Loading IP mappings...</td>
                     </tr>
-                  ))}
+                  ) : (
+                    filteredRows.map((row) => (
+                      <tr key={row.id ?? row.ipAddress}>
+                        <td>
+                          <div className="ip-mapping-ip-cell">
+                            <strong>{row.ipAddress}</strong>
+                          </div>
+                        </td>
+                        <td>{row.assignedTo || "Unassigned"}</td>
+                        <td>
+                          {row.assignmentType ? (
+                            <span className={`ip-mapping-type-pill type-${row.assignmentType.toLowerCase()}`}>
+                              {row.assignmentType}
+                            </span>
+                          ) : (
+                            "Not mapped"
+                          )}
+                        </td>
+                        <td>
+                          <div className="ip-mapping-row-actions">
+                            <button type="button" className="ip-mapping-assign-btn" onClick={() => openAssignModal(row)}>
+                              {row.assignmentType ? "Reassign" : "Assign"}
+                            </button>
+                            {row.assignmentType && (
+                              <button
+                                type="button"
+                                className="ip-mapping-clear-btn"
+                                onClick={() => handleUnassign(row.ipAddress)}
+                              >
+                                Clear
+                              </button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
                 </tbody>
               </table>
             </div>
 
-            {filteredRows.length === 0 && (
+            {!isLoadingMappings && filteredRows.length === 0 && (
               <div className="ip-mapping-empty-state">
                 <h4>No IPs match the current filters</h4>
-                <p>Adjust the subnet, assignment status, or search query to explore the generated pool.</p>
+                <p>Adjust the subnet, assignment status, or search query to explore the fetched IP mappings.</p>
               </div>
             )}
           </div>
@@ -483,21 +711,121 @@ export default function IpMappingPage() {
             aria-labelledby="ip-mapping-modal-title"
           >
             <div className="ip-mapping-modal-head">
-              <div>
+              <div className="ip-mapping-modal-title-block">
                 <p>Assign IP Ownership</p>
                 <h3 id="ip-mapping-modal-title">{selectedIp.ipAddress}</h3>
+                <span>{getAssignmentPreview(selectedIp)}</span>
               </div>
               <button type="button" onClick={closeAssignModal} aria-label="Close IP mapping modal">
-                x
+                ×
               </button>
             </div>
 
             <div className="ip-mapping-modal-body">
-              <div className="ip-mapping-modal-info">
-                <span>Subnet</span>
-                <strong>{selectedIp.subnet}</strong>
-              </div>
+            <div className="ip-mapping-form-card">
+                <div className="ip-mapping-form-card-head">
+                  <strong>{selectedAssignmentType === "Employee" ? "Employee assignment" : "Device assignment"}</strong>
+                  <p>
+                    {selectedAssignmentType === "Employee"
+                      ? "Search and select the employee who owns this IP."
+                      : "Provide a clear device name so this IP can be tracked accurately."}
+                  </p>
+                </div>
 
+                {selectedAssignmentType === "Employee" ? (
+                  <label className="ip-mapping-field">
+                    <span>Employee</span>
+                    <small className="ip-mapping-field-helper">
+                      Start typing to filter employees by name, employee ID, or team.
+                    </small>
+                    <div className="ip-mapping-employee-combobox" ref={employeeComboboxRef}>
+                      <div className={`ip-mapping-employee-shell ${isEmployeeDropdownOpen ? "open" : ""}`}>
+                        <input
+                          type="text"
+                          value={employeeQuery}
+                          onChange={(event) => {
+                            setEmployeeQuery(event.target.value);
+                            setSelectedSourceId("");
+                            setIsEmployeeDropdownOpen(true);
+                          }}
+                          onFocus={() => setIsEmployeeDropdownOpen(true)}
+                          placeholder={isLoadingOptions ? "Loading employees..." : "Search by name, ID, or team"}
+                          disabled={isLoadingOptions || isSaving}
+                          className="ip-mapping-employee-input"
+                        />
+                      </div>
+                      <button
+                        type="button"
+                        className={`ip-mapping-employee-trigger ${isEmployeeDropdownOpen ? "open" : ""}`}
+                        onClick={() => {
+                          if (isLoadingOptions || isSaving) {
+                            return;
+                          }
+
+                          setIsEmployeeDropdownOpen((current) => !current);
+                        }}
+                        aria-label="Toggle employee dropdown"
+                        disabled={isLoadingOptions || isSaving}
+                      >
+                        <span />
+                      </button>
+                      {isEmployeeDropdownOpen && !isLoadingOptions && filteredEmployees.length > 0 && (
+                        <div className="ip-mapping-employee-options">
+                          <div className="ip-mapping-employee-options-head">
+                            <strong>Select employee</strong>
+                            <span>{filteredEmployees.length} result{filteredEmployees.length === 1 ? "" : "s"}</span>
+                          </div>
+                          {filteredEmployees.map((employee) => {
+                            const optionLabel = getEmployeeOptionLabel(employee);
+                            const isSelected = String(employee.id) === selectedSourceId;
+
+                            return (
+                              <button
+                                key={`${employee.id}-${employee.employeeId}`}
+                                type="button"
+                                className={`ip-mapping-employee-option ${isSelected ? "selected" : ""}`}
+                                onMouseDown={(event) => event.preventDefault()}
+                                onClick={() => {
+                                  setSelectedSourceId(String(employee.id));
+                                  setEmployeeQuery(optionLabel);
+                                  setIsEmployeeDropdownOpen(false);
+                                }}
+                              >
+                                <div className="ip-mapping-employee-option-main">
+                                  <strong>{employee.name}</strong>
+                                  <small>{employee.team || "Team not added"}</small>
+                                </div>
+                                <span className="ip-mapping-employee-option-id">
+                                  {employee.employeeId || "No employee ID"}
+                                </span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                    {selectedEmployee && (
+                      <div className="ip-mapping-selected-employee">
+                        <strong>{selectedEmployee.name}</strong>
+                        <span>
+                          {[selectedEmployee.employeeId, selectedEmployee.team].filter(Boolean).join(" • ") || "Employee selected"}
+                        </span>
+                      </div>
+                    )}
+                  </label>
+                ) : (
+                  <label className="ip-mapping-field">
+                    <span>Device</span>
+                    <input
+                      type="text"
+                      value={deviceNameInput}
+                      onChange={(event) => setDeviceNameInput(event.target.value)}
+                      placeholder="Enter device name"
+                      disabled={isSaving}
+                    />
+                  </label>
+                )}
+              </div>
               <div className="ip-mapping-toggle-group">
                 {ASSIGNMENT_TYPES.map((type) => (
                   <button
@@ -507,50 +835,39 @@ export default function IpMappingPage() {
                     disabled={isSaving}
                     onClick={() => {
                       setSelectedAssignmentType(type);
-                      setSelectedSourceId("");
+                      if (type !== "Employee") {
+                        setSelectedSourceId("");
+                        setEmployeeQuery("");
+                      }
+                      setIsEmployeeDropdownOpen(false);
                       setDeviceNameInput(type === "Device" ? selectedIp?.assignedTo ?? "" : "");
                     }}
                   >
-                    {type}
+                    <strong>{type}</strong>
+                    <span>
+                      {type === "Employee" ? "Assign ownership to a person record" : "Reserve the IP directly for a device"}
+                    </span>
                   </button>
                 ))}
               </div>
 
-              {selectedAssignmentType === "Employee" ? (
-                <label className="ip-mapping-field">
-                  <span>Employee</span>
-                  <select
-                    value={selectedSourceId}
-                    onChange={(event) => setSelectedSourceId(event.target.value)}
-                    disabled={isLoadingOptions || isSaving}
-                  >
-                    <option value="">
-                      {isLoadingOptions ? "Loading employees..." : "Select employee"}
-                    </option>
-                    {employees.map((employee) => (
-                      <option key={`${employee.id}-${employee.employeeId}`} value={String(employee.id)}>
-                        {employee.name} {employee.employeeId ? `(${employee.employeeId})` : ""}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-              ) : (
-                <label className="ip-mapping-field">
-                  <span>Device</span>
-                  <input
-                    type="text"
-                    value={deviceNameInput}
-                    onChange={(event) => setDeviceNameInput(event.target.value)}
-                    placeholder="Enter device name"
-                    disabled={isSaving}
-                  />
-                </label>
-              )}
+
 
               {!isLoadingOptions && selectedAssignmentType === "Employee" && employees.length === 0 && (
                 <div className="ip-mapping-empty-state">
                   <h4>No employees available</h4>
                   <p>Load employee records in the related module first.</p>
+                </div>
+              )}
+
+              {!isLoadingOptions &&
+                selectedAssignmentType === "Employee" &&
+                employees.length > 0 &&
+                filteredEmployees.length === 0 &&
+                selectedSourceId.trim() === "" && (
+                <div className="ip-mapping-empty-state">
+                  <h4>No matching employees</h4>
+                  <p>Try a different name, employee ID, or team in the employee dropdown.</p>
                 </div>
               )}
 

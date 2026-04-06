@@ -6,7 +6,8 @@
   width: 98%;
   max-width: 98%;
   padding: 30px;
-  height: 92vh;
+  min-height: calc(100vh - 110px);
+  height: auto;
   background-size: cover;
   // margin-top: 20px;
   top: 2px;
@@ -26,6 +27,12 @@
 
 body {
   overflow: hidden;
+}
+
+.assets-page-wrapper {
+  width: 100%;
+  padding: 0 16px 24px;
+  box-sizing: border-box;
 }
 
 .pageHeader {
@@ -130,6 +137,57 @@ body {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 20px;
+}
+
+@media (max-width: 1200px) {
+  .dashboard-main-page {
+    width: 100%;
+    max-width: 100%;
+    border-radius: 24px;
+    padding: 24px;
+    min-height: calc(100vh - 132px);
+  }
+}
+
+@media (max-width: 900px) {
+  .assets-page-wrapper {
+    padding: 0 12px 20px;
+  }
+
+  .dashboard-main-page {
+    width: 100%;
+    max-width: 100%;
+    padding: 20px;
+    border-radius: 22px;
+    min-height: calc(100vh - 128px);
+  }
+
+  .pageHeader {
+    height: auto;
+    min-height: 56px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .card,
+  .dashboard-card {
+    padding: 18px;
+  }
+
+  .asset-grid {
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .assets-page-wrapper {
+    padding: 0 6px 16px;
+  }
+
+  .dashboard-main-page {
+    padding: 16px;
+    border-radius: 18px;
+  }
 }
 
 .asset-card.enhanced {

@@ -1,7 +1,7 @@
 .layout-component {
     width: 100%;
     display: flex;
-    height: 100vh;
+    min-height: 100vh;
     background-color: #f9fafc;
 
     .sidebar {
@@ -38,7 +38,9 @@
     .layout-center {
         width: 100%;
         margin-top: 70px;
-        // overflow-y: auto;
+        min-width: 0;
+        min-height: calc(100vh - 70px);
+        overflow-x: hidden;
         margin-left: 0px;
         transition: margin-left 0.3s ease-in-out;
 
@@ -52,20 +54,39 @@
 
 @media only screen and (max-width: 1200px) {
     .layout-component .sidebar {
-        width: 75px;
+        width: 220px;
     }
 
-    .layout-center {
+    .layout-component .layout-center {
         width: 100%;
-        margin-top: 80px;
-        margin-left: 80px;
+        margin-top: 96px;
+        margin-left: 220px;
+        min-height: calc(100vh - 96px);
         overflow-y: auto;
-
     }
 
     .layout-component .layout-center-sidebar-open {
-        margin-left: 80px;
+        margin-left: 220px;
         transition: margin-left 0.3s ease-in-out;
+    }
+}
+
+@media only screen and (max-width: 900px) {
+    .layout-component {
+        .sidebar {
+            width: min(82vw, 280px);
+        }
+
+        .layout-center,
+        .layout-center-sidebar-open {
+            margin-left: 0;
+            margin-top: 104px;
+            min-height: calc(100vh - 104px);
+        }
+
+        .sidebar-hidden {
+            transform: translateX(-115%);
+        }
     }
 }
 

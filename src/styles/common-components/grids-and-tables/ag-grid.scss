@@ -29,6 +29,15 @@
   color: var(--text-color);
 }
 
+.grid-cell-truncate {
+  display: inline-block;
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: top;
+}
+
 .operation-grid {
   .ag-cell {
     border-right: 1px solid #B3CAE1 !important;

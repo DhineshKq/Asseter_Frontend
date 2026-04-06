@@ -58,7 +58,7 @@ export default function UserEdit({ setassetsPageView, setEditAssets, editAssetId
         };
     }, []);
 
-    const isFormInvalid = !firstName || !lastName || !!usernameError || !!emailError || !!mobileError;
+    const isFormInvalid = !firstName || !lastName || !username || !email || !!usernameError || !!emailError || !!mobileError;
     const validateUsername = (val: string) => {
         const usernameRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
 
@@ -77,7 +77,7 @@ export default function UserEdit({ setassetsPageView, setEditAssets, editAssetId
     };
 
     const validateMobile = (val: string) => {
-        setMobileError(val.length === 10 ? '' : 'Mobile number must be 10 digits');
+        setMobileError(val === '' || val.length === 10 ? '' : 'Mobile number must be 10 digits');
     };
 
     useEffect(() => {
@@ -287,7 +287,7 @@ export default function UserEdit({ setassetsPageView, setEditAssets, editAssetId
 
                         {/* Mobile */}
                         <div className="inputfield">
-                            <label htmlFor="mobile" className="form-label fieldLabel">Mobile Number</label>
+                            <label htmlFor="mobile" className="form-label fieldLabel">Mobile Number (Optional)</label>
                             <input
                                 id="mobile"
                                 type="tel"

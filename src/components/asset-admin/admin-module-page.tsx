@@ -17,6 +17,7 @@ interface AdminModulePageProps<T extends object> {
   subtitle: string;
   actionLabel: string;
   onActionClick?: () => void;
+  headerActions?: React.ReactNode;
   onEditRow?: (row: T, index: number) => void;
   renderRowActions?: (row: T, index: number) => React.ReactNode;
   metrics: MetricItem[];
@@ -36,6 +37,7 @@ export default function AdminModulePage<T extends object>({
   subtitle,
   actionLabel,
   onActionClick,
+  headerActions,
   onEditRow,
   renderRowActions,
   metrics,
@@ -48,6 +50,10 @@ export default function AdminModulePage<T extends object>({
 }: AdminModulePageProps<T>) {
   const displayCount = rows.length;
   const totalCount = totalRowCount ?? rows.length;
+  const maxCellLength = 10;
+
+  const truncateText = (text: string) =>
+    text.length > maxCellLength ? `${text.slice(0, maxCellLength)}...` : text;
 
   const formatCellValue = (value: unknown) => {
     if (value === null || value === undefined || value === "") {
@@ -81,7 +87,11 @@ export default function AdminModulePage<T extends object>({
       });
     }
 
-    return text;
+    return (
+      <span className="asset-admin-cell-text" title={text}>
+        {truncateText(text)}
+      </span>
+    );
   };
 
   return (
@@ -98,9 +108,12 @@ export default function AdminModulePage<T extends object>({
               <span>{columns.length} tracked fields</span>
             </div>
           </div>
-          <button type="button" className="asset-admin-primary-btn" onClick={onActionClick}>
-            {actionLabel}
-          </button>
+          <div className="asset-admin-hero-actions">
+            {headerActions}
+            <button type="button" className="asset-admin-primary-btn" onClick={onActionClick}>
+              {actionLabel}
+            </button>
+          </div>
         </div>
 
         <div className="asset-admin-metrics">

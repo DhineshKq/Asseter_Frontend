@@ -26,6 +26,7 @@ interface CredentialFormState {
 }
 
 interface CredentialDisplayRow extends CredentialRecord {
+  sourceCell: React.ReactNode;
   usernameCell: React.ReactNode;
   passwordCell: React.ReactNode;
 }
@@ -55,6 +56,34 @@ const copyIconButtonStyle: React.CSSProperties = {
   padding: 0,
   flexShrink: 0,
 };
+
+const truncateCellText = (value: string) =>
+  value.length > 10 ? `${value.slice(0, 10)}...` : value;
+
+const buildCopyCell = (
+  value: string,
+  label: string,
+  copiedValue: string,
+  handleCopy: (value: string, label: string) => void
+) => (
+  <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
+    <span title={value}>{truncateCellText(value || "Not set")}</span>
+    <button
+      type="button"
+      style={copyIconButtonStyle}
+      onClick={() => handleCopy(value, label)}
+      aria-label={`Copy ${label}`}
+      title={copiedValue === label ? "Copied" : "Copy"}
+      disabled={!value.trim()}
+    >
+      {copiedValue === label ? (
+        <img src={tickIcon} alt="Copied" style={{ width: "16px", height: "16px" }} />
+      ) : (
+        <IoMdCopy />
+      )}
+    </button>
+  </div>
+);
 
 export default function CredentialManagerPage() {
   const axiosPrivate = useAxiosPrivate();
@@ -169,33 +198,18 @@ export default function CredentialManagerPage() {
     () =>
       filteredRows.map((row) => ({
         ...row,
-        usernameCell: (
-          <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
-            <span>{row.username}</span>
-            <button
-              type="button"
-              style={copyIconButtonStyle}
-              onClick={() => handleCopy(row.username, `username-${row.id}`)}
-              aria-label="Copy username"
-              title={copiedValue === `username-${row.id}` ? "Copied" : "Copy username"}
-            >
-              {copiedValue === `username-${row.id}` ? (
-                <img src={tickIcon} alt="Copied" style={{ width: "16px", height: "16px" }} />
-              ) : (
-                <IoMdCopy />
-              )}
-            </button>
-          </div>
-        ),
+        sourceCell: buildCopyCell(row.source, `source-${row.id}`, copiedValue, handleCopy),
+        usernameCell: buildCopyCell(row.username, `username-${row.id}`, copiedValue, handleCopy),
         passwordCell: (
           <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
-            <span>{row.passwordPreview}</span>
+            <span title={row.passwordPreview}>{truncateCellText(row.passwordPreview)}</span>
             <button
               type="button"
               style={copyIconButtonStyle}
               onClick={() => handleCopy(row.password, `password-${row.id}`)}
               aria-label="Copy password"
-              title={copiedValue === `password-${row.id}` ? "Copied" : "Copy password"}
+              title={copiedValue === `password-${row.id}` ? "Copied" : "Copy"}
+              disabled={!row.password.trim()}
             >
               {copiedValue === `password-${row.id}` ? (
                 <img src={tickIcon} alt="Copied" style={{ width: "16px", height: "16px" }} />
@@ -400,7 +414,7 @@ export default function CredentialManagerPage() {
       metrics={metrics}
       columns={[
         { key: "name", label: "Name" },
-        { key: "source", label: "Source" },
+        { key: "sourceCell", label: "Source" },
         { key: "usernameCell", label: "Username" },
         { key: "passwordCell", label: "Password" },
         { key: "category", label: "Category" },
@@ -444,13 +458,27 @@ export default function CredentialManagerPage() {
                   <strong>{viewingCredential.name}</strong>
                 </div>
                 <div className="asset-admin-field">
-                  <span>Source</span>
+                  <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
+                    <span>Source</span>
+                    <button
+                      type="button"
+                      style={copyIconButtonStyle}
+                      onClick={() => handleCopy(viewingCredential.source, `view-source-${viewingCredential.id}`)}
+                      aria-label="Copy source"
+                      title={copiedValue === `view-source-${viewingCredential.id}` ? "Copied" : "Copy source"}
+                    >
+                      {copiedValue === `view-source-${viewingCredential.id}` ? (
+                        <img src={tickIcon} alt="Copied" style={{ width: "16px", height: "16px" }} />
+                      ) : (
+                        <IoMdCopy />
+                      )}
+                    </button>
+                  </div>
                   <strong>{viewingCredential.source}</strong>
                 </div>
                 <div className="asset-admin-field">
-                  <span>Username</span>
                   <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
-                    <strong>{viewingCredential.username}</strong>
+                    <span>Username</span>
                     <button
                       type="button"
                       style={copyIconButtonStyle}
@@ -465,11 +493,11 @@ export default function CredentialManagerPage() {
                       )}
                     </button>
                   </div>
+                  <strong>{viewingCredential.username}</strong>
                 </div>
                 <div className="asset-admin-field">
-                  <span>Password</span>
                   <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
-                    <strong>{viewingCredential.password}</strong>
+                    <span>Password</span>
                     <button
                       type="button"
                       style={copyIconButtonStyle}
@@ -484,6 +512,7 @@ export default function CredentialManagerPage() {
                       )}
                     </button>
                   </div>
+                  <strong>{viewingCredential.password}</strong>
                 </div>
                 <div className="asset-admin-field">
                   <span>Category</span>

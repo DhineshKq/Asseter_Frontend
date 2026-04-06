@@ -95,45 +95,65 @@ export default function AssetMappingPage() {
   }, []);
 
   const mapMappingRecord = useCallback(
-    (mapping: any): MappingRecord => {
+    (
+      mapping: any,
+      lookups?: {
+        assetsById: Map<number, AssetOption>;
+        usersById: Map<number, EmployeeOption>;
+        locationsById: Map<number, LocationOption>;
+      }
+    ): MappingRecord => {
+      const assetId = typeof mapping?.assetId === "number" ? mapping.assetId : null;
+      const userId = typeof mapping?.userId === "number" ? mapping.userId : null;
+      const locationId = typeof mapping?.locationId === "number" ? mapping.locationId : null;
+      const matchedAsset = assetId !== null ? lookups?.assetsById.get(assetId) : undefined;
+      const matchedUser = userId !== null ? lookups?.usersById.get(userId) : undefined;
+      const matchedLocation = locationId !== null ? lookups?.locationsById.get(locationId) : undefined;
       const fullUserName = `${mapping?.user?.firstName ?? ""} ${mapping?.user?.lastName ?? ""}`.trim();
 
       return {
         assetName:
           mapping?.asset?.assetName ??
           mapping?.assetDetails?.assetName ??
+          matchedAsset?.assetName ??
           mapping?.assetName ??
           "",
         deviceId:
           mapping?.asset?.deviceId ??
           mapping?.assetDetails?.deviceId ??
+          matchedAsset?.deviceId ??
           mapping?.deviceId ??
           "",
         serialNumber:
           mapping?.asset?.serialNumber ??
           mapping?.assetDetails?.serialNumber ??
+          matchedAsset?.serialNumber ??
           mapping?.serialNumber ??
           "",
         employeeId:
           mapping?.employeeId ??
           mapping?.employee?.employeeId ??
           mapping?.user?.employeeId ??
+          matchedUser?.employeeId ??
           "",
         assignedTo:
           mapping?.responsibilityUser ??
           mapping?.employee?.name ??
           (fullUserName || undefined) ??
           mapping?.user?.name ??
+          matchedUser?.name ??
           mapping?.assignedTo ??
           "",
         department:
           mapping?.employee?.team ??
           mapping?.user?.team ??
+          matchedUser?.team ??
           mapping?.department ??
           "",
         location:
           mapping?.location?.locationName ??
           mapping?.location?.name ??
+          matchedLocation?.locationName ??
           mapping?.locationName ??
           mapping?.location ??
           "",
@@ -153,17 +173,87 @@ export default function AssetMappingPage() {
     setLoadError("");
 
     try {
-      // axios baseURL already includes `/v1`, so this hits `GET /v1/assets/mappings`.
-      const response = await axiosPrivate.get("/assets/mappings");
-      const payload = Array.isArray(response.data?.data)
-        ? response.data.data
-        : Array.isArray(response.data?.mappings)
-          ? response.data.mappings
-          : Array.isArray(response.data)
-            ? response.data
+      // axios baseURL already includes `/v1`, so these hit the matching `/v1/...` routes.
+      const [mappingsResponse, assetsResponse, locationsResponse, employeesResponse] = await Promise.all([
+        axiosPrivate.get("/assets/mappings"),
+        axiosPrivate.get("/assets"),
+        axiosPrivate.get("/assets/locations"),
+        axiosPrivate.get("/employees"),
+      ]);
+
+      const mappingsPayload = Array.isArray(mappingsResponse.data?.data)
+        ? mappingsResponse.data.data
+        : Array.isArray(mappingsResponse.data?.mappings)
+          ? mappingsResponse.data.mappings
+          : Array.isArray(mappingsResponse.data)
+            ? mappingsResponse.data
             : [];
 
-      setRows(payload.map(mapMappingRecord));
+      const assetsPayload = Array.isArray(assetsResponse.data?.data)
+        ? assetsResponse.data.data
+        : Array.isArray(assetsResponse.data)
+          ? assetsResponse.data
+          : [];
+
+      const locationsPayload = Array.isArray(locationsResponse.data?.data)
+        ? locationsResponse.data.data
+        : Array.isArray(locationsResponse.data)
+          ? locationsResponse.data
+          : [];
+
+      const employeesPayload = Array.isArray(employeesResponse.data?.data)
+        ? employeesResponse.data.data
+        : Array.isArray(employeesResponse.data?.employees)
+          ? employeesResponse.data.employees
+          : Array.isArray(employeesResponse.data)
+            ? employeesResponse.data
+            : [];
+
+      const assetsById = new Map<number, AssetOption>(
+        assetsPayload
+          .filter((asset: any) => typeof asset?.id === "number")
+          .map((asset: any) => [
+            asset.id,
+            {
+              id: asset.id,
+              assetName: asset.assetName ?? "",
+              deviceId: asset.deviceId ?? "",
+              serialNumber: asset.serialNumber ?? "",
+            },
+          ])
+      );
+
+      const locationsById = new Map<number, LocationOption>(
+        locationsPayload
+          .filter((location: any) => typeof location?.id === "number")
+          .map((location: any) => [
+            location.id,
+            {
+              id: location.id,
+              locationName: location.locationName ?? "",
+            },
+          ])
+      );
+
+      const usersById = new Map<number, EmployeeOption>(
+        employeesPayload
+          .filter((employee: any) => typeof employee?.id === "number")
+          .map((employee: any) => [
+            employee.id,
+            {
+              id: employee.id,
+              employeeId: employee.employeeId ?? "",
+              name: employee.name ?? "",
+              team: employee.team ?? "",
+            },
+          ])
+      );
+
+      setRows(
+        mappingsPayload.map((mapping: any) =>
+          mapMappingRecord(mapping, { assetsById, usersById, locationsById })
+        )
+      );
     } catch (error: any) {
       setRows([]);
       setLoadError(
@@ -297,8 +387,7 @@ export default function AssetMappingPage() {
         assetId: selectedAsset.id,
         locationId: selectedLocation.id,
         userId: selectedUser.id,
-        responsibilityUser: formData.assignedTo,
-        assignedDate: new Date(formData.assignedOn).toISOString(),
+        assignedDate: formData.assignedOn,
       });
 
       await fetchMappings();
@@ -313,7 +402,14 @@ export default function AssetMappingPage() {
     }
   };
 
-  const isSubmitDisabled = Object.values(formData).some((value) => value.trim() === "");
+  const isSubmitDisabled =
+    formData.assetName.trim() === "" ||
+    formData.deviceId.trim() === "" ||
+    formData.assignedTo.trim() === "" ||
+    formData.employeeId.trim() === "" ||
+    formData.department.trim() === "" ||
+    formData.location.trim() === "" ||
+    formData.assignedOn.trim() === "";
 
   return (
     <AdminModulePage
@@ -392,14 +488,14 @@ export default function AssetMappingPage() {
                 </label>
 
                 <label className="asset-admin-field">
-                  <span>Serial Number</span>
+                  <span>Serial Number (Optional)</span>
                   <input
                     name="serialNumber"
                     type="text"
                     value={formData.serialNumber}
                     readOnly
                     disabled
-                    placeholder="Auto-filled from asset"
+                    placeholder="Auto-filled when available"
                   />
                 </label>
 

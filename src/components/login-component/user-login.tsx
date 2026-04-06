@@ -78,41 +78,24 @@ export default function UserLogin({ handleclick }: propsType) {
             }, 5000)
         }
     }
-
+ 
     return (
 
         <>
             <div className='loginPage'>
                 <div className='login-shell'>
                     <section className='login-hero-panel'>
-                        <div className='login-hero-badge'>InfraPilot 360</div>
-                        <h1>Infrastructure operations, asset control, and ownership in one place.</h1>
-                        <p>
-                            Bring assets, IP mappings, locations, assignments, and users into one reliable
-                            operational workspace with a cleaner control surface.
-                        </p>
-                        <div className='login-hero-points'>
-                            <div className='login-hero-point'>
-                                <strong>Unified Infrastructure</strong>
-                                <span>Track assets, IP ownership, and operational context in one command layer.</span>
-                            </div>
-                            <div className='login-hero-point'>
-                                <strong>Operational Clarity</strong>
-                                <span>Review status, assignment ownership, and location visibility without switching tools.</span>
-                            </div>
-                            <div className='login-hero-point'>
-                                <strong>Built For Control</strong>
-                                <span>Designed for structured admin workflows across people, devices, and network resources.</span>
-                            </div>
-                        </div>
+                        <div className='login-hero-badge'>Infra Pilot</div>
+                        <h1>Simple access to your workspace.</h1>
+                        <p>Manage assets and operations from one secure login.</p>
                     </section>
 
                     <div className='login-container'>
                         <div className='login-box'>
                             <div className='login-box-header'>
-                                <span className='login-box-kicker'>Welcome Back</span>
+                                <span className='login-box-kicker'>Welcome back</span>
                                 <h2>Sign In</h2>
-                                <p>Use your InfraPilot 360 credentials to access the operations workspace.</p>
+                                <p>Enter your account details to continue.</p>
                             </div>
 
                             <div className='inputs-align'>
@@ -180,18 +163,18 @@ export default function UserLogin({ handleclick }: propsType) {
                                     </button>
                                 </div>
 
-                                <div className="linkArea">
+                                {/* <div className="linkArea">
                                     <p tabIndex={0} onClick={() => handleclick('forgotPassword')}>
                                         Forgot password?
                                     </p>
-                                </div>
+                                </div> */}
                             </div>
                         </div>
 
-                        <div className="footer">
+                        {/* <div className="footer">
                             <span>Version 1.0</span> &nbsp;
                             <span>&copy; KnowledgeQ Interactive Consultancy Services Pvt Ltd</span>
-                        </div>
+                        </div> */}
                     </div>
                 </div>
             </div >

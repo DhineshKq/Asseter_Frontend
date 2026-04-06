@@ -6,7 +6,8 @@
     width: 98%;
     max-width: 98%;
     padding: 30px;
-    height: 92vh;
+    min-height: calc(100vh - 110px);
+    height: auto;
     background-size: cover;
     // margin-top: 20px;
     top: 2px;
@@ -112,7 +113,7 @@
     animation: fadeIn 0.3s ease-in-out;
 
     .container {
-        width: 600px;
+        width: min(600px, calc(100vw - 32px));
         background-color: var(--body-bg);
         padding: 40px 30px;
         border-radius: 20px;
@@ -203,6 +204,45 @@
             gap: 20px;
             margin-top: 30px;
         }
+    }
+}
+
+@media (max-width: 1200px) {
+    .assets-main-page {
+        width: 100%;
+        max-width: 100%;
+        border-radius: 24px;
+        padding: 24px;
+    }
+}
+
+@media (max-width: 900px) {
+    .assets-main-page {
+        padding: 20px;
+        border-radius: 22px;
+    }
+
+    .pageHeader {
+        height: auto;
+        min-height: 56px;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+}
+
+@media (max-width: 640px) {
+    .assets-main-page {
+        padding: 16px;
+        border-radius: 18px;
+    }
+
+    .add-modal .container {
+        padding: 24px 18px;
+        border-radius: 18px;
+    }
+
+    .add-modal .container .buttons {
+        flex-direction: column;
     }
 }
 

@@ -92,7 +92,7 @@ export default function UserGridView({ setassetsPageView, setEditAssets, setOrig
     }, []);
 
     const CustomEllipsisRendererName: React.FC<any> = ({ value }) => {
-        const maxLength = 25;
+        const maxLength = 10;
         const displayValue = value?.length > maxLength ? `${value.substring(0, maxLength)}...` : value;
 
         const cellStyle: React.CSSProperties = {

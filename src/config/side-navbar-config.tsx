@@ -1,31 +1,21 @@
 import { useEffect, useState } from 'react'
-import { ReactComponent as DashboardIcon } from '../assets/web-icons/dashboard.svg';
-import { ReactComponent as AssestsIcon } from '../assets/web-icons/assets.svg';
-import { ReactComponent as ScansIcon } from '../assets/web-icons/Scans.svg';
-import { ReactComponent as CapturesIcon } from '../assets/web-icons/captures.svg';
-import { ReactComponent as LogoutIcon } from '../assets/web-icons/Logout.svg';
-import { ReactComponent as UserIcon } from '../assets/web-icons/Users.svg';
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
-import { resetFormModified } from '../redux/action';
-import Logoutmodal from '../components/common-component/modals/delete-modal'
 import useAxiosPrivate from '../services/hooks/useaxios-private';
-import useAuth from '../services/hooks/useauth';
 import { useCommonData } from '../services/context/useContext';
+import Changesmodal from '../components/common-component/modals/changes-modal';
 
 interface SidebarItemProps {
   title: string;
   route: string;
-  icon: React.ReactElement;
   caption: string;
   selectedTitle: string;
   navConfirmation: (title: string, path: string) => void;
 }
 
 function SidebarItem({
-  title,
+  title,  
   route,
-  icon,
   caption,
   selectedTitle,
   navConfirmation
@@ -39,9 +29,9 @@ function SidebarItem({
       onClick={() => navConfirmation(title, route)}
       title={`${title} - ${caption}`}
     >
-      <div className="sidebar-nav-icon">{icon}</div>
       <div className="sidebar-nav-copy">
         <span>{title}</span>
+        <small>{caption}</small>
       </div>
     </button>
   );
@@ -52,11 +42,10 @@ export default function SideBar() {
   const [selectedTitle, setSelectedTitle] = useState("");
   const isFormModified = useSelector((state: any) => state.isFormModified);
   const [showChangesModal, setShowChangesModal] = useState(false);
-  const dispatch = useDispatch();
+  const [pendingNavigation, setPendingNavigation] = useState<{ title: string; route: string } | null>(null);
   const axiosPrivate = useAxiosPrivate();
   const location = useLocation();
   const navigate = useNavigate()
-  const { setAuth } = useAuth();
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
@@ -98,6 +87,7 @@ export default function SideBar() {
 
   const navConfirmation = (select: string, navTo: string) => {
     if (isFormModified && location.pathname !== navTo) {
+      setPendingNavigation({ title: select, route: navTo });
       setShowChangesModal(true);
     } else {
       setSelectedTitle(select);
@@ -105,34 +95,14 @@ export default function SideBar() {
     }
   };
 
-  const handleLogout = async () => {
-    try {
-      const response = await axiosPrivate.post("signOut");
-      if (response.status === 200) {
-        completeLogout();
-      }
-    } catch {
-      completeLogout();
-    }
-  };
-
-  const completeLogout = () => {
-    setShowChangesModal(false);
-    dispatch(resetFormModified(false));
-    setAuth({});
-    localStorage.clear();
-    navigate("/");
-  };
-
   const menuItems: SidebarItemProps[] = [
-    { title: "Dashboard", route: "/dashboard", icon: <DashboardIcon />, caption: "Overview and health", selectedTitle, navConfirmation },
-    { title: "Assets", route: "/assets", icon: <AssestsIcon />, caption: "Inventory records", selectedTitle, navConfirmation },
-    { title: "Asset Locations", route: "/asset-locations", icon: <ScansIcon />, caption: "Teams and places", selectedTitle, navConfirmation },
-    { title: "Asset Mapping", route: "/asset-mapping", icon: <CapturesIcon />, caption: "Ownership mapping", selectedTitle, navConfirmation },
-    { title: "IP Mapping", route: "/ip-mapping", icon: <ScansIcon />, caption: "Subnet ownership", selectedTitle, navConfirmation },
-    { title: "Credential Manager", route: "/credential-manager", icon: <UserIcon />, caption: "Access vault", selectedTitle, navConfirmation },
-    // { title: "EB Tracker", route: "/eb-tracker", icon: <CapturesIcon />, caption: "Energy readings and units", selectedTitle, navConfirmation },
-    { title: "Employees", route: "/users", icon: <UserIcon />, caption: "People for asset mapping", selectedTitle, navConfirmation },
+    { title: "Dashboard", route: "/dashboard", caption: "Overview and health", selectedTitle, navConfirmation },
+    { title: "Assets", route: "/assets", caption: "Inventory records", selectedTitle, navConfirmation },
+    { title: "Asset Locations", route: "/asset-locations", caption: "Teams and places", selectedTitle, navConfirmation },
+    { title: "Asset Mapping", route: "/asset-mapping", caption: "Ownership mapping", selectedTitle, navConfirmation },
+    { title: "IP Mapping", route: "/ip-mapping", caption: "Subnet ownership", selectedTitle, navConfirmation },
+    { title: "Credential Manager", route: "/credential-manager", caption: "Access vault", selectedTitle, navConfirmation },
+    { title: "Employees", route: "/users", caption: "People for asset mapping", selectedTitle, navConfirmation },
   ];
 
   return (
@@ -147,6 +117,10 @@ export default function SideBar() {
             </div>
             <span>{isAdmin ? "Administrator Access" : "Workspace Access"}</span>
           </div>
+          {/* <div className="sidebar-summary-card">
+            <strong>Workspace Navigation</strong>
+            <p>Move between modules quickly with a cleaner text-first menu.</p>
+          </div> */}
         </div>
 
         <div className="menu-items-wrapper">
@@ -156,27 +130,27 @@ export default function SideBar() {
               <SidebarItem key={item.title} {...item} />
             ))}
           </div>
-          <button
-            type="button"
-            className="sidebar-nav-item sidebar-nav-item-logout"
-            onClick={() => setShowChangesModal(true)}
-          >
-            <div className="sidebar-nav-icon">
-              <LogoutIcon />
-            </div>
-            <div className="sidebar-nav-copy">
-              <span>Logout</span>
-              <small>End current session</small>
-            </div>
-          </button>
         </div>
       </div>
 
       {showChangesModal && (
-        <Logoutmodal
-          clearValue={() => setShowChangesModal(false)}
-          handleSignOut={handleLogout}
-          modelType="signOut"
+        <Changesmodal
+          closeModal={() => {
+            setShowChangesModal(false);
+            setPendingNavigation(null);
+          }}
+          leavePage={() => {
+            if (pendingNavigation) {
+              setSelectedTitle(pendingNavigation.title);
+              navigate(pendingNavigation.route);
+            }
+            setShowChangesModal(false);
+            setPendingNavigation(null);
+          }}
+          handleClose={() => {
+            setShowChangesModal(false);
+            setPendingNavigation(null);
+          }}
         />
       )}
     </>

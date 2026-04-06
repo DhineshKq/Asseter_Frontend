@@ -29,7 +29,7 @@ export default function UsersFormView({ setassetsPageView, setRefreshGrid, setOr
   const [selectedPlan, setSelectedPlan] = useState<string>(""); // currently selected plan
 
 
-  const isFormInvalid = !firstName || !lastName || !!usernameError || !!emailError || !!mobileError;
+  const isFormInvalid = !firstName || !lastName || !username || !email || !!usernameError || !!emailError || !!mobileError;
   const validateUsername = (val: string) => {
     const usernameRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
 
@@ -48,7 +48,7 @@ export default function UsersFormView({ setassetsPageView, setRefreshGrid, setOr
   };
 
   const validateMobile = (val: string) => {
-    setMobileError(val.length === 10 ? '' : 'Mobile number must be 10 digits');
+    setMobileError(val === '' || val.length === 10 ? '' : 'Mobile number must be 10 digits');
   };
 
 
@@ -246,7 +246,7 @@ export default function UsersFormView({ setassetsPageView, setRefreshGrid, setOr
 
           {/* Row 3 */}
           <div className="inputfield">
-            <label className="form-label fieldLabel">Mobile Number</label>
+            <label className="form-label fieldLabel">Mobile Number (Optional)</label>
             <input
               type="tel"
               className={`form-control formFormat ${mobileError ? 'is-invalid' : ''}`}

@@ -1,6 +1,6 @@
 .asset-admin-page {
   width: 100%;
-  height: 90vh;
+  min-height: calc(100vh - 90px);
   overflow-y: auto;
   padding: 0 16px 24px;
   background:
@@ -87,6 +87,14 @@
 .asset-admin-primary-btn,
 .asset-admin-hero-highlight {
   flex-shrink: 0;
+}
+
+.asset-admin-hero-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
 }
 
 .asset-admin-primary-btn {
@@ -322,6 +330,13 @@
   grid-column: auto;
 }
 
+.asset-admin-form-success {
+  margin: 0;
+  color: #166534;
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+
 .asset-admin-filter-reset {
   align-self: end;
   min-height: 46px;
@@ -364,6 +379,15 @@
   tbody tr:nth-child(even) td {
     background: rgba(248, 250, 252, 0.72);
   }
+}
+
+.asset-admin-cell-text {
+  display: inline-block;
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: top;
 }
 
 .asset-admin-row-actions {
@@ -607,6 +631,15 @@
 }
 
 @media (max-width: 992px) {
+  .asset-admin-page {
+    padding: 0 12px 20px;
+  }
+
+  .asset-admin-shell {
+    padding: 22px;
+    border-radius: 24px;
+  }
+
   .asset-admin-table-controls,
   .asset-admin-dashboard-band,
   .asset-admin-grid {
@@ -615,10 +648,21 @@
 
   .asset-admin-hero {
     flex-direction: column;
+    padding: 24px;
   }
 
   .asset-admin-primary-btn {
     align-self: flex-start;
+  }
+
+  .asset-admin-hero-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .asset-admin-hero-highlight {
+    width: 100%;
+    min-width: 0;
   }
 
   .asset-admin-form-grid {
@@ -628,7 +672,7 @@
 
 @media (max-width: 640px) {
   .asset-admin-page {
-    height: calc(100vh - 90px);
+    min-height: calc(100vh - 104px);
     padding: 0 6px 20px;
   }
 
@@ -649,6 +693,17 @@
   .asset-admin-card-toolbar,
   .asset-admin-hero-meta {
     gap: 8px;
+  }
+
+  .asset-admin-card-header,
+  .asset-admin-list-row,
+  .asset-admin-row-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .asset-admin-table-card {
+    padding: 18px;
   }
 
   .asset-admin-modal-backdrop {
