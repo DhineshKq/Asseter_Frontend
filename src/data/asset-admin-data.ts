@@ -7,6 +7,13 @@ export interface AssetRecord {
   deviceId: string;
   serialNumber: string;
   assetName: string;
+  invoiceNo: string;
+  invoiceDate: string;
+  vendor: string;
+  quantity: string;
+  receiveBy: string;
+  amount: string;
+  receivedDate: string;
   type: string;
   status: AssetStatus;
   location: string;

@@ -99,7 +99,7 @@ export default function UserDetails() {
                 setEmail(user.email || '');
                 setMobile(user.mobileNumber || '');
                 setSelectedPlan({ label: user.subscriptionPlan, value: user.subscriptionPlan })
-                userData()
+                // userData()
             } else {
                 setShowAlertBox(true);
                 setShowType("warning");
@@ -115,24 +115,24 @@ export default function UserDetails() {
         }
     }
 
-    async function userData() {
-        try {
-            const res = await axiosPrivate.get('/userData');
-            if (res.status === 200) {
-                const { userID, name, userName, isAdmin } = res.data.data;
+    // async function userData() {
+    //     try {
+    //         const res = await axiosPrivate.get('/userData');
+    //         if (res.status === 200) {
+    //             const { userID, name, userName, isAdmin } = res.data.data;
 
-                setCurrentLoggedUserData((prevData: any) => ({
-                    ...prevData,
-                    userID: userID || prevData.userID,
-                    isAdmin: isAdmin ?? prevData.isAdmin,
-                    userName: userName ?? prevData.userName,
-                    name: name ?? prevData.name,
-                }));
-            }
-        } catch (error: any) {
-            console.error("Error fetching user data:", error);
-        }
-    }
+    //             setCurrentLoggedUserData((prevData: any) => ({
+    //                 ...prevData,
+    //                 userID: userID || prevData.userID,
+    //                 isAdmin: isAdmin ?? prevData.isAdmin,
+    //                 userName: userName ?? prevData.userName,
+    //                 name: name ?? prevData.name,
+    //             }));
+    //         }
+    //     } catch (error: any) {
+    //         console.error("Error fetching user data:", error);
+    //     }
+    // }
 
     const handleUserSubmit = async () => {
         try {

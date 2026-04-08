@@ -90,6 +90,7 @@ export default function CredentialManagerPage() {
   const [rows, setRows] = useState<CredentialRecord[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [viewingCredential, setViewingCredential] = useState<CredentialRecord | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<CredentialRecord | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("All Categories");
@@ -254,13 +255,25 @@ export default function CredentialManagerPage() {
     setViewingCredential(null);
   }, []);
 
+  const closeDeleteModal = useCallback(() => {
+    if (isDeletingId !== null) {
+      return;
+    }
+
+    setDeleteTarget(null);
+  }, [isDeletingId]);
+
   useEffect(() => {
-    if (!isModalOpen && !viewingCredential) {
+    if (!isModalOpen && !viewingCredential && !deleteTarget) {
       return undefined;
     }
 
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
+        if (deleteTarget) {
+          closeDeleteModal();
+          return;
+        }
         if (viewingCredential) {
           closeViewModal();
           return;
@@ -271,7 +284,7 @@ export default function CredentialManagerPage() {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [closeModal, closeViewModal, isModalOpen, viewingCredential]);
+  }, [closeDeleteModal, closeModal, closeViewModal, deleteTarget, isModalOpen, viewingCredential]);
 
   const openAddModal = () => {
     if (isSaving || isDeletingId !== null) {
@@ -303,17 +316,31 @@ export default function CredentialManagerPage() {
     setViewingCredential(row);
   };
 
-  const handleDelete = async (id: string) => {
-    setIsDeletingId(id);
+  const openDeleteModal = (row: CredentialRecord) => {
+    if (isDeletingId !== null || isSaving) {
+      return;
+    }
+
+    setDeleteTarget(row);
+  };
+
+  const handleDelete = async () => {
+    if (!deleteTarget?.id) {
+      return;
+    }
+
+    setIsDeletingId(deleteTarget.id);
 
     try {
       // axios baseURL already includes `/v1`, so this hits `DELETE /v1/assets/credentials/:id`.
-      await axiosPrivate.delete(`/assets/credentials/${id}`);
-      setRows((current) => current.filter((row) => row.id !== id));
+      await axiosPrivate.delete(`/assets/credentials/${deleteTarget.id}`);
+      setRows((current) => current.filter((row) => row.id !== deleteTarget.id));
 
-      if (viewingCredential?.id === id) {
+      if (viewingCredential?.id === deleteTarget.id) {
         closeViewModal();
       }
+
+      closeDeleteModal();
     } catch (error: any) {
       console.error("Failed to delete credential:", error);
     } finally {
@@ -417,7 +444,7 @@ export default function CredentialManagerPage() {
           <button
             type="button"
             className="asset-admin-danger-btn"
-            onClick={() => handleDelete((row as CredentialRecord).id)}
+            onClick={() => openDeleteModal(row as CredentialRecord)}
             disabled={isDeletingId === (row as CredentialRecord).id}
           >
             {isDeletingId === (row as CredentialRecord).id ? "Deleting..." : "Delete"}
@@ -614,6 +641,42 @@ export default function CredentialManagerPage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+      {deleteTarget && (
+        <div className="asset-admin-modal-backdrop" onClick={closeDeleteModal}>
+          <div
+            className="asset-admin-modal"
+            onClick={(event) => event.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="credential-delete-modal-title"
+          >
+            <div className="asset-admin-modal-header">
+              <div>
+                <p className="asset-admin-modal-kicker">Confirm Delete</p>
+                <h3 id="credential-delete-modal-title">Delete Credential</h3>
+              </div>
+              <button type="button" className="asset-admin-modal-close" onClick={closeDeleteModal} aria-label="Close delete credential popup">
+                x
+              </button>
+            </div>
+
+            <div className="asset-admin-form">
+              <p>
+                Delete <strong>{deleteTarget.name || deleteTarget.source || "this credential"}</strong>? This action cannot be undone.
+              </p>
+
+              <div className="asset-admin-form-actions">
+                <button type="button" className="asset-admin-secondary-btn" onClick={closeDeleteModal} disabled={isDeletingId !== null}>
+                  Cancel
+                </button>
+                <button type="button" className="asset-admin-danger-btn" onClick={handleDelete} disabled={isDeletingId !== null}>
+                  {isDeletingId !== null ? "Deleting..." : "Delete"}
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}

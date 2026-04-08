@@ -2,27 +2,27 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import AdminModulePage from "../../components/asset-admin/admin-module-page";
 import useAxiosPrivate from "../../services/hooks/useaxios-private";
 import { AssetRecord, AssetStatus } from "../../data/asset-admin-data";
+import * as XLSX from "xlsx";
+import downloadIcon from "../../assets/icons/download.png";
 
 interface AssetFormState {
-  deviceId: string;
   serialNumber: string;
   assetName: string;
+  invoiceNo: string;
+  invoiceDate: string;
+  vendor: string;
+  quantity: string;
+  receiveBy: string;
+  amount: string;
+  receivedDate: string;
   type: string;
   status: AssetStatus;
   locationId: string;
 }
 
-interface AssetLocationOption {
-  id: number;
-  locationCode: string;
-  locationName: string;
-  teamName: string;
-}
-
 export default function AssetsPage() {
   const axiosPrivate = useAxiosPrivate();
   const [rows, setRows] = useState<AssetRecord[]>([]);
-  const [locationOptions, setLocationOptions] = useState<AssetLocationOption[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
@@ -33,9 +33,15 @@ export default function AssetsPage() {
   const [submitError, setSubmitError] = useState("");
   const [deleteError, setDeleteError] = useState("");
   const [formData, setFormData] = useState<AssetFormState>({
-    deviceId: "",
     serialNumber: "",
     assetName: "",
+    invoiceNo: "",
+    invoiceDate: "",
+    vendor: "",
+    quantity: "",
+    receiveBy: "",
+    amount: "",
+    receivedDate: "",
     type: "",
     status: "Working",
     locationId: "",
@@ -54,11 +60,39 @@ export default function AssetsPage() {
     [rows]
   );
 
+  const handleDownloadReport = useCallback(() => {
+    const exportRows = rows.map((row) => ({
+      assetCode: row.assetCode,
+      receivedDate: row.receivedDate,
+      invoiceNumber: row.invoiceNo,
+      invoiceDate: row.invoiceDate,
+      vendor: row.vendor,
+      assetName: row.assetName,
+      assetModel: row.type,
+      serialNumber: row.serialNumber,
+      quantity: row.quantity,
+      amount: row.amount,
+      receivedBy: row.receiveBy,
+      status: row.status,
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(exportRows);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Inward");
+    XLSX.writeFile(workbook, "inward-report.xlsx");
+  }, [rows]);
+
   const resetForm = useCallback(() => {
     setFormData({
-      deviceId: "",
       serialNumber: "",
       assetName: "",
+      invoiceNo: "",
+      invoiceDate: "",
+      vendor: "",
+      quantity: "",
+      receiveBy: "",
+      amount: "",
+      receivedDate: "",
       type: "",
       status: "Working",
       locationId: "",
@@ -89,33 +123,17 @@ export default function AssetsPage() {
     deviceId: asset.deviceId ?? "",
     serialNumber: asset.serialNumber ?? "",
     assetName: asset.assetName ?? "",
-    type: asset.assetType ?? asset.type ?? "",
+    invoiceNo: asset.invoiceNo ?? asset.invoice_no ?? asset.invoiceNumber ?? "",
+    invoiceDate: asset.invoiceDate ?? asset.invoice_date ?? "",
+    vendor: asset.vendor ?? "",
+    quantity: asset.quantity != null ? String(asset.quantity) : "",
+    receiveBy: asset.receiveBy ?? asset.receivedBy ?? asset.receive_by ?? asset.received_by ?? "",
+    amount: asset.amount != null ? String(asset.amount) : "",
+    receivedDate: asset.receivedDate ?? asset.received_date ?? "",
+    type: asset.assetType ?? asset.assetModel ?? asset.type ?? "",
     status: normalizeStatus(asset.assetStatus ?? asset.status),
     location: asset.location?.locationName ?? asset.location?.name ?? asset.locationName ?? `Location ${asset.locationId ?? "-"}`,
   }), []);
-
-  const fetchLocations = useCallback(async () => {
-    try {
-      const response = await axiosPrivate.get("/assets/locations");
-      const payload = Array.isArray(response.data?.data)
-        ? response.data.data
-        : Array.isArray(response.data)
-          ? response.data
-          : [];
-
-      setLocationOptions(
-        payload.map((location: any) => ({
-          id: location.id,
-          locationCode: location.locationCode ?? "",
-          locationName: location.locationName ?? "",
-          teamName: location.teamName ?? "",
-        }))
-      );
-    } catch (error) {
-      setLocationOptions([]);
-      console.error("Failed to fetch asset locations:", error);
-    }
-  }, [axiosPrivate]);
 
   const fetchAssets = useCallback(async () => {
     setIsLoading(true);
@@ -159,8 +177,7 @@ export default function AssetsPage() {
 
   useEffect(() => {
     fetchAssets();
-    fetchLocations();
-  }, [fetchAssets, fetchLocations]);
+  }, [fetchAssets]);
 
   useEffect(() => {
     if (!isModalOpen && !isDeleteModalOpen) {
@@ -196,9 +213,15 @@ export default function AssetsPage() {
     }
     setEditingIndex(index);
       setFormData({
-        deviceId: row.deviceId,
         serialNumber: row.serialNumber,
         assetName: row.assetName,
+        invoiceNo: row.invoiceNo,
+        invoiceDate: row.invoiceDate,
+        vendor: row.vendor,
+        quantity: row.quantity,
+        receiveBy: row.receiveBy,
+        amount: row.amount,
+        receivedDate: row.receivedDate,
         type: row.type,
         status: row.status,
         locationId: row.locationId ? String(row.locationId) : "",
@@ -254,25 +277,39 @@ export default function AssetsPage() {
     event.preventDefault();
 
     const locationId = Number(formData.locationId);
+    const quantity = Number(formData.quantity);
+    const amount = formData.amount.trim() === "" ? undefined : Number(formData.amount);
 
-    if (!Number.isInteger(locationId) || locationId <= 0) {
-      setSubmitError("Select a valid location before saving the asset.");
+    if (!Number.isFinite(quantity) || quantity <= 0) {
+      setSubmitError("Qty must be greater than 0.");
       return;
     }
 
-    if (formData.deviceId.trim() === "" && formData.serialNumber.trim() === "") {
-      setSubmitError("Enter either a device ID or a serial number before saving the asset.");
+    if (amount !== undefined && (!Number.isFinite(amount) || amount < 0)) {
+      setSubmitError("Amount must be a valid number.");
       return;
     }
 
-    const payload = {
-      deviceId: formData.deviceId.trim(),
+    const payload: Record<string, string | number> = {
       serialNumber: formData.serialNumber.trim(),
       assetName: formData.assetName.trim(),
-      assetType: formData.type.trim(),
-      locationId,
-      assetStatus: formData.status.toLowerCase(),
+      receivedDate: formData.receivedDate,
+      invoiceNumber: formData.invoiceNo.trim(),
+      invoiceDate: formData.invoiceDate,
+      vendor: formData.vendor.trim(),
+      assetModel: formData.type.trim(),
+      quantity,
+      receivedBy: formData.receiveBy.trim(),
+      status: formData.status.toLowerCase(),
     };
+
+    if (amount !== undefined) {
+      payload.amount = amount;
+    }
+
+    if (Number.isInteger(locationId) && locationId > 0) {
+      payload.locationId = locationId;
+    }
 
     if (editingIndex !== null) {
       const currentAsset = rows[editingIndex];
@@ -314,16 +351,23 @@ export default function AssetsPage() {
 
   const isSubmitDisabled = [
     formData.assetName,
-    formData.type,
+    formData.vendor,
+    formData.quantity,
+    formData.receiveBy,
+    formData.receivedDate,
     formData.status,
-    formData.locationId,
   ].some((value) => value.trim() === "");
 
   return (
     <AdminModulePage
-      title="Assets Module"
+      title="Inward"
       subtitle="Manage IT assets with device ID, serial number, asset name, type, status, and item location handled by the responsible team."
-      actionLabel="Add Asset"
+      actionLabel="Add Inward"
+      headerActions={
+        <button type="button" className="asset-admin-secondary-btn" onClick={handleDownloadReport} aria-label="Download inward report" title="Download Report">
+          <img src={downloadIcon} alt="Download" style={{ width: "16px", height: "16px" }} />
+        </button>
+      }
       onActionClick={openAddModal}
       onEditRow={openEditModal}
       renderRowActions={(row) => (
@@ -341,12 +385,18 @@ export default function AssetsPage() {
       metrics={metrics}
       columns={[
         { key: "assetCode", label: "Asset Code" },
-        { key: "deviceId", label: "Device ID" },
         { key: "serialNumber", label: "S/N No" },
-        { key: "assetName", label: "Asset Name" },
-        { key: "type", label: "Type" },
-        { key: "status", label: "Asset Status" },
-        { key: "location", label: "Location" },
+        { key: "assetName", label: "Assets Name" },
+        { key: "invoiceNo", label: "Invoice Number" },
+        { key: "invoiceDate", label: "Invoice Date" },
+        { key: "vendor", label: "Vendor" },
+        { key: "quantity", label: "Qty" },
+        { key: "receiveBy", label: "Received By" },
+        { key: "amount", label: "Amount" },
+        { key: "receivedDate", label: "Receive Date" },
+        { key: "type", label: "Assets Modal" },
+        { key: "status", label: "Status" },
+        // { key: "location", label: "Location" },
       ]}
       rows={rows}
       emptyState={{
@@ -367,10 +417,10 @@ export default function AssetsPage() {
           >
             <div className="asset-admin-modal-header">
               <div>
-                <p className="asset-admin-modal-kicker">{editingIndex === null ? "New Asset" : "Edit Asset"}</p>
-                <h3 id="asset-admin-modal-title">{editingIndex === null ? "Add Asset" : "Edit Asset"}</h3>
+                <p className="asset-admin-modal-kicker">{editingIndex === null ? "New Inward" : "Edit Inward"}</p>
+                <h3 id="asset-admin-modal-title">{editingIndex === null ? "Add Inward" : "Edit Inward"}</h3>
               </div>
-              <button type="button" className="asset-admin-modal-close" onClick={closeModal} aria-label="Close add asset popup">
+              <button type="button" className="asset-admin-modal-close" onClick={closeModal} aria-label="Close add inward popup">
                 x
               </button>
             </div>
@@ -378,15 +428,73 @@ export default function AssetsPage() {
             <form className="asset-admin-form" onSubmit={handleSubmit}>
               <div className="asset-admin-form-grid">
                 <label className="asset-admin-field">
-                  <span>Device ID</span>
+                  <span>Receive Date *</span>
                   <input
-                    name="deviceId"
-                    type="text"
-                    value={formData.deviceId}
+                    name="receivedDate"
+                    type="date"
+                    value={formData.receivedDate}
                     onChange={handleInputChange}
-                    placeholder="Enter device ID"
                   />
-                  <small>Enter device ID or serial number.</small>
+                </label>
+
+                <label className="asset-admin-field">
+                  <span>Invoice Number</span>
+                  <input
+                    name="invoiceNo"
+                    type="text"
+                    value={formData.invoiceNo}
+                    onChange={handleInputChange}
+                    placeholder="Enter invoice number"
+                  />
+                </label>
+
+                <label className="asset-admin-field">
+                  <span>Invoice Date</span>
+                  <input
+                    name="invoiceDate"
+                    type="date"
+                    value={formData.invoiceDate}
+                    onChange={handleInputChange}
+                  />
+                </label>
+
+                <label className="asset-admin-field">
+                  <span>Vendor *</span>
+                  <input
+                    name="vendor"
+                    type="text"
+                    value={formData.vendor}
+                    onChange={handleInputChange}
+                    placeholder="Enter vendor name"
+                  />
+                </label>
+
+                <label className="asset-admin-field">
+                  <span>Assets Name *</span>
+                  <input
+                    name="assetName"
+                    type="text"
+                    value={formData.assetName}
+                    onChange={handleInputChange}
+                    placeholder="Enter assets name"
+                  />
+                </label>
+
+                <label className="asset-admin-field">
+                  <span>Assets Modal</span>
+                  <input
+                    name="type"
+                    type="text"
+                    list="asset-type-options"
+                    value={formData.type}
+                    onChange={handleInputChange}
+                    placeholder="Enter assets modal"
+                  />
+                  <datalist id="asset-type-options">
+                    {typeOptions.map((option) => (
+                      <option key={option} value={option} />
+                    ))}
+                  </datalist>
                 </label>
 
                 <label className="asset-admin-field">
@@ -398,59 +506,51 @@ export default function AssetsPage() {
                     onChange={handleInputChange}
                     placeholder="Enter serial number"
                   />
-                  <small>At least one identifier is required.</small>
                 </label>
 
                 <label className="asset-admin-field">
-                  <span>Asset Name</span>
+                  <span>Qty *</span>
                   <input
-                    name="assetName"
-                    type="text"
-                    value={formData.assetName}
+                    name="quantity"
+                    type="number"
+                    min="0"
+                    step="1"
+                    value={formData.quantity}
                     onChange={handleInputChange}
-                    placeholder="Enter asset name"
+                    placeholder="Enter quantity"
                   />
                 </label>
 
                 <label className="asset-admin-field">
-                  <span>Type</span>
+                  <span>Amount</span>
                   <input
-                    name="type"
-                    type="text"
-                    list="asset-type-options"
-                    value={formData.type}
+                    name="amount"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={formData.amount}
                     onChange={handleInputChange}
-                    placeholder="Enter or select type"
+                    placeholder="Enter amount"
                   />
-                  <datalist id="asset-type-options">
-                    {typeOptions.map((option) => (
-                      <option key={option} value={option} />
-                    ))}
-                  </datalist>
                 </label>
 
                 <label className="asset-admin-field">
-                  <span>Status</span>
+                  <span>Received By *</span>
+                  <input
+                    name="receiveBy"
+                    type="text"
+                    value={formData.receiveBy}
+                    onChange={handleInputChange}
+                    placeholder="Enter receiver name"
+                  />
+                </label>
+
+                <label className="asset-admin-field">
+                  <span>Status *</span>
                   <select name="status" value={formData.status} onChange={handleInputChange}>
                     {statusOptions.map((option) => (
                       <option key={option} value={option}>
                         {option}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-
-                <label className="asset-admin-field">
-                  <span>Location ID</span>
-                  <select
-                    name="locationId"
-                    value={formData.locationId}
-                    onChange={handleInputChange}
-                  >
-                    <option value="">Select location</option>
-                    {locationOptions.map((location) => (
-                      <option key={location.id} value={String(location.id)}>
-                        {location.locationName} ({location.locationCode})
                       </option>
                     ))}
                   </select>
@@ -464,7 +564,7 @@ export default function AssetsPage() {
                   Cancel
                 </button>
                 <button type="submit" className="asset-admin-primary-btn" disabled={isSubmitDisabled || isSaving}>
-                  {isSaving ? "Saving..." : editingIndex === null ? "Save Asset" : "Update Asset"}
+                  {isSaving ? "Saving..." : editingIndex === null ? "Save Inward" : "Update Inward"}
                 </button>
               </div>
             </form>

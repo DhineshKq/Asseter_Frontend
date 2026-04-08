@@ -2,12 +2,15 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import AdminModulePage from "../../components/asset-admin/admin-module-page";
 import useAxiosPrivate from "../../services/hooks/useaxios-private";
 import { MappingRecord } from "../../data/asset-admin-data";
+import * as XLSX from "xlsx";
+import downloadIcon from "../../assets/icons/download.png";
 
 interface AssetOption {
   id: number;
   assetName: string;
   deviceId: string;
   serialNumber: string;
+  availableQuantity: string;
 }
 
 interface EmployeeOption {
@@ -27,9 +30,15 @@ interface AssetMappingRow extends MappingRecord {
   assetId: number | null;
   userId: number | null;
   locationId: number | null;
+  assignedQuantity: string;
 }
 
-const emptyFormState: MappingRecord = {
+interface MappingFormState extends MappingRecord {
+  availableQuantity: string;
+  assignedQuantity: string;
+}
+
+const emptyFormState: MappingFormState = {
   assetName: "",
   deviceId: "",
   serialNumber: "",
@@ -38,6 +47,8 @@ const emptyFormState: MappingRecord = {
   department: "",
   location: "",
   assignedOn: "",
+  availableQuantity: "",
+  assignedQuantity: "",
 };
 
 export default function AssetMappingPage() {
@@ -45,7 +56,7 @@ export default function AssetMappingPage() {
   const [rows, setRows] = useState<AssetMappingRow[]>([]);
   const [isMapModalOpen, setIsMapModalOpen] = useState(false);
   const [editingMappingId, setEditingMappingId] = useState<number | null>(null);
-  const [formData, setFormData] = useState<MappingRecord>(emptyFormState);
+  const [formData, setFormData] = useState<MappingFormState>(emptyFormState);
   const [assetOptions, setAssetOptions] = useState<AssetOption[]>([]);
   const [userOptions, setUserOptions] = useState<EmployeeOption[]>([]);
   const [locationOptions, setLocationOptions] = useState<LocationOption[]>([]);
@@ -67,6 +78,24 @@ export default function AssetMappingPage() {
       { label: "Departments", value: new Set(rows.map((item) => item.department).filter(Boolean)).size, helper: "Teams with mappings" },
       { label: "Latest Mapping", value: latestMapping || "-", helper: "Most recent assignment date" },
     ];
+  }, [rows]);
+
+  const handleDownloadReport = useCallback(() => {
+    const exportRows = rows.map((row) => ({
+      assetName: row.assetName,
+      serialNumber: row.serialNumber,
+      employeeId: row.employeeId,
+      assignedTo: row.assignedTo,
+      department: row.department,
+      location: row.location,
+      assignedQuantity: row.assignedQuantity,
+      assignedOn: row.assignedOn,
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(exportRows);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Asset Mapping");
+    XLSX.writeFile(workbook, "asset-mapping-report.xlsx");
   }, [rows]);
 
   const resetForm = useCallback(() => {
@@ -101,6 +130,17 @@ export default function AssetMappingPage() {
     }
 
     return parsedDate.toISOString().slice(0, 10);
+  }, []);
+
+  const getAvailableQuantity = useCallback((asset: any) => {
+    const totalQuantity = Number(asset?.quantity ?? 0);
+    const assignedItems = Number(asset?.Assigned_items ?? asset?.assignedItems ?? 0);
+
+    if (!Number.isFinite(totalQuantity)) {
+      return "";
+    }
+
+    return String(Math.max(totalQuantity - (Number.isFinite(assignedItems) ? assignedItems : 0), 0));
   }, []);
 
   const mapMappingRecord = useCallback(
@@ -181,6 +221,12 @@ export default function AssetMappingPage() {
           mapping?.mappingDate ??
           mapping?.createdAt
         ),
+        assignedQuantity:
+          mapping?.assignedQuantity != null
+            ? String(mapping.assignedQuantity)
+            : mapping?.assigned_items != null
+              ? String(mapping.assigned_items)
+              : "",
       };
     },
     [normalizeDate]
@@ -237,6 +283,7 @@ export default function AssetMappingPage() {
               assetName: asset.assetName ?? "",
               deviceId: asset.deviceId ?? "",
               serialNumber: asset.serialNumber ?? "",
+              availableQuantity: getAvailableQuantity(asset),
             },
           ])
       );
@@ -281,7 +328,7 @@ export default function AssetMappingPage() {
     } finally {
       setIsLoadingMappings(false);
     }
-  }, [axiosPrivate, mapMappingRecord]);
+  }, [axiosPrivate, getAvailableQuantity, mapMappingRecord]);
 
   const fetchMappingOptions = useCallback(async () => {
     setIsLoadingOptions(true);
@@ -316,6 +363,7 @@ export default function AssetMappingPage() {
           assetName: asset.assetName ?? "",
           deviceId: asset.deviceId ?? "",
           serialNumber: asset.serialNumber ?? "",
+          availableQuantity: getAvailableQuantity(asset),
         }))
       );
       setLocationOptions(
@@ -343,12 +391,27 @@ export default function AssetMappingPage() {
     } finally {
       setIsLoadingOptions(false);
     }
-  }, [axiosPrivate]);
+  }, [axiosPrivate, getAvailableQuantity]);
 
   useEffect(() => {
     fetchMappings();
     fetchMappingOptions();
   }, [fetchMappingOptions, fetchMappings]);
+
+  useEffect(() => {
+    if (!isMapModalOpen) {
+      return undefined;
+    }
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        closeModal();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [closeModal, isMapModalOpen]);
 
   const openAddModal = useCallback(() => {
     if (isSaving) {
@@ -375,10 +438,12 @@ export default function AssetMappingPage() {
       department: row.department,
       location: row.location,
       assignedOn: row.assignedOn,
+      availableQuantity: assetOptions.find((item) => item.assetName === row.assetName)?.availableQuantity ?? "",
+      assignedQuantity: row.assignedQuantity,
     });
     setSubmitError("");
     setIsMapModalOpen(true);
-  }, [isSaving]);
+  }, [assetOptions, isSaving]);
 
   const handleInputChange = (
     event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -393,6 +458,7 @@ export default function AssetMappingPage() {
         assetName: value,
         deviceId: selectedAsset?.deviceId ?? "",
         serialNumber: selectedAsset?.serialNumber ?? "",
+        availableQuantity: selectedAsset?.availableQuantity ?? "",
       }));
       return;
     }
@@ -420,36 +486,57 @@ export default function AssetMappingPage() {
     const selectedAsset = assetOptions.find((item) => item.assetName === formData.assetName);
     const selectedUser = userOptions.find((item) => item.name === formData.assignedTo);
     const selectedLocation = locationOptions.find((item) => item.locationName === formData.location);
-    const hasAssetIdentifier =
-      formData.deviceId.trim() !== "" || formData.serialNumber.trim() !== "";
+    const assignedQuantity = Number(formData.assignedQuantity);
+    const assignedDateIso = formData.assignedOn ? new Date(`${formData.assignedOn}T00:00:00`).toISOString() : "";
 
     if (!selectedAsset?.id || !selectedUser?.id || !selectedLocation?.id) {
       setSubmitError("Select a valid asset, responsible user, and location before saving the mapping.");
       return;
     }
 
-    if (!hasAssetIdentifier) {
-      setSubmitError("The selected asset must have either a Device ID or a Serial Number before saving the mapping.");
+    if (formData.assignedQuantity.trim() === "") {
+      setSubmitError("Enter the assigned quantity before saving the mapping.");
       return;
     }
+
+    const availableQuantity = Number(selectedAsset.availableQuantity);
+
+    if (!Number.isFinite(assignedQuantity) || assignedQuantity <= 0) {
+      setSubmitError("Assigned quantity must be greater than 0.");
+      return;
+    }
+
+    if (assignedDateIso === "" || Number.isNaN(new Date(assignedDateIso).getTime())) {
+      setSubmitError("Enter a valid assigned date before saving the mapping.");
+      return;
+    }
+
+    // if (Number.isFinite(availableQuantity) && Number.isFinite(assignedQuantity) && assignedQuantity > availableQuantity) {
+    //   setSubmitError("Assigned quantity cannot be greater than available quantity.");
+    //   return;
+    // }
 
     setIsSaving(true);
     setSubmitError("");
 
     try {
       const payload = {
-        ...(editingMappingId ? { id: editingMappingId, mappingId: editingMappingId } : {}),
         assetId: selectedAsset.id,
         locationId: selectedLocation.id,
         userId: selectedUser.id,
-        assignedDate: formData.assignedOn,
+        assignedQuantity,
+        assignedDate: assignedDateIso,
+        remarks: "Updated allocation",
       };
 
-      // axios baseURL already includes `/v1`, so this hits `POST /v1/assets/mappings`
-      // for both create and edit flows. When editing, we also pass the mapping id.
-      await axiosPrivate.post("/assets/mappings", payload);
+      if (editingMappingId) {
+        await axiosPrivate.put(`/assets/mappings/${editingMappingId}`, payload);
+        
+      } else {
+        await axiosPrivate.post("/assets/mappings", payload);
+      }
 
-      await fetchMappings();
+      await Promise.all([fetchMappings(), fetchMappingOptions()]);
       setIsMapModalOpen(false);
       setEditingMappingId(null);
       resetForm();
@@ -464,24 +551,28 @@ export default function AssetMappingPage() {
 
   const isSubmitDisabled =
     formData.assetName.trim() === "" ||
-    (formData.deviceId.trim() === "" && formData.serialNumber.trim() === "") ||
     formData.assignedTo.trim() === "" ||
     formData.employeeId.trim() === "" ||
     formData.department.trim() === "" ||
     formData.location.trim() === "" ||
-    formData.assignedOn.trim() === "";
+    formData.assignedOn.trim() === "" ||
+    formData.assignedQuantity.trim() === "";
 
   return (
     <AdminModulePage
       title="Asset Mapping"
       subtitle="Track which employee or team is responsible for each asset. This module gives the admin a single place to review ownership."
       actionLabel="Map Asset"
+      headerActions={
+        <button type="button" className="asset-admin-secondary-btn" onClick={handleDownloadReport} aria-label="Download asset mapping report" title="Download Report">
+          <img src={downloadIcon} alt="Download" style={{ width: "16px", height: "16px" }} />
+        </button>
+      }
       onActionClick={openAddModal}
       onEditRow={(row) => openEditModal(row as AssetMappingRow)}
       metrics={metrics}
       columns={[
         { key: "assetName", label: "Asset Name" },
-        { key: "deviceId", label: "Device ID" },
         { key: "serialNumber", label: "S/N No" },
         { key: "employeeId", label: "Employee ID" },
         { key: "assignedTo", label: "Responsible User" },
@@ -537,26 +628,39 @@ export default function AssetMappingPage() {
                 </label>
 
                 <label className="asset-admin-field">
-                  <span>Device ID</span>
-                  <input
-                    name="deviceId"
-                    type="text"
-                    value={formData.deviceId}
-                    readOnly
-                    disabled
-                    placeholder="Auto-filled from asset"
-                  />
-                </label>
-
-                <label className="asset-admin-field">
-                  <span>Serial Number (Optional)</span>
+                  <span>Serial Number</span>
                   <input
                     name="serialNumber"
                     type="text"
                     value={formData.serialNumber}
                     readOnly
                     disabled
-                    placeholder="Auto-filled when available"
+                    placeholder="Auto-filled if available"
+                  />
+                </label>
+
+                <label className="asset-admin-field">
+                  <span>Available Quantity</span>
+                  <input
+                    name="availableQuantity"
+                    type="text"
+                    value={formData.availableQuantity}
+                    readOnly
+                    disabled
+                    placeholder="Auto-filled from selected asset"
+                  />
+                </label>
+
+                <label className="asset-admin-field">
+                  <span>Assigned Quantity</span>
+                  <input
+                    name="assignedQuantity"
+                    type="number"
+                    min="1"
+                    step="1"
+                    value={formData.assignedQuantity}
+                    onChange={handleInputChange}
+                    placeholder="Enter assigned quantity"
                   />
                 </label>
 

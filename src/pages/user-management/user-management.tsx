@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import AdminModulePage from "../../components/asset-admin/admin-module-page";
 import useAxiosPrivate from "../../services/hooks/useaxios-private";
 import * as XLSX from "xlsx";
+import downloadIcon from "../../assets/icons/download.png";
 
 interface EmployeeRecord {
   id: number | null;
@@ -57,6 +58,7 @@ export default function UserManagementPage() {
   const [isFetchingEmployee, setIsFetchingEmployee] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isDeletingId, setIsDeletingId] = useState<number | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<EmployeeRecord | null>(null);
   const [formData, setFormData] = useState<EmployeeFormState>(emptyFormState);
   const [isBulkUploadOpen, setIsBulkUploadOpen] = useState(false);
   const [isBulkUploading, setIsBulkUploading] = useState(false);
@@ -134,6 +136,23 @@ export default function UserManagementPage() {
     [rows]
   );
 
+  const handleDownloadReport = useCallback(() => {
+    const exportRows = rows.map((row) => ({
+      employeeId: row.employeeId,
+      name: row.name,
+      email: row.email,
+      phone: row.phone,
+      role: row.role,
+      team: row.team,
+      status: row.status,
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(exportRows);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Employees");
+    XLSX.writeFile(workbook, "employee-report.xlsx");
+  }, [rows]);
+
   const resetForm = useCallback(() => {
     setFormData(emptyFormState);
     setValidationError("");
@@ -183,6 +202,14 @@ export default function UserManagementPage() {
     setSelectedBulkFileName("");
   }, [isBulkUploading]);
 
+  const closeDeleteModal = useCallback(() => {
+    if (isDeletingId !== null) {
+      return;
+    }
+
+    setDeleteTarget(null);
+  }, [isDeletingId]);
+
   useEffect(() => {
     fetchEmployees();
   }, [fetchEmployees]);
@@ -201,6 +228,21 @@ export default function UserManagementPage() {
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [closeModal, isModalOpen]);
+
+  useEffect(() => {
+    if (!deleteTarget) {
+      return undefined;
+    }
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        closeDeleteModal();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [closeDeleteModal, deleteTarget]);
 
   useEffect(() => {
     if (!isBulkUploadOpen) {
@@ -343,21 +385,26 @@ export default function UserManagementPage() {
     }
   };
 
-  const handleDeleteUser = async (row: EmployeeRecord) => {
+  const openDeleteModal = (row: EmployeeRecord) => {
     if (isSaving || isFetchingEmployee || !row.id) {
       return;
     }
 
-    if (!window.confirm(`Delete ${row.name || "this user"} from the users module?`)) {
+    setDeleteTarget(row);
+  };
+
+  const handleDeleteUser = async () => {
+    if (isSaving || isFetchingEmployee || !deleteTarget?.id) {
       return;
     }
 
-    setIsDeletingId(row.id);
+    setIsDeletingId(deleteTarget.id);
 
     try {
       // axios baseURL already includes `/v1`, so this hits `DELETE /v1/employees/:id`.
-      await axiosPrivate.delete(`/employees/${row.id}`);
+      await axiosPrivate.delete(`/employees/${deleteTarget.id}`);
       await fetchEmployees();
+      closeDeleteModal();
     } catch (error: any) {
       setValidationError(
         error?.response?.data?.message || "Failed to delete employee. Check the API and try again."
@@ -572,16 +619,21 @@ export default function UserManagementPage() {
       actionLabel="Add Employee"
       onActionClick={openAddModal}
       headerActions={
-        <button type="button" className="asset-admin-secondary-btn" onClick={openBulkUploadModal}>
-          Bulk Upload
-        </button>
+        <>
+          <button type="button" className="asset-admin-secondary-btn" onClick={handleDownloadReport} aria-label="Download employee report" title="Download Report">
+            <img src={downloadIcon} alt="Download" style={{ width: "16px", height: "16px" }} />
+          </button>
+          {/* <button type="button" className="asset-admin-secondary-btn" onClick={openBulkUploadModal}>
+            Bulk Upload
+          </button> */}
+        </>
       }
       onEditRow={(row) => openEditModal(row as EmployeeRecord)}
       renderRowActions={(row) => (
         <button
           type="button"
           className="asset-admin-danger-btn"
-          onClick={() => handleDeleteUser(row as EmployeeRecord)}
+          onClick={() => openDeleteModal(row as EmployeeRecord)}
           disabled={isDeletingId === (row as EmployeeRecord).id || !(row as EmployeeRecord).id}
           aria-disabled={isDeletingId === (row as EmployeeRecord).id || !(row as EmployeeRecord).id}
           title={!(row as EmployeeRecord).id ? "Cannot delete an employee without an ID" : "Delete employee"}
@@ -833,6 +885,42 @@ export default function UserManagementPage() {
               <div className="asset-admin-form-actions">
                 <button type="button" className="asset-admin-secondary-btn" onClick={closeBulkUploadModal} disabled={isBulkUploading}>
                   Close
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      {deleteTarget && (
+        <div className="asset-admin-modal-backdrop" onClick={closeDeleteModal}>
+          <div
+            className="asset-admin-modal"
+            onClick={(event) => event.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="employee-delete-modal-title"
+          >
+            <div className="asset-admin-modal-header">
+              <div>
+                <p className="asset-admin-modal-kicker">Confirm Delete</p>
+                <h3 id="employee-delete-modal-title">Delete Employee</h3>
+              </div>
+              <button type="button" className="asset-admin-modal-close" onClick={closeDeleteModal} aria-label="Close delete employee popup">
+                x
+              </button>
+            </div>
+
+            <div className="asset-admin-form">
+              <p>
+                Delete <strong>{deleteTarget.name || deleteTarget.employeeId || "this employee"}</strong>? This action cannot be undone.
+              </p>
+
+              <div className="asset-admin-form-actions">
+                <button type="button" className="asset-admin-secondary-btn" onClick={closeDeleteModal} disabled={isDeletingId !== null}>
+                  Cancel
+                </button>
+                <button type="button" className="asset-admin-danger-btn" onClick={handleDeleteUser} disabled={isDeletingId !== null}>
+                  {isDeletingId !== null ? "Deleting..." : "Delete"}
                 </button>
               </div>
             </div>

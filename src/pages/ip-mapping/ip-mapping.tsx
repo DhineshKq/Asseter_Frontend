@@ -121,6 +121,7 @@ export default function IpMappingPage() {
   const [employeeQuery, setEmployeeQuery] = useState("");
   const [isEmployeeDropdownOpen, setIsEmployeeDropdownOpen] = useState(false);
   const [deviceNameInput, setDeviceNameInput] = useState("");
+  const [clearTarget, setClearTarget] = useState<IpMappingRecord | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [submitError, setSubmitError] = useState("");
   const [actionError, setActionError] = useState("");
@@ -530,6 +531,37 @@ export default function IpMappingPage() {
     }
   };
 
+  const openClearModal = (row: IpMappingRecord) => {
+    setClearTarget(row);
+    setActionError("");
+  };
+
+  const closeClearModal = () => {
+    setClearTarget(null);
+  };
+
+  useEffect(() => {
+    if (!selectedIp && !clearTarget) {
+      return undefined;
+    }
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        if (clearTarget) {
+          closeClearModal();
+          return;
+        }
+
+        if (selectedIp) {
+          closeAssignModal();
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [clearTarget, selectedIp]);
+
   return (
     <div className="ip-mapping-page">
       <section className="ip-mapping-hero">
@@ -677,7 +709,7 @@ export default function IpMappingPage() {
                               <button
                                 type="button"
                                 className="ip-mapping-clear-btn"
-                                onClick={() => handleUnassign(row.ipAddress)}
+                                onClick={() => openClearModal(row)}
                               >
                                 Clear
                               </button>
@@ -890,6 +922,56 @@ export default function IpMappingPage() {
                 >
                   {isSaving ? "Saving..." : "Save Mapping"}
                 </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      {clearTarget && (
+        <div className="ip-mapping-modal-backdrop" onClick={closeClearModal}>
+          <div
+            className="ip-mapping-modal"
+            onClick={(event) => event.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="ip-mapping-clear-modal-title"
+          >
+            <div className="ip-mapping-modal-head">
+              <div className="ip-mapping-modal-title-block">
+                <p>Confirm Clear</p>
+                <h3 id="ip-mapping-clear-modal-title">{clearTarget.ipAddress}</h3>
+                <span>Remove the current IP assignment for this address.</span>
+              </div>
+              <button type="button" onClick={closeClearModal} aria-label="Close IP clear confirmation modal">
+                ×
+              </button>
+            </div>
+
+            <div className="ip-mapping-modal-body">
+              <div className="ip-mapping-form-card">
+                <div className="ip-mapping-form-card-head">
+                  <strong>Clear assignment</strong>
+                  <p>
+                    Clear <strong>{clearTarget.ipAddress}</strong> from{" "}
+                    <strong>{clearTarget.assignedTo || "the current assignee"}</strong>? This action can be reassigned later.
+                  </p>
+                </div>
+
+                <div className="asset-admin-form-actions">
+                  <button type="button" className="asset-admin-secondary-btn" onClick={closeClearModal}>
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    className="asset-admin-danger-btn"
+                    onClick={async () => {
+                      await handleUnassign(clearTarget.ipAddress);
+                      closeClearModal();
+                    }}
+                  >
+                    Clear
+                  </button>
+                </div>
               </div>
             </div>
           </div>

@@ -37,7 +37,7 @@ export default function Header({ filterClick, filterIconStatus }: Props) {
 
     const currentPageTitle = {
         "/dashboard": "Dashboard",
-        "/assets": "Assets",
+        "/assets": "Inward",
         "/asset-locations": "Asset Locations",
         "/asset-mapping": "Asset Mapping",
         "/ip-mapping": "IP Mapping",

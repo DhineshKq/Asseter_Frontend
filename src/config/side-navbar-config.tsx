@@ -51,7 +51,7 @@ export default function SideBar() {
   useEffect(() => {
     const pathMap: Record<string, string> = {
       "/dashboard": "Dashboard",
-      "/assets": "Assets",
+      "/assets": "Inward",
       "/asset-locations": "Asset Locations",
       "/asset-mapping": "Asset Mapping",
       "/ip-mapping": "IP Mapping",
@@ -62,28 +62,28 @@ export default function SideBar() {
     setSelectedTitle(pathMap[location.pathname] || "");
   }, [location.pathname]);
 
-  async function userData() {
-    try {
-      const res = await axiosPrivate.get('/userData');
-      if (res.status === 200) {
-        const { name, userName, isAdmin } = res.data.data;
+  // async function userData() {
+  //   try {
+  //     const res = await axiosPrivate.get('/userData');
+  //     if (res.status === 200) {
+  //       const { name, userName, isAdmin } = res.data.data;
 
-        setCurrentLoggedUserData((prevData: any) => ({
-          ...prevData,
-          isAdmin: isAdmin ?? prevData.isAdmin,
-          userName: userName ?? prevData.userName,
-          name: name ?? prevData.name,
-        }));
-        setIsAdmin(isAdmin);
-      }
-    } catch (error: any) {
-      console.error("Error fetching user data:", error);
-    }
-  }
+  //       setCurrentLoggedUserData((prevData: any) => ({
+  //         ...prevData,
+  //         isAdmin: isAdmin ?? prevData.isAdmin,
+  //         userName: userName ?? prevData.userName,
+  //         name: name ?? prevData.name,
+  //       }));
+  //       setIsAdmin(isAdmin);
+  //     }
+  //   } catch (error: any) {
+  //     console.error("Error fetching user data:", error);
+  //   }
+  // }
 
-  useEffect(() => {
-    userData()
-  }, []);
+  // useEffect(() => {
+  //   userData()
+  // }, []);
 
   const navConfirmation = (select: string, navTo: string) => {
     if (isFormModified && location.pathname !== navTo) {
@@ -97,7 +97,7 @@ export default function SideBar() {
 
   const menuItems: SidebarItemProps[] = [
     { title: "Dashboard", route: "/dashboard", caption: "Overview and health", selectedTitle, navConfirmation },
-    { title: "Assets", route: "/assets", caption: "Inventory records", selectedTitle, navConfirmation },
+    { title: "Inward", route: "/assets", caption: "Inventory records", selectedTitle, navConfirmation },
     { title: "Asset Locations", route: "/asset-locations", caption: "Teams and places", selectedTitle, navConfirmation },
     { title: "Asset Mapping", route: "/asset-mapping", caption: "Ownership mapping", selectedTitle, navConfirmation },
     { title: "IP Mapping", route: "/ip-mapping", caption: "Subnet ownership", selectedTitle, navConfirmation },
