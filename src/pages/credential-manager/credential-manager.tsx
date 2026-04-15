@@ -179,6 +179,11 @@ export default function CredentialManagerPage() {
     });
   }, [categoryFilter, rows, searchTerm]);
 
+  const clearFilters = useCallback(() => {
+    setSearchTerm("");
+    setCategoryFilter("All Categories");
+  }, []);
+
   const handleCopy = useCallback(async (value: string, label: string) => {
     if (!value.trim()) return;
 
@@ -402,20 +407,29 @@ export default function CredentialManagerPage() {
 
   const tableControls = (
     <>
-      <input
-        type="search"
-        value={searchTerm}
-        onChange={(event) => setSearchTerm(event.target.value)}
-        placeholder="Search name, source, username, or notes"
-      />
-      <select value={categoryFilter} onChange={(event) => setCategoryFilter(event.target.value)}>
-        <option>All Categories</option>
-        {availableCategories.map((category) => (
-          <option key={category} value={category}>
-            {category}
-          </option>
-        ))}
-      </select>
+      <label className="asset-admin-control asset-admin-control-search">
+        <span>Search</span>
+        <input
+          type="search"
+          value={searchTerm}
+          onChange={(event) => setSearchTerm(event.target.value)}
+          placeholder="Search name, source, username, or notes"
+        />
+      </label>
+      <label className="asset-admin-control">
+        <span>Category</span>
+        <select value={categoryFilter} onChange={(event) => setCategoryFilter(event.target.value)}>
+          <option>All Categories</option>
+          {availableCategories.map((category) => (
+            <option key={category} value={category}>
+              {category}
+            </option>
+          ))}
+        </select>
+      </label>
+      <button type="button" className="asset-admin-secondary-btn asset-admin-filter-reset" onClick={clearFilters}>
+        Clear Filters
+      </button>
     </>
   );
 

@@ -1,4 +1,5 @@
 import React from "react";
+import { DEFAULT_TABLE_PAGE_SIZE, TablePagination, useTablePagination } from "../common-component/tables";
 import "../../styles/pages/asset-admin/asset-admin.scss";
 
 interface MetricItem {
@@ -48,7 +49,15 @@ export default function AdminModulePage<T extends object>({
   emptyState,
   children,
 }: AdminModulePageProps<T>) {
-  const displayCount = rows.length;
+  const {
+    currentPage,
+    endItem,
+    paginatedRows,
+    setCurrentPage,
+    startItem,
+    totalItems,
+  } = useTablePagination(rows, { pageSize: DEFAULT_TABLE_PAGE_SIZE, resetDeps: [rows] });
+  const displayCount = paginatedRows.length;
   const totalCount = totalRowCount ?? rows.length;
   const maxCellLength = 10;
 
@@ -130,10 +139,13 @@ export default function AdminModulePage<T extends object>({
           <div className="asset-admin-card-header">
             <div>
               <h3>{title} Records</h3>
-              <p>{displayCount} visible records from {totalCount} total entries in the current frontend prototype.</p>
+              <p>
+                Showing {startItem}-{endItem} of {totalItems} visible records from {totalCount} total entries in the current frontend prototype.
+              </p>
             </div>
             <div className="asset-admin-card-toolbar">
-              <span>{displayCount} items</span>
+              <span>{DEFAULT_TABLE_PAGE_SIZE} per page</span>
+              <span>{totalItems} items</span>
               <span>Live frontend preview</span>
             </div>
           </div>
@@ -152,31 +164,35 @@ export default function AdminModulePage<T extends object>({
                   </tr>
                 </thead>
                 <tbody>
-                  {rows.map((row, index) => (
-                    <tr key={`${String(row[columns[0].key])}-${index}`}>
-                      {columns.map((column) => (
-                        <td key={String(column.key)}>
-                          {formatCellValue(row[column.key])}
-                        </td>
-                      ))}
-                      {(onEditRow || renderRowActions) && (
-                        <td>
-                          <div className="asset-admin-row-actions">
-                            {onEditRow && (
-                              <button
-                                type="button"
-                                className="asset-admin-secondary-btn"
-                                onClick={() => onEditRow(row, index)}
-                              >
-                                Edit
-                              </button>
-                            )}
-                            {renderRowActions?.(row, index)}
-                          </div>
-                        </td>
-                      )}
-                    </tr>
-                  ))}
+                  {paginatedRows.map((row, index) => {
+                    const rowIndex = startItem > 0 ? startItem - 1 + index : index;
+
+                    return (
+                      <tr key={`${String(row[columns[0].key])}-${rowIndex}`}>
+                        {columns.map((column) => (
+                          <td key={String(column.key)}>
+                            {formatCellValue(row[column.key])}
+                          </td>
+                        ))}
+                        {(onEditRow || renderRowActions) && (
+                          <td>
+                            <div className="asset-admin-row-actions">
+                              {onEditRow && (
+                                <button
+                                  type="button"
+                                  className="asset-admin-secondary-btn"
+                                  onClick={() => onEditRow(row, rowIndex)}
+                                >
+                                  Edit
+                                </button>
+                              )}
+                              {renderRowActions?.(row, rowIndex)}
+                            </div>
+                          </td>
+                        )}
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             ) : (
@@ -186,6 +202,12 @@ export default function AdminModulePage<T extends object>({
               </div>
             )}
           </div>
+          <TablePagination
+            currentPage={currentPage}
+            pageSize={DEFAULT_TABLE_PAGE_SIZE}
+            totalItems={totalItems}
+            onPageChange={setCurrentPage}
+          />
         </div>
       </div>
       {children}

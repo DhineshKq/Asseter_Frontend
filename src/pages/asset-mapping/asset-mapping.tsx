@@ -1,5 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
+import Select, { StylesConfig } from "react-select";
 import AdminModulePage from "../../components/asset-admin/admin-module-page";
+import DeleteModal from "../../components/common-component/modals/delete-modal";
 import useAxiosPrivate from "../../services/hooks/useaxios-private";
 import { MappingRecord } from "../../data/asset-admin-data";
 import * as XLSX from "xlsx";
@@ -25,7 +27,7 @@ interface LocationOption {
   locationName: string;
 }
 
-interface AssetMappingRow extends MappingRecord {
+interface AssetMappingRow extends Omit<MappingRecord, "assignedQuantity"> {
   id: number | null;
   assetId: number | null;
   userId: number | null;
@@ -33,15 +35,15 @@ interface AssetMappingRow extends MappingRecord {
   assignedQuantity: string;
 }
 
-interface MappingFormState extends MappingRecord {
+interface MappingFormState extends Omit<MappingRecord, "id" | "assetCode" | "role" | "assignedQuantity" | "isActive" | "serialNumber"> {
   availableQuantity: string;
   assignedQuantity: string;
+  selectedSerialNumbers: string[];
 }
 
 const emptyFormState: MappingFormState = {
   assetName: "",
   deviceId: "",
-  serialNumber: "",
   employeeId: "",
   assignedTo: "",
   department: "",
@@ -49,6 +51,99 @@ const emptyFormState: MappingFormState = {
   assignedOn: "",
   availableQuantity: "",
   assignedQuantity: "",
+  selectedSerialNumbers: [],
+};
+
+type SerialOption = { value: string; label: string };
+
+const serialSelectStyles: StylesConfig<SerialOption, false> = {
+  control: (base, state) => ({
+    ...base,
+    minHeight: "46px",
+    borderRadius: "12px",
+    border: state.isFocused ? "1.5px solid #0f766e" : "1.5px solid #e2e8f0",
+    boxShadow: state.isFocused
+      ? "0 0 0 3px rgba(15, 118, 110, 0.14), 0 4px 12px rgba(15, 118, 110, 0.1)"
+      : "0 1px 4px rgba(15, 23, 42, 0.06)",
+    backgroundColor: state.isFocused ? "#f0fdf9" : "#ffffff",
+    cursor: "text",
+    transition: "all 0.2s ease",
+    "&:hover": {
+      borderColor: state.isFocused ? "#0f766e" : "#94a3b8",
+      boxShadow: state.isFocused
+        ? "0 0 0 3px rgba(15, 118, 110, 0.14), 0 4px 12px rgba(15, 118, 110, 0.1)"
+        : "0 2px 8px rgba(15, 23, 42, 0.08)",
+    },
+  }),
+  valueContainer: (base) => ({ ...base, padding: "0 12px", gap: "4px" }),
+  input: (base) => ({
+    ...base,
+    color: "#0f172a",
+    caretColor: "#0f766e",
+    margin: 0,
+    padding: 0,
+    fontSize: "0.9rem",
+  }),
+  singleValue: (base) => ({
+    ...base,
+    color: "#0f172a",
+    fontSize: "0.9rem",
+    fontWeight: 600,
+  }),
+  placeholder: (base) => ({
+    ...base,
+    color: "#b0bec5",
+    fontSize: "0.88rem",
+    fontStyle: "italic",
+  }),
+  indicatorSeparator: () => ({ display: "none" }),
+  dropdownIndicator: (base, state) => ({
+    ...base,
+    color: state.isFocused ? "#0f766e" : "#cbd5e1",
+    paddingRight: "10px",
+    transition: "color 0.2s ease, transform 0.25s ease",
+    transform: state.selectProps.menuIsOpen ? "rotate(180deg)" : "rotate(0deg)",
+    "&:hover": { color: "#0f766e" },
+  }),
+  clearIndicator: (base) => ({
+    ...base,
+    color: "#cbd5e1",
+    padding: "0 4px",
+    transition: "color 0.2s ease",
+    "&:hover": { color: "#ef4444" },
+  }),
+  menu: (base) => ({
+    ...base,
+    borderRadius: "16px",
+    border: "1px solid rgba(15, 118, 110, 0.14)",
+    boxShadow: "0 20px 48px rgba(15, 23, 42, 0.14), 0 4px 16px rgba(15, 118, 110, 0.08)",
+    overflow: "hidden",
+    marginTop: "6px",
+  }),
+  menuList: (base) => ({ ...base, padding: "8px" }),
+  option: (base, state) => ({
+    ...base,
+    borderRadius: "10px",
+    backgroundColor: state.isSelected
+      ? "#0f766e"
+      : state.isFocused
+        ? "rgba(15, 118, 110, 0.08)"
+        : "transparent",
+    color: state.isSelected ? "#ffffff" : "#0f172a",
+    fontSize: "0.88rem",
+    fontWeight: state.isSelected ? 600 : 400,
+    padding: "10px 14px",
+    cursor: "pointer",
+    "&:active": { backgroundColor: "rgba(15, 118, 110, 0.18)" },
+  }),
+  noOptionsMessage: (base) => ({
+    ...base,
+    color: "#94a3b8",
+    fontSize: "0.86rem",
+    padding: "14px 12px",
+    textAlign: "center" as const,
+  }),
+  menuPortal: (base) => ({ ...base, zIndex: 100000 }),
 };
 
 export default function AssetMappingPage() {
@@ -66,6 +161,8 @@ export default function AssetMappingPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [optionsError, setOptionsError] = useState("");
   const [submitError, setSubmitError] = useState("");
+  const [deletingMappingId, setDeletingMappingId] = useState<number | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const metrics = useMemo(() => {
     const latestMapping = rows.reduce<string>((latest, current) => {
@@ -94,7 +191,7 @@ export default function AssetMappingPage() {
 
     const worksheet = XLSX.utils.json_to_sheet(exportRows);
     const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Asset Mapping");
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Allocation");
     XLSX.writeFile(workbook, "asset-mapping-report.xlsx");
   }, [rows]);
 
@@ -170,6 +267,11 @@ export default function AssetMappingPage() {
         assetId,
         userId,
         locationId,
+        assetCode:
+          mapping?.asset?.assetCode ??
+          mapping?.assetDetails?.assetCode ??
+          mapping?.assetCode ??
+          "",
         assetName:
           mapping?.asset?.assetName ??
           mapping?.assetDetails?.assetName ??
@@ -202,6 +304,11 @@ export default function AssetMappingPage() {
           matchedUser?.name ??
           mapping?.assignedTo ??
           "",
+        role:
+          mapping?.employee?.role ??
+          mapping?.user?.role ??
+          mapping?.role ??
+          "",
         department:
           mapping?.employee?.team ??
           mapping?.user?.team ??
@@ -227,6 +334,7 @@ export default function AssetMappingPage() {
             : mapping?.assigned_items != null
               ? String(mapping.assigned_items)
               : "",
+        isActive: Boolean(mapping?.isActive ?? true),
       };
     },
     [normalizeDate]
@@ -398,6 +506,20 @@ export default function AssetMappingPage() {
     fetchMappingOptions();
   }, [fetchMappingOptions, fetchMappings]);
 
+  const handleDeleteConfirm = useCallback(async () => {
+    if (deletingMappingId === null) return;
+    setIsDeleting(true);
+    try {
+      await axiosPrivate.delete(`/mappings/${deletingMappingId}`);
+      setDeletingMappingId(null);
+      await fetchMappings();
+    } catch (error: any) {
+      console.error("Failed to delete mapping:", error);
+    } finally {
+      setIsDeleting(false);
+    }
+  }, [axiosPrivate, deletingMappingId, fetchMappings]);
+
   useEffect(() => {
     if (!isMapModalOpen) {
       return undefined;
@@ -429,10 +551,15 @@ export default function AssetMappingPage() {
     }
 
     setEditingMappingId(row.id);
+    const qty = parseInt(row.assignedQuantity, 10);
+    const count = Number.isFinite(qty) && qty > 0 ? qty : 0;
+    const existingSerials = row.serialNumber
+      ? row.serialNumber.split(",").map((s) => s.trim())
+      : [];
+    const selectedSerialNumbers = Array.from({ length: count }, (_, i) => existingSerials[i] ?? "");
     setFormData({
       assetName: row.assetName,
       deviceId: row.deviceId,
-      serialNumber: row.serialNumber,
       employeeId: row.employeeId,
       assignedTo: row.assignedTo,
       department: row.department,
@@ -440,6 +567,7 @@ export default function AssetMappingPage() {
       assignedOn: row.assignedOn,
       availableQuantity: assetOptions.find((item) => item.assetName === row.assetName)?.availableQuantity ?? "",
       assignedQuantity: row.assignedQuantity,
+      selectedSerialNumbers,
     });
     setSubmitError("");
     setIsMapModalOpen(true);
@@ -452,14 +580,41 @@ export default function AssetMappingPage() {
 
     if (name === "assetName") {
       const selectedAsset = assetOptions.find((item) => item.assetName === value);
+      const assetSerials = selectedAsset?.serialNumber
+        ? selectedAsset.serialNumber.split(",").map((s) => s.trim()).filter(Boolean)
+        : [];
 
-      setFormData((current) => ({
-        ...current,
-        assetName: value,
-        deviceId: selectedAsset?.deviceId ?? "",
-        serialNumber: selectedAsset?.serialNumber ?? "",
-        availableQuantity: selectedAsset?.availableQuantity ?? "",
-      }));
+      setFormData((current) => {
+        const qty = parseInt(current.assignedQuantity, 10);
+        const count = Number.isFinite(qty) && qty > 0 ? qty : 0;
+        return {
+          ...current,
+          assetName: value,
+          deviceId: selectedAsset?.deviceId ?? "",
+          availableQuantity: selectedAsset?.availableQuantity ?? "",
+          selectedSerialNumbers: assetSerials.length > 0
+            ? Array.from({ length: count }, (_, i) => current.selectedSerialNumbers[i] ?? "")
+            : [],
+        };
+      });
+      return;
+    }
+
+    if (name === "assignedQuantity") {
+      const qty = parseInt(value, 10);
+      const count = Number.isFinite(qty) && qty > 0 ? qty : 0;
+
+      setFormData((current) => {
+        const selectedAsset = assetOptions.find((a) => a.assetName === current.assetName);
+        const hasSerials = Boolean(selectedAsset?.serialNumber);
+        return {
+          ...current,
+          assignedQuantity: value,
+          selectedSerialNumbers: hasSerials
+            ? Array.from({ length: count }, (_, i) => current.selectedSerialNumbers[i] ?? "")
+            : [],
+        };
+      });
       return;
     }
 
@@ -479,6 +634,20 @@ export default function AssetMappingPage() {
       [name]: value,
     }));
   };
+
+  const handleSerialNumberSelect = (index: number, value: string) => {
+    setFormData((current) => {
+      const updated = [...current.selectedSerialNumbers];
+      updated[index] = value;
+      return { ...current, selectedSerialNumbers: updated };
+    });
+  };
+
+  const availableSerialNumbers = useMemo(() => {
+    const selectedAsset = assetOptions.find((a) => a.assetName === formData.assetName);
+    if (!selectedAsset?.serialNumber) return [];
+    return selectedAsset.serialNumber.split(",").map((s) => s.trim()).filter(Boolean);
+  }, [assetOptions, formData.assetName]);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -520,12 +689,14 @@ export default function AssetMappingPage() {
     setSubmitError("");
 
     try {
+      const nonEmptySerials = formData.selectedSerialNumbers.filter((s) => s.trim() !== "");
       const payload = {
         assetId: selectedAsset.id,
         locationId: selectedLocation.id,
         userId: selectedUser.id,
         assignedQuantity,
         assignedDate: assignedDateIso,
+        serialNumber: nonEmptySerials.join(", "),
         remarks: "Updated allocation",
       };
 
@@ -560,9 +731,9 @@ export default function AssetMappingPage() {
 
   return (
     <AdminModulePage
-      title="Asset Mapping"
+      title="Allocation"
       subtitle="Track which employee or team is responsible for each asset. This module gives the admin a single place to review ownership."
-      actionLabel="Map Asset"
+      actionLabel="Allocate"
       headerActions={
         <button type="button" className="asset-admin-secondary-btn" onClick={handleDownloadReport} aria-label="Download asset mapping report" title="Download Report">
           <img src={downloadIcon} alt="Download" style={{ width: "16px", height: "16px" }} />
@@ -570,6 +741,19 @@ export default function AssetMappingPage() {
       }
       onActionClick={openAddModal}
       onEditRow={(row) => openEditModal(row as AssetMappingRow)}
+      renderRowActions={(row) => {
+        const mappingRow = row as AssetMappingRow;
+        return (
+          <button
+            type="button"
+            className="asset-admin-danger-btn"
+            disabled={isDeleting && deletingMappingId === mappingRow.id}
+            onClick={() => mappingRow.id !== null && setDeletingMappingId(mappingRow.id)}
+          >
+            {isDeleting && deletingMappingId === mappingRow.id ? "Deleting..." : "Delete"}
+          </button>
+        );
+      }}
       metrics={metrics}
       columns={[
         { key: "assetName", label: "Asset Name" },
@@ -594,6 +778,13 @@ export default function AssetMappingPage() {
             : "Create a new asset mapping to populate this module.",
       }}
     >
+      {deletingMappingId !== null && (
+        <DeleteModal
+          modelType="grid-delete"
+          clearValue={() => setDeletingMappingId(null)}
+          getDelete={handleDeleteConfirm}
+        />
+      )}
       {isMapModalOpen && (
         <div className="asset-admin-modal-backdrop" onClick={closeModal}>
           <div
@@ -605,8 +796,8 @@ export default function AssetMappingPage() {
           >
             <div className="asset-admin-modal-header">
               <div>
-                <p className="asset-admin-modal-kicker">{editingMappingId ? "Edit Mapping" : "New Mapping"}</p>
-                <h3 id="map-asset-modal-title">{editingMappingId ? "Edit Asset Mapping" : "Map Asset"}</h3>
+                <p className="asset-admin-modal-kicker">{editingMappingId ? "Edit Mapping" : "New Allocatation"}</p>
+                <h3 id="map-asset-modal-title">{editingMappingId ? "Edit Allocation" : "Allocation"}</h3>
               </div>
               <button type="button" className="asset-admin-modal-close" onClick={closeModal} aria-label="Close map asset popup">
                 x
@@ -625,18 +816,6 @@ export default function AssetMappingPage() {
                       </option>
                     ))}
                   </select>
-                </label>
-
-                <label className="asset-admin-field">
-                  <span>Serial Number</span>
-                  <input
-                    name="serialNumber"
-                    type="text"
-                    value={formData.serialNumber}
-                    readOnly
-                    disabled
-                    placeholder="Auto-filled if available"
-                  />
                 </label>
 
                 <label className="asset-admin-field">
@@ -710,6 +889,32 @@ export default function AssetMappingPage() {
                   />
                 </label>
               </div>
+
+              {availableSerialNumbers.length > 0 && formData.selectedSerialNumbers.length > 0 && (
+                <div className="asset-admin-serial-section">
+                  <p className="asset-admin-serial-label">
+                    Serial Numbers <span className="asset-admin-serial-optional">(optional — select one per unit)</span>
+                  </p>
+                  <div className="asset-admin-serial-grid">
+                    {formData.selectedSerialNumbers.map((sn, index) => (
+                      <label key={index} className="asset-admin-field">
+                        <span>Unit #{index + 1}</span>
+                        <Select<SerialOption, false>
+                          value={sn ? { value: sn, label: sn } : null}
+                          onChange={(opt) => handleSerialNumberSelect(index, opt?.value ?? "")}
+                          options={availableSerialNumbers.map((s) => ({ value: s, label: s }))}
+                          placeholder="Search serial number..."
+                          isClearable
+                          isSearchable
+                          menuPortalTarget={document.body}
+                          styles={serialSelectStyles}
+                          noOptionsMessage={() => "No serial numbers found"}
+                        />
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {(optionsError || submitError) && <p className="asset-admin-form-error">{submitError || optionsError}</p>}
 

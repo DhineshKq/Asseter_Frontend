@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import useAxiosPrivate from "../../services/hooks/useaxios-private";
 import { AssetRecord, AssetStatus, LocationRecord, MappingRecord, UserRecord } from "../../data/asset-admin-data";
+import { DEFAULT_TABLE_PAGE_SIZE, TablePagination, useTablePagination } from "../common-component/tables";
 import "../../styles/pages/asset-admin/asset-admin.scss";
 
 export default function DashboardMain() {
@@ -71,16 +72,24 @@ export default function DashboardMain() {
     deviceId: asset.deviceId ?? "",
     serialNumber: asset.serialNumber ?? "",
     assetName: asset.assetName ?? "",
+    assetModel: asset.assetModel ?? "",
     invoiceNo: asset.invoiceNo ?? asset.invoice_no ?? "",
     invoiceDate: asset.invoiceDate ?? asset.invoice_date ?? "",
     vendor: asset.vendor ?? "",
     quantity: asset.quantity != null ? String(asset.quantity) : "",
+    assignedItems: typeof asset.Assigned_items === "number"
+      ? asset.Assigned_items
+      : typeof asset.assignedItems === "number"
+        ? asset.assignedItems
+        : 0,
     receiveBy: asset.receiveBy ?? asset.receivedBy ?? asset.receive_by ?? asset.received_by ?? "",
     amount: asset.amount != null ? String(asset.amount) : "",
     receivedDate: asset.receivedDate ?? asset.received_date ?? "",
-    type: asset.assetType ?? asset.type ?? "",
+    type: asset.assetType ?? asset.type ?? asset.assetModel ?? "",
     status: normalizeStatus(asset.assetStatus ?? asset.status),
-    location: asset.location?.locationName ?? asset.location?.name ?? asset.locationName ?? `Location ${asset.locationId ?? "-"}`,
+    location: asset.location?.locationName ?? asset.location?.name ?? asset.locationName ?? "",
+    createdAt: asset.createdAt ?? "",
+    updatedAt: asset.updatedAt ?? "",
   }), [normalizeStatus]);
 
   const mapLocationRecord = useCallback((location: any): LocationRecord => ({
@@ -96,16 +105,24 @@ export default function DashboardMain() {
     role: employee?.role ?? "",
     team: employee?.team ?? "",
     status: normalizeEmployeeStatus(employee?.status),
+    createdAt: employee?.createdAt ?? "",
+    updatedAt: employee?.updatedAt ?? "",
   }), [normalizeEmployeeStatus]);
 
   const mapMappingRecord = useCallback((mapping: any): MappingRecord => {
     const fullUserName = `${mapping?.user?.firstName ?? ""} ${mapping?.user?.lastName ?? ""}`.trim();
 
     return {
+      id: typeof mapping?.id === "number" ? mapping.id : null,
       assetName:
         mapping?.asset?.assetName ??
         mapping?.assetDetails?.assetName ??
         mapping?.assetName ??
+        "",
+      assetCode:
+        mapping?.asset?.assetCode ??
+        mapping?.assetDetails?.assetCode ??
+        mapping?.assetCode ??
         "",
       deviceId:
         mapping?.asset?.deviceId ??
@@ -129,6 +146,11 @@ export default function DashboardMain() {
         mapping?.user?.name ??
         mapping?.assignedTo ??
         "",
+      role:
+        mapping?.employee?.role ??
+        mapping?.user?.role ??
+        mapping?.role ??
+        "",
       department:
         mapping?.employee?.team ??
         mapping?.user?.team ??
@@ -140,6 +162,13 @@ export default function DashboardMain() {
         mapping?.locationName ??
         mapping?.location ??
         "",
+      assignedQuantity:
+        typeof mapping?.assignedQuantity === "number"
+          ? mapping.assignedQuantity
+          : typeof mapping?.quantity === "number"
+            ? mapping.quantity
+            : 0,
+      isActive: Boolean(mapping?.isActive ?? true),
       assignedOn: normalizeDate(
         mapping?.assignedDate ??
         mapping?.assignedOn ??
@@ -208,17 +237,67 @@ export default function DashboardMain() {
     fetchDashboardData();
   }, [fetchDashboardData]);
 
-  const recentAssets = useMemo(() => assets.slice(0, 4), [assets]);
-  const recentMappings = useMemo(() => mappings.slice(0, 4), [mappings]);
+  const parseCount = useCallback((value: string) => {
+    const numericValue = Number(value);
+    return Number.isFinite(numericValue) ? numericValue : 0;
+  }, []);
+
+  const formatDisplayDate = useCallback((value: string) => {
+    if (!value) {
+      return "Not available";
+    }
+
+    const normalizedValue = value.includes("T") ? value : `${value}T00:00:00`;
+    const parsedDate = new Date(normalizedValue);
+
+    if (Number.isNaN(parsedDate.getTime())) {
+      return "Not available";
+    }
+
+    return parsedDate.toLocaleDateString(undefined, {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+  }, []);
+
+  const recentAssets = useMemo(
+    () => [...assets].sort((left, right) => {
+      const rightTimestamp = new Date(right.updatedAt || right.createdAt || 0).getTime();
+      const leftTimestamp = new Date(left.updatedAt || left.createdAt || 0).getTime();
+      return rightTimestamp - leftTimestamp;
+    }),
+    [assets]
+  );
+  const recentMappings = useMemo(
+    () => [...mappings].sort((left, right) => new Date(right.assignedOn).getTime() - new Date(left.assignedOn).getTime()),
+    [mappings]
+  );
+  const recentAssetsPagination = useTablePagination(recentAssets, {
+    pageSize: DEFAULT_TABLE_PAGE_SIZE,
+    resetDeps: [recentAssets],
+  });
+  const recentMappingsPagination = useTablePagination(recentMappings, {
+    pageSize: DEFAULT_TABLE_PAGE_SIZE,
+    resetDeps: [recentMappings],
+  });
   const totalTrackedEntities = assets.length + locations.length + mappings.length + users.length;
+  const totalAssetUnits = assets.reduce((sum, asset) => sum + parseCount(asset.quantity), 0);
+  const assignedAssetUnits = assets.reduce((sum, asset) => sum + asset.assignedItems, 0);
+  const availableAssetUnits = Math.max(totalAssetUnits - assignedAssetUnits, 0);
   const workingAssets = assets.filter((asset) => asset.status === "Working").length;
   const deferredAssets = assets.filter((asset) => asset.status === "Deferred").length;
   const activeEmployees = users.filter((user) => user.status === "Active").length;
+  const uniqueMappedEmployees = new Set(
+    mappings
+      .map((mapping) => mapping.employeeId)
+      .filter((employeeId) => employeeId.trim() !== "")
+  ).size;
   const dashboardMetrics = [
-    { label: "Total Assets", value: assets.length, helper: "Tracked in the current workspace" },
-    { label: "Working Assets", value: workingAssets, helper: "Ready for use" },
-    { label: "Deferred Assets", value: deferredAssets, helper: "Pending review" },
-    { label: "Active Employees", value: activeEmployees, helper: "Available for asset assignment" },
+    { label: "Asset Records", value: assets.length, helper: "Distinct asset entries from the asset API" },
+    { label: "Total Units", value: totalAssetUnits, helper: "Combined quantity across all tracked assets" },
+    { label: "Assigned Units", value: assignedAssetUnits, helper: "Units already allocated from current stock" },
+    { label: "Mapped Employees", value: uniqueMappedEmployees, helper: "People currently receiving asset assignments" },
   ];
   const statusBreakdown = [
     { label: "Working", value: workingAssets },
@@ -231,8 +310,88 @@ export default function DashboardMain() {
       accumulator.set(asset.type || "Unspecified", (accumulator.get(asset.type || "Unspecified") ?? 0) + 1);
       return accumulator;
     }, new Map())
-  ).map(([label, value]) => ({ label, value }));
-  const readinessSnapshot = assets.length > 0 ? `${Math.round((workingAssets / assets.length) * 100)}%` : "0%";
+  )
+    .map(([label, value]) => ({ label, value }))
+    .sort((left, right) => right.value - left.value)
+    .slice(0, 5);
+  const locationBreakdown = Array.from(
+    mappings.reduce<Map<string, number>>((accumulator, mapping) => {
+      const locationName = mapping.location || "Unknown";
+      accumulator.set(locationName, (accumulator.get(locationName) ?? 0) + mapping.assignedQuantity);
+      return accumulator;
+    }, new Map())
+  )
+    .map(([label, value]) => ({ label, value }))
+    .sort((left, right) => right.value - left.value)
+    .slice(0, 5);
+  const teamBreakdown = Array.from(
+    users.reduce<Map<string, number>>((accumulator, user) => {
+      const teamName = user.team || "Unassigned team";
+      accumulator.set(teamName, (accumulator.get(teamName) ?? 0) + 1);
+      return accumulator;
+    }, new Map())
+  )
+    .map(([label, value]) => ({ label, value }))
+    .sort((left, right) => right.value - left.value)
+    .slice(0, 6);
+  const recentEmployeeJoins = useMemo(
+    () => [...users]
+      .sort((left, right) => {
+        const rightTimestamp = new Date(right.createdAt || 0).getTime();
+        const leftTimestamp = new Date(left.createdAt || 0).getTime();
+        return rightTimestamp - leftTimestamp;
+      })
+      .slice(0, 5),
+    [users]
+  );
+  const readinessSnapshot = totalAssetUnits > 0 ? `${Math.round((assignedAssetUnits / totalAssetUnits) * 100)}%` : "0%";
+  const assignedAssets = new Set(
+    mappings.map((mapping) => mapping.assetCode || mapping.deviceId || mapping.assetName).filter((value) => value.trim() !== "")
+  ).size;
+  const unassignedAssets = Math.max(assets.length - assignedAssets, 0);
+  const topAssetType = typeBreakdown.reduce<{ label: string; value: number } | null>((topItem, currentItem) => {
+    if (!topItem || currentItem.value > topItem.value) {
+      return currentItem;
+    }
+
+    return topItem;
+  }, null);
+  const busiestLocation = locationBreakdown.reduce<{ label: string; value: number } | null>((topItem, currentItem) => {
+    if (!topItem || currentItem.value > topItem.value) {
+      return currentItem;
+    }
+
+    return topItem;
+  }, null);
+  const dashboardSignals = [
+    {
+      eyebrow: "Stock Coverage",
+      title: `${availableAssetUnits} units available`,
+      description: `${assignedAssetUnits} of ${totalAssetUnits} total units are already allocated based on asset stock data.`,
+      tone: "coverage",
+    },
+    {
+      eyebrow: "Most Common Category",
+      title: topAssetType ? topAssetType.label : "No asset types yet",
+      description: topAssetType
+        ? `${topAssetType.value} asset records currently fall into the dominant device category.`
+        : "As assets are added, type distribution will surface here.",
+      tone: "type",
+    },
+    {
+      eyebrow: "Busy Assignment Location",
+      title: busiestLocation ? busiestLocation.label : "No active locations",
+      description: busiestLocation
+        ? `${busiestLocation.value} assigned units are currently tied to this location through mapping records.`
+        : "Location activity appears once assets are mapped to users and locations.",
+      tone: "location",
+    },
+  ];
+  const dashboardHighlights = [
+    { label: "Locations online", value: locations.length, helper: "Managed places currently available in the workspace" },
+    { label: "Active employees", value: activeEmployees, helper: "People currently marked active in the employee module" },
+    { label: "Assets without mapping", value: unassignedAssets, helper: "Asset records not yet represented in mapping activity" },
+  ];
 
   const renderLoadState = (title: string, description: string) => (
     <div className="asset-admin-empty-state">
@@ -244,52 +403,86 @@ export default function DashboardMain() {
   return (
     <div className="asset-admin-page">
       <div className="asset-admin-shell">
-        <div className="asset-admin-hero asset-admin-dashboard-hero">
-          <div>
-            <p className="asset-admin-kicker">InfraPilot 360</p>
-            <h2>IT Asset Dashboard</h2>
-            <p>
-              A live operational view of assets, locations, employees, and ownership mappings
-              using the same backend APIs as the admin modules.
-            </p>
-          </div>
-          <div className="asset-admin-hero-highlight">
-            <span>Modules Ready</span>
-            <strong>4 Core Modules</strong>
-            <p>Assets, Locations, Asset Mapping, and Employees now stay aligned with backend data.</p>
-          </div>
-        </div>
+        <section className="asset-admin-dashboard-studio">
+          <div className="asset-admin-dashboard-hero-panel">
+            <div className="asset-admin-dashboard-hero-copy">
+              <p className="asset-admin-kicker">InfraPilot Command Center</p>
+              <h2>Dashboard</h2>
+              <p className="asset-admin-dashboard-intro">
+                A sharper operational view of asset readiness, ownership flow, and workspace coverage,
+                all driven by the same live admin APIs.
+              </p>
+              <div className="asset-admin-dashboard-chip-row">
+                <span>{assets.length} tracked assets</span>
+                <span>{locations.length} managed locations</span>
+                <span>{users.length} employees in scope</span>
+                <span>{mappings.length} ownership records</span>
+              </div>
+            </div>
 
-        <div className="asset-admin-dashboard-band">
-          <div className="asset-admin-band-card">
-            <span>Total Operational Records</span>
-            <strong>{totalTrackedEntities}</strong>
-            <p>Combined entities across the live admin workspace.</p>
+            <div className="asset-admin-dashboard-hero-rail">
+              <div className="asset-admin-dashboard-orbit-card">
+                <span className="asset-admin-dashboard-orbit-label">Readiness</span>
+                <strong>{readinessSnapshot}</strong>
+                <p>of total stock has already been allocated to users based on asset quantity and assigned items.</p>
+              </div>
+              <div className="asset-admin-dashboard-mini-metrics">
+                <div>
+                  <span>Mapped Assets</span>
+                  <strong>{assignedAssets}</strong>
+                </div>
+                <div>
+                  <span>Available Units</span>
+                  <strong>{availableAssetUnits}</strong>
+                </div>
+              </div>
+            </div>
           </div>
-          <div className="asset-admin-band-card">
-            <span>Readiness Snapshot</span>
-            <strong>{readinessSnapshot}</strong>
-            <p>Percentage of tracked assets currently marked as working.</p>
-          </div>
-          <div className="asset-admin-band-card">
-            <span>Assignment Coverage</span>
-            <strong>{assets.length > 0 ? `${mappings.length}/${assets.length}` : "0/0"}</strong>
-            <p>Assets currently represented in the ownership mapping module.</p>
-          </div>
-        </div>
 
-        <div className="asset-admin-metrics">
-          {dashboardMetrics.map((metric) => (
-            <div key={metric.label} className="asset-admin-metric-card">
-              <span>{metric.label}</span>
-              <strong>{metric.value}</strong>
-              <p>{metric.helper}</p>
+          <div className="asset-admin-dashboard-overview-grid">
+            <div className="asset-admin-dashboard-scoreboard">
+              <div className="asset-admin-dashboard-scoreboard-head">
+                <div>
+                  <p className="asset-admin-dashboard-section-label">Overview</p>
+                  <h3>System health at a glance</h3>
+                </div>
+                <span>{totalTrackedEntities} total records</span>
+              </div>
+              <div className="asset-admin-dashboard-scoreboard-metrics">
+                {dashboardMetrics.map((metric) => (
+                  <div key={metric.label} className="asset-admin-dashboard-score-card">
+                    <span>{metric.label}</span>
+                    <strong>{metric.value}</strong>
+                    <p>{metric.helper}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="asset-admin-dashboard-signal-column">
+              {dashboardSignals.map((signal) => (
+                <div key={signal.eyebrow} className={`asset-admin-dashboard-signal-card tone-${signal.tone}`}>
+                  <span>{signal.eyebrow}</span>
+                  <strong>{signal.title}</strong>
+                  <p>{signal.description}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <div className="asset-admin-dashboard-band asset-admin-dashboard-band-redesign">
+          {dashboardHighlights.map((highlight) => (
+            <div key={highlight.label} className="asset-admin-band-card">
+              <span>{highlight.label}</span>
+              <strong>{highlight.value}</strong>
+              <p>{highlight.helper}</p>
             </div>
           ))}
         </div>
 
         {loadError && (
-          <div className="asset-admin-table-card">
+          <div className="asset-admin-table-card asset-admin-dashboard-alert-card">
             <div className="asset-admin-empty-state">
               <h4>Unable to load dashboard data</h4>
               <p>{loadError}</p>
@@ -297,35 +490,37 @@ export default function DashboardMain() {
           </div>
         )}
 
-        <div className="asset-admin-grid">
-          <section className="asset-admin-table-card">
+        <div className="asset-admin-dashboard-feature-grid">
+          <section className="asset-admin-table-card asset-admin-dashboard-spotlight-card">
             <div className="asset-admin-card-header">
               <div>
-                <h3>Asset Status Summary</h3>
-                <p>Quick operational view of device condition.</p>
+                <p className="asset-admin-dashboard-section-label">Operational Pulse</p>
+                <h3>Asset status summary</h3>
+                <p>Quick visual read on the condition of tracked devices.</p>
               </div>
             </div>
-            <div className="asset-admin-pill-grid">
+            <div className="asset-admin-dashboard-pill-grid">
               {statusBreakdown.map((item) => (
-                <div key={item.label} className="asset-admin-pill-card">
-                  <strong>{item.value}</strong>
+                <div key={item.label} className="asset-admin-dashboard-pill-card">
                   <span>{item.label}</span>
+                  <strong>{item.value}</strong>
                 </div>
               ))}
             </div>
           </section>
 
-          <section className="asset-admin-table-card">
+          <section className="asset-admin-table-card asset-admin-dashboard-spotlight-card">
             <div className="asset-admin-card-header">
               <div>
-                <h3>Asset Type Summary</h3>
-                <p>What kinds of devices are being tracked.</p>
+                <p className="asset-admin-dashboard-section-label">Type Distribution</p>
+                <h3>Asset mix</h3>
+                <p>Top categories based on the current asset inventory records.</p>
               </div>
             </div>
             {isLoading ? (
               renderLoadState("Loading asset types", "Fetching asset summary from the backend.")
             ) : typeBreakdown.length > 0 ? (
-              <div className="asset-admin-list">
+              <div className="asset-admin-list asset-admin-dashboard-list">
                 {typeBreakdown.map((item) => (
                   <div key={item.label} className="asset-admin-list-row">
                     <span>{item.label}</span>
@@ -339,137 +534,158 @@ export default function DashboardMain() {
           </section>
         </div>
 
-        <div className="asset-admin-grid">
-          <section className="asset-admin-table-card">
+        <div className="asset-admin-grid asset-admin-dashboard-data-grid">
+          <section className="asset-admin-table-card asset-admin-dashboard-table-card">
             <div className="asset-admin-card-header">
               <div>
                 <h3>Recent Assets</h3>
-                <p>Latest records available in the asset module.</p>
+                <p>Latest asset records using the current asset API payload.</p>
               </div>
             </div>
             {isLoading ? (
               renderLoadState("Loading assets", "Fetching recent assets from the backend.")
             ) : recentAssets.length > 0 ? (
-              <div className="asset-admin-table-wrap">
-                <table className="asset-admin-table">
-                  <thead>
-                    <tr>
-                      <th>Device ID</th>
-                      <th>Asset Name</th>
-                      <th>Status</th>
-                      <th>Location</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {recentAssets.map((asset) => (
-                      <tr key={`${asset.deviceId}-${asset.id ?? asset.assetCode}`}>
-                        <td>{asset.deviceId}</td>
-                        <td>{asset.assetName}</td>
-                        <td>
-                          <span className={`asset-admin-status-pill status-${asset.status.toLowerCase().replace(/\s+/g, "-")}`}>
-                            {asset.status}
-                          </span>
-                        </td>
-                        <td>{asset.location}</td>
+              <>
+                <div className="asset-admin-table-wrap">
+                  <table className="asset-admin-table">
+                    <thead>
+                      <tr>
+                        <th>Asset Code</th>
+                        <th>Asset Name</th>
+                        <th>Units</th>
+                        <th>Status</th>
+                        <th>Updated</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                    </thead>
+                    <tbody>
+                      {recentAssetsPagination.paginatedRows.map((asset) => (
+                        <tr key={`${asset.assetCode}-${asset.id ?? asset.serialNumber}`}>
+                          <td>{asset.assetCode || "Not set"}</td>
+                          <td>
+                            <span className="asset-admin-cell-text">{asset.assetName}</span>
+                          </td>
+                          <td>{`${asset.assignedItems}/${parseCount(asset.quantity)}`}</td>
+                          <td>
+                            <span className={`asset-admin-status-pill status-${asset.status.toLowerCase().replace(/\s+/g, "-")}`}>
+                              {asset.status}
+                            </span>
+                          </td>
+                          <td>{formatDisplayDate(asset.updatedAt || asset.createdAt)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                <TablePagination
+                  currentPage={recentAssetsPagination.currentPage}
+                  pageSize={recentAssetsPagination.pageSize}
+                  totalItems={recentAssetsPagination.totalItems}
+                  onPageChange={recentAssetsPagination.setCurrentPage}
+                />
+              </>
             ) : (
               renderLoadState("No assets available", "Create assets to see recent activity here.")
             )}
           </section>
 
-          <section className="asset-admin-table-card">
+          <section className="asset-admin-table-card asset-admin-dashboard-table-card">
             <div className="asset-admin-card-header">
               <div>
                 <h3>Recent Mapping Activity</h3>
-                <p>Who is currently responsible for tracked assets.</p>
+                <p>Latest allocation activity across users, quantities, and locations.</p>
               </div>
             </div>
             {isLoading ? (
               renderLoadState("Loading mappings", "Fetching recent mapping activity from the backend.")
             ) : recentMappings.length > 0 ? (
-              <div className="asset-admin-table-wrap">
-                <table className="asset-admin-table">
-                  <thead>
-                    <tr>
-                      <th>Asset</th>
-                      <th>Employee ID</th>
-                      <th>Responsible</th>
-                      <th>Department</th>
-                      <th>Date</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {recentMappings.map((mapping) => (
-                      <tr key={`${mapping.deviceId}-${mapping.employeeId}-${mapping.assignedOn}`}>
-                        <td>{mapping.assetName}</td>
-                        <td>{mapping.employeeId || "Not set"}</td>
-                        <td>{mapping.assignedTo}</td>
-                        <td>{mapping.department}</td>
-                        <td>
-                          {mapping.assignedOn
-                            ? new Date(`${mapping.assignedOn}T00:00:00`).toLocaleDateString(undefined, {
-                                year: "numeric",
-                                month: "short",
-                                day: "numeric",
-                              })
-                            : "Not set"}
-                        </td>
+              <>
+                <div className="asset-admin-table-wrap">
+                  <table className="asset-admin-table">
+                    <thead>
+                      <tr>
+                        <th>Asset</th>
+                        <th>Employee</th>
+                        <th>Qty</th>
+                        <th>Location</th>
+                        <th>Date</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                    </thead>
+                    <tbody>
+                      {recentMappingsPagination.paginatedRows.map((mapping) => (
+                        <tr key={`${mapping.id ?? mapping.assetCode}-${mapping.employeeId}-${mapping.assignedOn}`}>
+                          <td>{mapping.assetName || mapping.assetCode || "Not set"}</td>
+                          <td>{mapping.assignedTo || mapping.employeeId || "Not set"}</td>
+                          <td>{mapping.assignedQuantity}</td>
+                          <td>{mapping.location || "Not set"}</td>
+                          <td>{formatDisplayDate(mapping.assignedOn)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                <TablePagination
+                  currentPage={recentMappingsPagination.currentPage}
+                  pageSize={recentMappingsPagination.pageSize}
+                  totalItems={recentMappingsPagination.totalItems}
+                  onPageChange={recentMappingsPagination.setCurrentPage}
+                />
+              </>
             ) : (
               renderLoadState("No mappings available", "Assign assets to employees to populate recent mapping activity.")
             )}
           </section>
         </div>
 
-        <div className="asset-admin-grid">
-          <section className="asset-admin-table-card">
+        <div className="asset-admin-grid asset-admin-dashboard-support-grid">
+          <section className="asset-admin-table-card asset-admin-dashboard-table-card">
             <div className="asset-admin-card-header">
               <div>
                 <h3>Location Coverage</h3>
-                <p>{locations.length} managed locations in the current workspace.</p>
+                <p>Managed locations ordered by assignment activity.</p>
               </div>
             </div>
             {isLoading ? (
               renderLoadState("Loading locations", "Fetching locations from the backend.")
-            ) : locations.length > 0 ? (
-              <div className="asset-admin-list">
-                {locations.map((location) => (
-                  <div key={`${location.code}-${location.name}`} className="asset-admin-list-row">
-                    <span>{location.name}</span>
-                    <strong>{location.code}</strong>
+            ) : locationBreakdown.length > 0 ? (
+              <div className="asset-admin-list asset-admin-dashboard-list">
+                {locationBreakdown.map((location) => (
+                  <div key={location.label} className="asset-admin-list-row">
+                    <span>{location.label}</span>
+                    <strong>{location.value} units</strong>
                   </div>
                 ))}
               </div>
             ) : (
-              renderLoadState("No locations available", "Create locations to use them in asset creation and mapping.")
+              renderLoadState("No mapped locations available", "Create mappings to see which locations are carrying asset assignments.")
             )}
           </section>
 
-          <section className="asset-admin-table-card">
+          <section className="asset-admin-table-card asset-admin-dashboard-table-card">
             <div className="asset-admin-card-header">
               <div>
                 <h3>Employee Snapshot</h3>
-                <p>{users.length} employees available for asset assignment.</p>
+                <p>Top team distribution from the employee directory.</p>
               </div>
             </div>
             {isLoading ? (
               renderLoadState("Loading employees", "Fetching employees from the backend.")
-            ) : users.length > 0 ? (
-              <div className="asset-admin-list">
-                {users.map((user) => (
-                  <div key={user.employeeId} className="asset-admin-list-row">
-                    <span>{user.name}</span>
-                    <strong>{user.role || user.status}</strong>
+            ) : teamBreakdown.length > 0 ? (
+              <div className="asset-admin-list asset-admin-dashboard-list">
+                {teamBreakdown.map((team) => (
+                  <div key={team.label} className="asset-admin-list-row">
+                    <div className="asset-admin-dashboard-user-row">
+                      <span>{team.label}</span>
+                      <small>Employees in this team</small>
+                    </div>
+                    <strong>{team.value}</strong>
                   </div>
                 ))}
+                {recentEmployeeJoins.length > 0 && (
+                  <div className="asset-admin-list-row asset-admin-dashboard-more-row">
+                    <span>Newest employee record</span>
+                    <strong>{recentEmployeeJoins[0].name}</strong>
+                  </div>
+                )}
               </div>
             ) : (
               renderLoadState("No employees available", "Add employees before mapping assets against them.")

@@ -169,7 +169,7 @@ export default function AssetLocationsPage() {
 
   return (
     <AdminModulePage
-      title="Asset Locations"
+      title="Locations"
       subtitle="Maintain the location master used by the IT admin while assigning and tracking devices by team or handling unit."
       actionLabel="Add Location"
       onActionClick={openAddModal}

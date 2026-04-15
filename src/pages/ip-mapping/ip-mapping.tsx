@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { DEFAULT_TABLE_PAGE_SIZE, TablePagination, useTablePagination } from "../../components/common-component/tables";
 import useAxiosPrivate from "../../services/hooks/useaxios-private";
 import "../../styles/pages/ip-mapping/ip-mapping.scss";
 
@@ -325,6 +326,10 @@ export default function IpMappingPage() {
       return matchesSubnet && matchesAssignment && matchesSearch;
     });
   }, [assignmentFilter, rows, searchTerm, subnetFilter]);
+  const paginatedRows = useTablePagination(filteredRows, {
+    pageSize: DEFAULT_TABLE_PAGE_SIZE,
+    resetDeps: [assignmentFilter, searchTerm, subnetFilter, filteredRows],
+  });
 
   const subnetCards = useMemo(
     () =>
@@ -683,15 +688,15 @@ export default function IpMappingPage() {
                       <td colSpan={4}>Loading IP mappings...</td>
                     </tr>
                   ) : (
-                    filteredRows.map((row) => (
+                    paginatedRows.paginatedRows.map((row) => (
                       <tr key={row.id ?? row.ipAddress}>
-                        <td>
+                        <td data-label="IP Address">
                           <div className="ip-mapping-ip-cell">
                             <strong>{row.ipAddress}</strong>
                           </div>
                         </td>
-                        <td>{row.assignedTo || "Unassigned"}</td>
-                        <td>
+                        <td data-label="Assigned To">{row.assignedTo || "Unassigned"}</td>
+                        <td data-label="Type">
                           {row.assignmentType ? (
                             <span className={`ip-mapping-type-pill type-${row.assignmentType.toLowerCase()}`}>
                               {row.assignmentType}
@@ -700,7 +705,7 @@ export default function IpMappingPage() {
                             "Not mapped"
                           )}
                         </td>
-                        <td>
+                        <td data-label="Action">
                           <div className="ip-mapping-row-actions">
                             <button type="button" className="ip-mapping-assign-btn" onClick={() => openAssignModal(row)}>
                               {row.assignmentType ? "Reassign" : "Assign"}
@@ -722,6 +727,13 @@ export default function IpMappingPage() {
                 </tbody>
               </table>
             </div>
+            <TablePagination
+              currentPage={paginatedRows.currentPage}
+              pageSize={paginatedRows.pageSize}
+              totalItems={paginatedRows.totalItems}
+              itemLabel="IP records"
+              onPageChange={paginatedRows.setCurrentPage}
+            />
 
             {!isLoadingMappings && filteredRows.length === 0 && (
               <div className="ip-mapping-empty-state">

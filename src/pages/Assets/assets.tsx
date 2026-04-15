@@ -6,7 +6,7 @@ import * as XLSX from "xlsx";
 import downloadIcon from "../../assets/icons/download.png";
 
 interface AssetFormState {
-  serialNumber: string;
+  serialNumbers: string[];
   assetName: string;
   invoiceNo: string;
   invoiceDate: string;
@@ -33,7 +33,7 @@ export default function AssetsPage() {
   const [submitError, setSubmitError] = useState("");
   const [deleteError, setDeleteError] = useState("");
   const [formData, setFormData] = useState<AssetFormState>({
-    serialNumber: "",
+    serialNumbers: [],
     assetName: "",
     invoiceNo: "",
     invoiceDate: "",
@@ -84,7 +84,7 @@ export default function AssetsPage() {
 
   const resetForm = useCallback(() => {
     setFormData({
-      serialNumber: "",
+      serialNumbers: [],
       assetName: "",
       invoiceNo: "",
       invoiceDate: "",
@@ -123,16 +123,24 @@ export default function AssetsPage() {
     deviceId: asset.deviceId ?? "",
     serialNumber: asset.serialNumber ?? "",
     assetName: asset.assetName ?? "",
+    assetModel: asset.assetModel ?? "",
     invoiceNo: asset.invoiceNo ?? asset.invoice_no ?? asset.invoiceNumber ?? "",
     invoiceDate: asset.invoiceDate ?? asset.invoice_date ?? "",
     vendor: asset.vendor ?? "",
     quantity: asset.quantity != null ? String(asset.quantity) : "",
+    assignedItems: typeof asset.Assigned_items === "number"
+      ? asset.Assigned_items
+      : typeof asset.assignedItems === "number"
+        ? asset.assignedItems
+        : 0,
     receiveBy: asset.receiveBy ?? asset.receivedBy ?? asset.receive_by ?? asset.received_by ?? "",
     amount: asset.amount != null ? String(asset.amount) : "",
     receivedDate: asset.receivedDate ?? asset.received_date ?? "",
     type: asset.assetType ?? asset.assetModel ?? asset.type ?? "",
     status: normalizeStatus(asset.assetStatus ?? asset.status),
     location: asset.location?.locationName ?? asset.location?.name ?? asset.locationName ?? `Location ${asset.locationId ?? "-"}`,
+    createdAt: asset.createdAt ?? "",
+    updatedAt: asset.updatedAt ?? "",
   }), []);
 
   const fetchAssets = useCallback(async () => {
@@ -212,19 +220,27 @@ export default function AssetsPage() {
       return;
     }
     setEditingIndex(index);
-      setFormData({
-        serialNumber: row.serialNumber,
-        assetName: row.assetName,
-        invoiceNo: row.invoiceNo,
-        invoiceDate: row.invoiceDate,
-        vendor: row.vendor,
-        quantity: row.quantity,
-        receiveBy: row.receiveBy,
-        amount: row.amount,
-        receivedDate: row.receivedDate,
-        type: row.type,
-        status: row.status,
-        locationId: row.locationId ? String(row.locationId) : "",
+    const qty = parseInt(row.quantity, 10);
+    const existingSerials = row.serialNumber
+      ? row.serialNumber.split(",").map((s) => s.trim())
+      : [];
+    const serialNumbers = Array.from(
+      { length: Number.isFinite(qty) && qty > 0 ? qty : 0 },
+      (_, i) => existingSerials[i] ?? ""
+    );
+    setFormData({
+      serialNumbers,
+      assetName: row.assetName,
+      invoiceNo: row.invoiceNo,
+      invoiceDate: row.invoiceDate,
+      vendor: row.vendor,
+      quantity: row.quantity,
+      receiveBy: row.receiveBy,
+      amount: row.amount,
+      receivedDate: row.receivedDate,
+      type: row.type,
+      status: row.status,
+      locationId: row.locationId ? String(row.locationId) : "",
     });
     setSubmitError("");
     setIsModalOpen(true);
@@ -267,10 +283,35 @@ export default function AssetsPage() {
     if (submitError) {
       setSubmitError("");
     }
+
+    if (name === "quantity") {
+      const qty = parseInt(value, 10);
+      setFormData((current) => ({
+        ...current,
+        quantity: value,
+        serialNumbers:
+          Number.isFinite(qty) && qty > 0
+            ? Array.from({ length: qty }, (_, i) => current.serialNumbers[i] ?? "")
+            : [],
+      }));
+      return;
+    }
+
     setFormData((current) => ({
       ...current,
       [name]: value,
     }));
+  };
+
+  const handleSerialNumberChange = (index: number, value: string) => {
+    if (submitError) {
+      setSubmitError("");
+    }
+    setFormData((current) => {
+      const updated = [...current.serialNumbers];
+      updated[index] = value;
+      return { ...current, serialNumbers: updated };
+    });
   };
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -290,8 +331,11 @@ export default function AssetsPage() {
       return;
     }
 
-    const payload: Record<string, string | number> = {
-      serialNumber: formData.serialNumber.trim(),
+    const nonEmptySerials = formData.serialNumbers.filter((s) => s.trim() !== "");
+
+    const payload: Record<string, string | number | string[]> = {
+      serialNumber: nonEmptySerials.join(", "),
+      serialNumbers: nonEmptySerials,
       assetName: formData.assetName.trim(),
       receivedDate: formData.receivedDate,
       invoiceNumber: formData.invoiceNo.trim(),
@@ -498,17 +542,6 @@ export default function AssetsPage() {
                 </label>
 
                 <label className="asset-admin-field">
-                  <span>Serial Number</span>
-                  <input
-                    name="serialNumber"
-                    type="text"
-                    value={formData.serialNumber}
-                    onChange={handleInputChange}
-                    placeholder="Enter serial number"
-                  />
-                </label>
-
-                <label className="asset-admin-field">
                   <span>Qty *</span>
                   <input
                     name="quantity"
@@ -556,6 +589,27 @@ export default function AssetsPage() {
                   </select>
                 </label>
               </div>
+
+              {formData.serialNumbers.length > 0 && (
+                <div className="asset-admin-serial-section">
+                  <p className="asset-admin-serial-label">
+                    Serial Numbers <span className="asset-admin-serial-optional">(optional)</span>
+                  </p>
+                  <div className="asset-admin-serial-grid">
+                    {formData.serialNumbers.map((sn, index) => (
+                      <label key={index} className="asset-admin-field">
+                        <span>Serial #{index + 1}</span>
+                        <input
+                          type="text"
+                          value={sn}
+                          onChange={(e) => handleSerialNumberChange(index, e.target.value)}
+                          placeholder={`Enter serial number ${index + 1}`}
+                        />
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {submitError && <p className="asset-admin-form-error">{submitError}</p>}
 

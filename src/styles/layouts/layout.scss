@@ -31,15 +31,17 @@
 
     .header {
         position: fixed;
-        // left: 300px;
-        // z-index: 10;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 100;
     }
 
     .layout-center {
         width: 100%;
-        margin-top: 70px;
+        margin-top: 74px;
         min-width: 0;
-        min-height: calc(100vh - 70px);
+        min-height: calc(100vh - 74px);
         overflow-x: hidden;
         margin-left: 0px;
         transition: margin-left 0.3s ease-in-out;

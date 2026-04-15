@@ -39,7 +39,7 @@ export default function Header({ filterClick, filterIconStatus }: Props) {
         "/dashboard": "Dashboard",
         "/assets": "Inward",
         "/asset-locations": "Asset Locations",
-        "/asset-mapping": "Asset Mapping",
+        "/asset-mapping": "Allocation",
         "/ip-mapping": "IP Mapping",
         "/credential-manager": "Credential Manager",
         "/users": "Employees",

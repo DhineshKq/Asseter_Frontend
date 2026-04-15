@@ -52,8 +52,8 @@ export default function SideBar() {
     const pathMap: Record<string, string> = {
       "/dashboard": "Dashboard",
       "/assets": "Inward",
-      "/asset-locations": "Asset Locations",
-      "/asset-mapping": "Asset Mapping",
+      "/asset-locations": "Locations",
+      "/asset-mapping": "Allocation",
       "/ip-mapping": "IP Mapping",
       "/credential-manager": "Credential Manager",
       "/eb-tracker": "EB Tracker",
@@ -61,29 +61,6 @@ export default function SideBar() {
     };
     setSelectedTitle(pathMap[location.pathname] || "");
   }, [location.pathname]);
-
-  // async function userData() {
-  //   try {
-  //     const res = await axiosPrivate.get('/userData');
-  //     if (res.status === 200) {
-  //       const { name, userName, isAdmin } = res.data.data;
-
-  //       setCurrentLoggedUserData((prevData: any) => ({
-  //         ...prevData,
-  //         isAdmin: isAdmin ?? prevData.isAdmin,
-  //         userName: userName ?? prevData.userName,
-  //         name: name ?? prevData.name,
-  //       }));
-  //       setIsAdmin(isAdmin);
-  //     }
-  //   } catch (error: any) {
-  //     console.error("Error fetching user data:", error);
-  //   }
-  // }
-
-  // useEffect(() => {
-  //   userData()
-  // }, []);
 
   const navConfirmation = (select: string, navTo: string) => {
     if (isFormModified && location.pathname !== navTo) {
@@ -98,10 +75,12 @@ export default function SideBar() {
   const menuItems: SidebarItemProps[] = [
     { title: "Dashboard", route: "/dashboard", caption: "Overview and health", selectedTitle, navConfirmation },
     { title: "Inward", route: "/assets", caption: "Inventory records", selectedTitle, navConfirmation },
-    { title: "Asset Locations", route: "/asset-locations", caption: "Teams and places", selectedTitle, navConfirmation },
-    { title: "Asset Mapping", route: "/asset-mapping", caption: "Ownership mapping", selectedTitle, navConfirmation },
+    { title: "Locations", route: "/asset-locations", caption: "Teams and places", selectedTitle, navConfirmation },
+    { title: "Allocation", route: "/asset-mapping", caption: "Ownership mapping", selectedTitle, navConfirmation },
     { title: "IP Mapping", route: "/ip-mapping", caption: "Subnet ownership", selectedTitle, navConfirmation },
+    { title: "EB Tracker", route: "/eb-tracker", caption: "Access vault", selectedTitle, navConfirmation },
     { title: "Credential Manager", route: "/credential-manager", caption: "Access vault", selectedTitle, navConfirmation },
+
     { title: "Employees", route: "/users", caption: "People for asset mapping", selectedTitle, navConfirmation },
   ];
 
@@ -117,10 +96,6 @@ export default function SideBar() {
             </div>
             <span>{isAdmin ? "Administrator Access" : "Workspace Access"}</span>
           </div>
-          {/* <div className="sidebar-summary-card">
-            <strong>Workspace Navigation</strong>
-            <p>Move between modules quickly with a cleaner text-first menu.</p>
-          </div> */}
         </div>
 
         <div className="menu-items-wrapper">

@@ -3,7 +3,7 @@ import '../../styles/login-component/user-login.scss';
 import { FaEye } from "react-icons/fa";
 import { FaEyeSlash } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
-import useAxiosPrivate from '../../services/hooks/useaxios-private';
+import axios from '../../middleware/axios-api';
 import Alertbox from '../common-component/modals/alertbox-modal';
 import { setCookie } from '../../services/utils/cookie-utils';
 import useAuth from '../../services/hooks/useauth';
@@ -27,7 +27,6 @@ export default function UserLogin({ handleclick }: propsType) {
     const [isLoading, setIsLoading] = useState(false)
     const navigate = useNavigate();
     const { setAuth } = useAuth();
-    const axiosPrivate = useAxiosPrivate();
     const { setCurrentLoggedUserData } = useCommonData();
 
     const toggleShowPassword = () => {
@@ -49,8 +48,9 @@ export default function UserLogin({ handleclick }: propsType) {
         setIsLoading(true)
         try {
             const ip = await getPublicIP();
-            const res = await axiosPrivate.post('/user/login', { "email": userValues.email, "password": userValues.password, ipAddress: ip })
+            const res = await axios.post('/user/login', { "email": userValues.email, "password": userValues.password, ipAddress: ip })
             if (res.status === 200) {
+                const token = res.data?.token ?? "";
 
                 setCurrentLoggedUserData((prevData: any) => ({
                     ...prevData,
@@ -59,20 +59,25 @@ export default function UserLogin({ handleclick }: propsType) {
                     email: res.data.userName || prevData.email,
                     name: res.data.name || prevData.name,
                 }));
-                setIsLoading(false)
-                navigate("/dashboard")
+
                 setAuth({
-                    token: res.data.token,
+                    token,
                     email: res.data.email,
                     userID: res.data.userID
                 })
-                setCookie("token", res.data.token)
+                setCookie("token", token)
+                setIsLoading(false)
+                navigate("/dashboard", { replace: true })
             }
         } catch (error: any) {
             setIsLoading(false) 
             setShowAlertBox(true)
             setShowType("danger")
-            setShowMessage(error.response.data.error)
+            setShowMessage(
+                error?.response?.data?.error ||
+                error?.response?.data?.message ||
+                "Login failed. Check your username and password and try again."
+            )
             setTimeout(() => {
                 setShowAlertBox(false)
             }, 5000)

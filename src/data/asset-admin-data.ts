@@ -7,16 +7,20 @@ export interface AssetRecord {
   deviceId: string;
   serialNumber: string;
   assetName: string;
+  assetModel: string;
   invoiceNo: string;
   invoiceDate: string;
   vendor: string;
   quantity: string;
+  assignedItems: number;
   receiveBy: string;
   amount: string;
   receivedDate: string;
   type: string;
   status: AssetStatus;
   location: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface LocationRecord {
@@ -25,13 +29,18 @@ export interface LocationRecord {
 }
 
 export interface MappingRecord {
+  id: number | null;
   assetName: string;
+  assetCode: string;
   deviceId: string;
   serialNumber: string;
   employeeId: string;
   assignedTo: string;
+  role: string;
   department: string;
   location: string;
+  assignedQuantity: number;
+  isActive: boolean;
   assignedOn: string;
 }
 
@@ -43,6 +52,8 @@ export interface UserRecord {
   role: string;
   team: string;
   status: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export const assets: AssetRecord[] = [];
