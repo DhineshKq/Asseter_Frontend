@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import Select, { StylesConfig } from "react-select";
 import AdminModulePage from "../../components/asset-admin/admin-module-page";
-import DeleteModal from "../../components/common-component/modals/delete-modal";
 import useAxiosPrivate from "../../services/hooks/useaxios-private";
 import { MappingRecord } from "../../data/asset-admin-data";
 import * as XLSX from "xlsx";
@@ -512,13 +511,13 @@ export default function AssetMappingPage() {
     try {
       await axiosPrivate.delete(`/mappings/${deletingMappingId}`);
       setDeletingMappingId(null);
-      await fetchMappings();
+      await Promise.all([fetchMappings(), fetchMappingOptions()]);
     } catch (error: any) {
       console.error("Failed to delete mapping:", error);
     } finally {
       setIsDeleting(false);
     }
-  }, [axiosPrivate, deletingMappingId, fetchMappings]);
+  }, [axiosPrivate, deletingMappingId, fetchMappings, fetchMappingOptions]);
 
   useEffect(() => {
     if (!isMapModalOpen) {
@@ -779,11 +778,68 @@ export default function AssetMappingPage() {
       }}
     >
       {deletingMappingId !== null && (
-        <DeleteModal
-          modelType="grid-delete"
-          clearValue={() => setDeletingMappingId(null)}
-          getDelete={handleDeleteConfirm}
-        />
+        <div
+          className="asset-admin-modal-backdrop"
+          onClick={() => { if (!isDeleting) setDeletingMappingId(null); }}
+        >
+          <div
+            className="asset-admin-modal asset-admin-delete-dialog"
+            onClick={(e) => e.stopPropagation()}
+            role="alertdialog"
+            aria-modal="true"
+            aria-labelledby="delete-allocation-title"
+          >
+            <div className="asset-admin-modal-header">
+              <div>
+                <p className="asset-admin-modal-kicker">Confirm Action</p>
+                <h3 id="delete-allocation-title">Delete Allocation</h3>
+              </div>
+              <button
+                type="button"
+                className="asset-admin-modal-close"
+                onClick={() => setDeletingMappingId(null)}
+                disabled={isDeleting}
+                aria-label="Close delete dialog"
+              >
+                ×
+              </button>
+            </div>
+
+            <div className="asset-admin-delete-body">
+              <div className="asset-admin-delete-icon-wrap">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <polyline points="3 6 5 6 21 6" />
+                  <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+                  <path d="M10 11v6M14 11v6" />
+                  <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
+                </svg>
+              </div>
+              <p className="asset-admin-delete-heading">Are you sure?</p>
+              <p className="asset-admin-delete-message">
+                This allocation record will be permanently deleted. This action cannot be undone.
+              </p>
+            </div>
+
+            <div className="asset-admin-form-actions">
+              <button
+                type="button"
+                className="asset-admin-secondary-btn"
+                onClick={() => setDeletingMappingId(null)}
+                disabled={isDeleting}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                className="asset-admin-danger-btn asset-admin-delete-confirm-btn"
+                onClick={handleDeleteConfirm}
+                disabled={isDeleting}
+              >
+                {isDeleting ? "Deleting..." : "Delete"}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
       {isMapModalOpen && (
         <div className="asset-admin-modal-backdrop" onClick={closeModal}>
@@ -796,7 +852,7 @@ export default function AssetMappingPage() {
           >
             <div className="asset-admin-modal-header">
               <div>
-                <p className="asset-admin-modal-kicker">{editingMappingId ? "Edit Mapping" : "New Allocatation"}</p>
+                <p className="asset-admin-modal-kicker">{editingMappingId ? "Edit Allocation" : "New Allocation"}</p>
                 <h3 id="map-asset-modal-title">{editingMappingId ? "Edit Allocation" : "Allocation"}</h3>
               </div>
               <button type="button" className="asset-admin-modal-close" onClick={closeModal} aria-label="Close map asset popup">

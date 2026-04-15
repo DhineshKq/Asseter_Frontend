@@ -113,8 +113,7 @@ export default function UserLogin({ handleclick }: propsType) {
                                         value={userValues.email}
                                         autoFocus={true}
                                         onChange={(e) => {
-                                            const val = e.target.value.replace(/[^A-Za-z0-9@_+-.]/g, "");
-                                            setUserValues({ ...userValues, email: val });
+                                            setUserValues({ ...userValues, email: e.target.value });
                                         }}
                                         onKeyPress={(e) => {
                                             if (e.key === ' ' || e.key === ",") {

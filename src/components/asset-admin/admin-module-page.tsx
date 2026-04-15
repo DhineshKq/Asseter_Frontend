@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo, useState } from "react";
 import { DEFAULT_TABLE_PAGE_SIZE, TablePagination, useTablePagination } from "../common-component/tables";
 import "../../styles/pages/asset-admin/asset-admin.scss";
 
@@ -49,6 +49,19 @@ export default function AdminModulePage<T extends object>({
   emptyState,
   children,
 }: AdminModulePageProps<T>) {
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const filteredRows = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) return rows;
+    return rows.filter((row) =>
+      columns.some((col) => {
+        const val = row[col.key];
+        return val != null && String(val).toLowerCase().includes(q);
+      })
+    );
+  }, [rows, columns, searchQuery]);
+
   const {
     currentPage,
     endItem,
@@ -56,13 +69,12 @@ export default function AdminModulePage<T extends object>({
     setCurrentPage,
     startItem,
     totalItems,
-  } = useTablePagination(rows, { pageSize: DEFAULT_TABLE_PAGE_SIZE, resetDeps: [rows] });
-  const displayCount = paginatedRows.length;
+  } = useTablePagination(filteredRows, { pageSize: DEFAULT_TABLE_PAGE_SIZE, resetDeps: [filteredRows] });
   const totalCount = totalRowCount ?? rows.length;
-  const maxCellLength = 10;
+  const maxCellLength = 24;
 
   const truncateText = (text: string) =>
-    text.length > maxCellLength ? `${text.slice(0, maxCellLength)}...` : text;
+    text.length > maxCellLength ? `${text.slice(0, maxCellLength)}…` : text;
 
   const formatCellValue = (value: unknown) => {
     if (value === null || value === undefined || value === "") {
@@ -140,20 +152,32 @@ export default function AdminModulePage<T extends object>({
             <div>
               <h3>{title} Records</h3>
               <p>
-                Showing {startItem}-{endItem} of {totalItems} visible records from {totalCount} total entries in the current frontend prototype.
+                {searchQuery.trim()
+                  ? `${filteredRows.length} of ${totalCount} records match your search`
+                  : `${totalCount} records total`}
               </p>
             </div>
             <div className="asset-admin-card-toolbar">
-              <span>{DEFAULT_TABLE_PAGE_SIZE} per page</span>
-              <span>{totalItems} items</span>
-              <span>Live frontend preview</span>
+              <input
+                type="search"
+                className="asset-admin-search-input"
+                placeholder={`Search ${title.toLowerCase()}…`}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                aria-label={`Search ${title.toLowerCase()} records`}
+              />
             </div>
           </div>
 
           {tableControls && <div className="asset-admin-table-controls">{tableControls}</div>}
 
           <div className="asset-admin-table-wrap">
-            {rows.length > 0 ? (
+            {rows.length > 0 && filteredRows.length === 0 ? (
+              <div className="asset-admin-empty-state">
+                <h4>No results for "{searchQuery}"</h4>
+                <p>Try a different search term or clear the search to show all records.</p>
+              </div>
+            ) : rows.length > 0 ? (
               <table className="asset-admin-table">
                 <thead>
                   <tr>

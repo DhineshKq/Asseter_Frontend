@@ -41,6 +41,7 @@ export default function Header({ filterClick, filterIconStatus }: Props) {
         "/asset-locations": "Asset Locations",
         "/asset-mapping": "Allocation",
         "/ip-mapping": "IP Mapping",
+        "/eb-tracker": "EB Tracker",
         "/credential-manager": "Credential Manager",
         "/users": "Employees",
     }[location.pathname] || "Workspace";

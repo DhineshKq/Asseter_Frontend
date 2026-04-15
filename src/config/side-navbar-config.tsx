@@ -78,8 +78,8 @@ export default function SideBar() {
     { title: "Locations", route: "/asset-locations", caption: "Teams and places", selectedTitle, navConfirmation },
     { title: "Allocation", route: "/asset-mapping", caption: "Ownership mapping", selectedTitle, navConfirmation },
     { title: "IP Mapping", route: "/ip-mapping", caption: "Subnet ownership", selectedTitle, navConfirmation },
-    { title: "EB Tracker", route: "/eb-tracker", caption: "Access vault", selectedTitle, navConfirmation },
-    { title: "Credential Manager", route: "/credential-manager", caption: "Access vault", selectedTitle, navConfirmation },
+    { title: "EB Tracker", route: "/eb-tracker", caption: "Power consumption", selectedTitle, navConfirmation },
+    { title: "Credential Manager", route: "/credential-manager", caption: "Credentials vault", selectedTitle, navConfirmation },
 
     { title: "Employees", route: "/users", caption: "People for asset mapping", selectedTitle, navConfirmation },
   ];

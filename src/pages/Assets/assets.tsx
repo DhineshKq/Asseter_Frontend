@@ -30,6 +30,7 @@ export default function AssetsPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
   const [submitError, setSubmitError] = useState("");
   const [deleteError, setDeleteError] = useState("");
   const [formData, setFormData] = useState<AssetFormState>({
@@ -52,7 +53,7 @@ export default function AssetsPage() {
 
   const metrics = useMemo(
     () => [
-      { label: "Asset Records", value: rows.length, helper: "Tracked in the frontend" },
+      { label: "Asset Records", value: rows.length, helper: "Fetched from the backend" },
       { label: "Working", value: rows.filter((item) => item.status === "Working").length, helper: "Healthy devices" },
       { label: "In Repair", value: rows.filter((item) => item.status === "In Repair").length, helper: "Under maintenance" },
       { label: "Deferred", value: rows.filter((item) => item.status === "Deferred").length, helper: "Waiting for action" },
@@ -145,6 +146,7 @@ export default function AssetsPage() {
 
   const fetchAssets = useCallback(async () => {
     setIsLoading(true);
+    setLoadError("");
 
     try {
       const response = await axiosPrivate.get("/assets");
@@ -157,8 +159,9 @@ export default function AssetsPage() {
             : [];
 
       setRows(payload.map(mapAssetRecord));
-    } catch (error) {
+    } catch (error: any) {
       setRows([]);
+      setLoadError(error?.response?.data?.message || "Failed to fetch assets. Check the API and try again.");
       console.error("Failed to fetch assets:", error);
     } finally {
       setIsLoading(false);
@@ -444,10 +447,12 @@ export default function AssetsPage() {
       ]}
       rows={rows}
       emptyState={{
-        title: isLoading ? "Loading assets" : "No assets available",
+        title: isLoading ? "Loading assets" : loadError ? "Unable to load assets" : "No assets available",
         description: isLoading
           ? "Fetching assets from the backend."
-          : "No asset records were returned from the backend yet.",
+          : loadError
+            ? loadError
+            : "No asset records were returned from the backend yet.",
       }}
     >
       {isModalOpen && (
