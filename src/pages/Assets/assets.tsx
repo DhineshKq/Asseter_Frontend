@@ -122,7 +122,11 @@ export default function AssetsPage() {
     assetCode: asset.assetCode ?? "",
     locationId: typeof asset.locationId === "number" ? asset.locationId : null,
     deviceId: asset.deviceId ?? "",
-    serialNumber: asset.serialNumber ?? "",
+    serialNumber: Array.isArray(asset.serialNumber)
+      ? asset.serialNumber.join(", ")
+      : asset.serialNumber != null
+      ? String(asset.serialNumber)
+      : "",
     assetName: asset.assetName ?? "",
     assetModel: asset.assetModel ?? "",
     invoiceNo: asset.invoiceNo ?? asset.invoice_no ?? asset.invoiceNumber ?? "",

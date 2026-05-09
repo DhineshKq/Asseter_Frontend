@@ -9,7 +9,9 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import * as XLSX from "xlsx";
 import { DEFAULT_TABLE_PAGE_SIZE, TablePagination, useTablePagination } from "../../components/common-component/tables";
+import downloadIcon from "../../assets/icons/download.png";
 import useAxiosPrivate from "../../services/hooks/useaxios-private";
 import "../../styles/pages/asset-admin/asset-admin.scss";
 import "../../styles/pages/eb-tracker/eb-tracker.scss";
@@ -87,6 +89,7 @@ interface FirstFloorChartRecord {
 type TrackerView = "kq" | "aitronics";
 
 const today = new Date().toISOString().slice(0, 10);
+const ALL_MONTHS_VALUE = "all";
 
 const initialGroundFloorFormState: GroundFloorFormState = {
   entryDate: today,
@@ -140,6 +143,9 @@ const formatUnits = (value: number) =>
 const formatNullableUnits = (value: number | null | undefined) =>
   typeof value === "number" && Number.isFinite(value) ? formatUnits(value) : "--";
 
+const getExportValue = (value: number | string | null | undefined) =>
+  value === null || value === undefined || value === "" ? "" : value;
+
 const addDays = (dateValue: string, days: number) => {
   const parsedDate = new Date(`${dateValue}T00:00:00`);
   parsedDate.setDate(parsedDate.getDate() + days);
@@ -153,6 +159,33 @@ const normaliseTime = (value: unknown) => {
 
   return value.slice(0, 5);
 };
+
+const getEntryMonthKey = (entryDate: string) => {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(entryDate)) {
+    return "";
+  }
+
+  return entryDate.slice(0, 7);
+};
+
+const formatMonthLabel = (monthKey: string) => {
+  const [year, month] = monthKey.split("-");
+  const monthDate = new Date(Number(year), Number(month) - 1, 1);
+
+  if (!Number.isFinite(monthDate.getTime())) {
+    return monthKey;
+  }
+
+  return monthDate.toLocaleDateString(undefined, {
+    month: "long",
+    year: "numeric",
+  });
+};
+
+const buildMonthOptions = <T extends { entryDate: string }>(entries: T[]) =>
+  Array.from(new Set(entries.map((entry) => getEntryMonthKey(entry.entryDate)).filter(Boolean))).sort((first, second) =>
+    second.localeCompare(first)
+  );
 
 const isGroundRemarkOnlyEntry = (entry: GroundFloorDisplayEntryRecord) =>
   entry.remarks?.trim() &&
@@ -187,6 +220,7 @@ export default function EbTrackerPage() {
   const [groundDeleteError, setGroundDeleteError] = useState("");
   const [editingGroundEntryId, setEditingGroundEntryId] = useState<string | null>(null);
   const [deleteGroundTarget, setDeleteGroundTarget] = useState<GroundFloorEntryRecord | null>(null);
+  const [selectedGroundMonth, setSelectedGroundMonth] = useState(ALL_MONTHS_VALUE);
   const [isFirstFloorLoading, setIsFirstFloorLoading] = useState(true);
   const [firstFloorLoadError, setFirstFloorLoadError] = useState("");
   const [isFirstFloorSaving, setIsFirstFloorSaving] = useState(false);
@@ -195,6 +229,7 @@ export default function EbTrackerPage() {
   const [firstFloorDeleteError, setFirstFloorDeleteError] = useState("");
   const [editingFirstFloorEntryId, setEditingFirstFloorEntryId] = useState<string | null>(null);
   const [deleteFirstFloorTarget, setDeleteFirstFloorTarget] = useState<FirstFloorEntryRecord | null>(null);
+  const [selectedFirstFloorMonth, setSelectedFirstFloorMonth] = useState(ALL_MONTHS_VALUE);
 
   const mapGroundFloorRecord = useCallback((record: any): GroundFloorEntryRecord => {
     const entryDate = record?.readingDate ?? record?.entryDate ?? today;
@@ -415,14 +450,103 @@ export default function EbTrackerPage() {
     [firstFloorEntries]
   );
 
-  const groundPaginatedEntries = useTablePagination(groundFloorDisplayEntries, {
+  const groundMonthOptions = useMemo(() => buildMonthOptions(groundFloorDisplayEntries), [groundFloorDisplayEntries]);
+  const firstFloorMonthOptions = useMemo(() => buildMonthOptions(firstFloorEntries), [firstFloorEntries]);
+
+  useEffect(() => {
+    if (selectedGroundMonth !== ALL_MONTHS_VALUE && !groundMonthOptions.includes(selectedGroundMonth)) {
+      setSelectedGroundMonth(ALL_MONTHS_VALUE);
+    }
+  }, [groundMonthOptions, selectedGroundMonth]);
+
+  useEffect(() => {
+    if (selectedFirstFloorMonth !== ALL_MONTHS_VALUE && !firstFloorMonthOptions.includes(selectedFirstFloorMonth)) {
+      setSelectedFirstFloorMonth(ALL_MONTHS_VALUE);
+    }
+  }, [firstFloorMonthOptions, selectedFirstFloorMonth]);
+
+  const groundMonthFilteredEntries = useMemo(
+    () =>
+      selectedGroundMonth === ALL_MONTHS_VALUE
+        ? groundFloorDisplayEntries
+        : groundFloorDisplayEntries.filter((entry) => getEntryMonthKey(entry.entryDate) === selectedGroundMonth),
+    [groundFloorDisplayEntries, selectedGroundMonth]
+  );
+
+  const firstFloorMonthFilteredEntries = useMemo(
+    () =>
+      selectedFirstFloorMonth === ALL_MONTHS_VALUE
+        ? firstFloorEntries
+        : firstFloorEntries.filter((entry) => getEntryMonthKey(entry.entryDate) === selectedFirstFloorMonth),
+    [firstFloorEntries, selectedFirstFloorMonth]
+  );
+
+  const groundMonthSummary =
+    selectedGroundMonth === ALL_MONTHS_VALUE
+      ? `${groundFloorDisplayEntries.length} items`
+      : `${groundMonthFilteredEntries.length} items in ${formatMonthLabel(selectedGroundMonth)}`;
+
+  const firstFloorMonthSummary =
+    selectedFirstFloorMonth === ALL_MONTHS_VALUE
+      ? `${firstFloorEntries.length} items`
+      : `${firstFloorMonthFilteredEntries.length} items in ${formatMonthLabel(selectedFirstFloorMonth)}`;
+
+  const handleDownloadGroundReport = useCallback(() => {
+    const exportRows = groundMonthFilteredEntries.map((entry) => ({
+      Date: entry.entryDate,
+      Remarks: entry.remarks ?? "",
+      "Start Time": entry.startTime,
+      "KQ Start": getExportValue(entry.startKqReading),
+      "BLE Start": getExportValue(entry.startBleReading),
+      "DG Start": getExportValue(entry.startDgReading),
+      "End Time": entry.endTime,
+      "KQ End": getExportValue(entry.endKqReading),
+      "BLE End": getExportValue(entry.endBleReading),
+      "DG End": getExportValue(entry.endDgReading),
+      "Total Unit (KQ)": getExportValue(entry.totalUnitKq),
+      "Total Unit (Ble)": getExportValue(entry.totalUnitBle),
+      "DG Unit": getExportValue(entry.dgUnit),
+      "Intra Unit (KQ)": getExportValue(entry.intraUnitKq),
+      "Intra Unit (Ble)": getExportValue(entry.intraUnitBle),
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(exportRows);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "KQ Ground Floor");
+    XLSX.writeFile(
+      workbook,
+      `eb-tracker-kq-ground-floor-${selectedGroundMonth === ALL_MONTHS_VALUE ? "all-months" : selectedGroundMonth}.xlsx`
+    );
+  }, [groundMonthFilteredEntries, selectedGroundMonth]);
+
+  const handleDownloadFirstFloorReport = useCallback(() => {
+    const exportRows = firstFloorMonthFilteredEntries.map((entry) => ({
+      Date: entry.entryDate,
+      Remarks: entry.remarks ?? "",
+      "Start Time": entry.startTime,
+      "Start Reading": getExportValue(entry.startReading),
+      "End Time": entry.endTime,
+      "End Reading": getExportValue(entry.endReading),
+      "Total Units": getExportValue(entry.totalUnits),
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(exportRows);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Aitronics First Floor");
+    XLSX.writeFile(
+      workbook,
+      `eb-tracker-aitronics-first-floor-${selectedFirstFloorMonth === ALL_MONTHS_VALUE ? "all-months" : selectedFirstFloorMonth}.xlsx`
+    );
+  }, [firstFloorMonthFilteredEntries, selectedFirstFloorMonth]);
+
+  const groundPaginatedEntries = useTablePagination(groundMonthFilteredEntries, {
     pageSize: DEFAULT_TABLE_PAGE_SIZE,
-    resetDeps: [groundFloorDisplayEntries],
+    resetDeps: [groundMonthFilteredEntries, selectedGroundMonth],
   });
 
-  const firstFloorPaginatedEntries = useTablePagination(firstFloorEntries, {
+  const firstFloorPaginatedEntries = useTablePagination(firstFloorMonthFilteredEntries, {
     pageSize: DEFAULT_TABLE_PAGE_SIZE,
-    resetDeps: [firstFloorEntries],
+    resetDeps: [firstFloorMonthFilteredEntries, selectedFirstFloorMonth],
   });
 
   const isGroundCalculationReady =
@@ -456,14 +580,6 @@ export default function EbTrackerPage() {
     firstFloorFormData.endTime.trim() !== "" &&
     firstFloorFormData.startReading.trim() !== "" &&
     firstFloorFormData.endReading.trim() !== "";
-
-  const isFirstFloorRemarkOnly =
-    firstFloorFormData.entryDate.trim() !== "" &&
-    firstFloorFormData.remarks.trim() !== "" &&
-    firstFloorFormData.startTime.trim() === "" &&
-    firstFloorFormData.endTime.trim() === "" &&
-    firstFloorFormData.startReading.trim() === "" &&
-    firstFloorFormData.endReading.trim() === "";
 
   const canSubmitFirstFloor = firstFloorFormData.entryDate.trim() !== "";
 
@@ -1285,8 +1401,34 @@ export default function EbTrackerPage() {
                     <p>Date-wise Ground Floor records with total and intra-unit details.</p>
                   </div>
                   <div className="asset-admin-card-toolbar">
-                    <span>{groundFloorDisplayEntries.length} items</span>
+                    <label className="eb-tracker-month-filter">
+                      <span>Month</span>
+                      <select
+                        value={selectedGroundMonth}
+                        onChange={(event) => setSelectedGroundMonth(event.target.value)}
+                        aria-label="Filter KQ Ground Floor history by month"
+                      >
+                        <option value={ALL_MONTHS_VALUE}>All months</option>
+                        {groundMonthOptions.map((monthKey) => (
+                          <option key={monthKey} value={monthKey}>
+                            {formatMonthLabel(monthKey)}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                    <span>{groundMonthSummary}</span>
                     <span>KQ, BLE and DG flow</span>
+                    <button
+                      type="button"
+                      className="asset-admin-secondary-btn eb-tracker-download-btn"
+                      onClick={handleDownloadGroundReport}
+                      disabled={isGroundLoading || groundMonthFilteredEntries.length === 0}
+                      aria-label="Download KQ Ground Floor EB tracker report"
+                      title="Download KQ report"
+                    >
+                      <img src={downloadIcon} alt="" aria-hidden="true" />
+                      <span>Download</span>
+                    </button>
                   </div>
                 </div>
 
@@ -1297,37 +1439,76 @@ export default function EbTrackerPage() {
                       <p>Fetching EB tracker records from the backend.</p>
                     </div>
                   ) : groundFloorDisplayEntries.length > 0 ? (
-                    <>
-                      <table className="asset-admin-table">
-                        <thead>
-                          <tr>
-                            <th>Date</th>
-                            <th>Remarks</th>
-                            <th>Start Time</th>
-                            <th>KQ Start</th>
-                            <th>BLE Start</th>
-                            <th>DG Start</th>
-                            <th>End Time</th>
-                            <th>KQ End</th>
-                            <th>BLE End</th>
-                            <th>DG End</th>
-                            <th>Total Unit (KQ)</th>
-                            <th>Total Unit (Ble)</th>
-                            <th>Intra Unit (KQ)</th>
-                            <th>Intra Unit (Ble)</th>
-                            <th>Actions</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {groundPaginatedEntries.paginatedRows.map((entry) =>
-                            isGroundRemarkOnlyEntry(entry) ? (
-                              <tr key={entry.id} className="eb-tracker-remark-row">
-                                <td>{entry.entryDate}</td>
-                                <td colSpan={14}>
-                                  <div className="eb-tracker-remark-cell">
-                                    <span>
-                                      <strong>Remarks:</strong> {entry.remarks}
-                                    </span>
+                    groundMonthFilteredEntries.length > 0 ? (
+                      <>
+                        <table className="asset-admin-table">
+                          <thead>
+                            <tr>
+                              <th>Date</th>
+                              <th>Remarks</th>
+                              <th>Start Time</th>
+                              <th>KQ Start</th>
+                              <th>BLE Start</th>
+                              <th>DG Start</th>
+                              <th>End Time</th>
+                              <th>KQ End</th>
+                              <th>BLE End</th>
+                              <th>DG End</th>
+                              <th>Total Unit (KQ)</th>
+                              <th>Total Unit (Ble)</th>
+                              <th>Intra Unit (KQ)</th>
+                              <th>Intra Unit (Ble)</th>
+                              <th>Actions</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {groundPaginatedEntries.paginatedRows.map((entry) =>
+                              isGroundRemarkOnlyEntry(entry) ? (
+                                <tr key={entry.id} className="eb-tracker-remark-row">
+                                  <td>{entry.entryDate}</td>
+                                  <td colSpan={14}>
+                                    <div className="eb-tracker-remark-cell">
+                                      <span>
+                                        <strong>Remarks:</strong> {entry.remarks}
+                                      </span>
+                                      <div className="eb-tracker-row-actions">
+                                        <button
+                                          type="button"
+                                          className="asset-admin-secondary-btn"
+                                          onClick={() => handleGroundEdit(entry)}
+                                          disabled={isGroundSaving || isGroundDeleting || !entry.apiId}
+                                        >
+                                          Edit
+                                        </button>
+                                        <button
+                                          type="button"
+                                          className="asset-admin-danger-btn"
+                                          onClick={() => openGroundDeleteModal(entry)}
+                                          disabled={isGroundSaving || isGroundDeleting || !entry.apiId}
+                                        >
+                                          Delete
+                                        </button>
+                                      </div>
+                                    </div>
+                                  </td>
+                                </tr>
+                              ) : (
+                                <tr key={entry.id}>
+                                  <td>{entry.entryDate}</td>
+                                  <td>{entry.remarks?.trim() ? entry.remarks : "--"}</td>
+                                  <td>{entry.startTime || "--"}</td>
+                                  <td>{formatNullableUnits(entry.startKqReading)}</td>
+                                  <td>{formatNullableUnits(entry.startBleReading)}</td>
+                                  <td>{formatNullableUnits(entry.startDgReading)}</td>
+                                  <td>{entry.endTime || "--"}</td>
+                                  <td>{formatNullableUnits(entry.endKqReading)}</td>
+                                  <td>{formatNullableUnits(entry.endBleReading)}</td>
+                                  <td>{formatNullableUnits(entry.endDgReading)}</td>
+                                  <td>{formatNullableUnits(entry.totalUnitKq)}</td>
+                                  <td>{formatNullableUnits(entry.totalUnitBle)}</td>
+                                  <td>{entry.intraUnitKq === null ? "Not calculated" : formatUnits(entry.intraUnitKq)}</td>
+                                  <td>{entry.intraUnitBle === null ? "Not calculated" : formatUnits(entry.intraUnitBle)}</td>
+                                  <td>
                                     <div className="eb-tracker-row-actions">
                                       <button
                                         type="button"
@@ -1346,58 +1527,26 @@ export default function EbTrackerPage() {
                                         Delete
                                       </button>
                                     </div>
-                                  </div>
-                                </td>
-                              </tr>
-                            ) : (
-                              <tr key={entry.id}>
-                                <td>{entry.entryDate}</td>
-                                <td>{entry.remarks?.trim() ? entry.remarks : "--"}</td>
-                                <td>{entry.startTime || "--"}</td>
-                                <td>{formatNullableUnits(entry.startKqReading)}</td>
-                                <td>{formatNullableUnits(entry.startBleReading)}</td>
-                                <td>{formatNullableUnits(entry.startDgReading)}</td>
-                                <td>{entry.endTime || "--"}</td>
-                                <td>{formatNullableUnits(entry.endKqReading)}</td>
-                                <td>{formatNullableUnits(entry.endBleReading)}</td>
-                                <td>{formatNullableUnits(entry.endDgReading)}</td>
-                                <td>{formatNullableUnits(entry.totalUnitKq)}</td>
-                                <td>{formatNullableUnits(entry.totalUnitBle)}</td>
-                                <td>{entry.intraUnitKq === null ? "Not calculated" : formatUnits(entry.intraUnitKq)}</td>
-                                <td>{entry.intraUnitBle === null ? "Not calculated" : formatUnits(entry.intraUnitBle)}</td>
-                                <td>
-                                  <div className="eb-tracker-row-actions">
-                                    <button
-                                      type="button"
-                                      className="asset-admin-secondary-btn"
-                                      onClick={() => handleGroundEdit(entry)}
-                                      disabled={isGroundSaving || isGroundDeleting || !entry.apiId}
-                                    >
-                                      Edit
-                                    </button>
-                                    <button
-                                      type="button"
-                                      className="asset-admin-danger-btn"
-                                      onClick={() => openGroundDeleteModal(entry)}
-                                      disabled={isGroundSaving || isGroundDeleting || !entry.apiId}
-                                    >
-                                      Delete
-                                    </button>
-                                  </div>
-                                </td>
-                              </tr>
-                            )
-                          )}
-                        </tbody>
-                      </table>
-                      <TablePagination
-                        currentPage={groundPaginatedEntries.currentPage}
-                        pageSize={groundPaginatedEntries.pageSize}
-                        totalItems={groundPaginatedEntries.totalItems}
-                        itemLabel="entries"
-                        onPageChange={groundPaginatedEntries.setCurrentPage}
-                      />
-                    </>
+                                  </td>
+                                </tr>
+                              )
+                            )}
+                          </tbody>
+                        </table>
+                        <TablePagination
+                          currentPage={groundPaginatedEntries.currentPage}
+                          pageSize={groundPaginatedEntries.pageSize}
+                          totalItems={groundPaginatedEntries.totalItems}
+                          itemLabel="entries"
+                          onPageChange={groundPaginatedEntries.setCurrentPage}
+                        />
+                      </>
+                    ) : (
+                      <div className="asset-admin-empty-state">
+                        <h4>No KQ entries in {formatMonthLabel(selectedGroundMonth)}</h4>
+                        <p>Choose another month or switch back to all months to see the complete history.</p>
+                      </div>
+                    )
                   ) : (
                     <div className="asset-admin-empty-state">
                       <h4>No KQ Ground Floor entries yet</h4>
@@ -1596,8 +1745,34 @@ export default function EbTrackerPage() {
                     <p>Date-wise First Floor records with the simple single-reading model.</p>
                   </div>
                   <div className="asset-admin-card-toolbar">
-                    <span>{firstFloorEntries.length} items</span>
+                    <label className="eb-tracker-month-filter">
+                      <span>Month</span>
+                      <select
+                        value={selectedFirstFloorMonth}
+                        onChange={(event) => setSelectedFirstFloorMonth(event.target.value)}
+                        aria-label="Filter Aitronics First Floor history by month"
+                      >
+                        <option value={ALL_MONTHS_VALUE}>All months</option>
+                        {firstFloorMonthOptions.map((monthKey) => (
+                          <option key={monthKey} value={monthKey}>
+                            {formatMonthLabel(monthKey)}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                    <span>{firstFloorMonthSummary}</span>
                     <span>Single-reading flow</span>
+                    <button
+                      type="button"
+                      className="asset-admin-secondary-btn eb-tracker-download-btn"
+                      onClick={handleDownloadFirstFloorReport}
+                      disabled={isFirstFloorLoading || firstFloorMonthFilteredEntries.length === 0}
+                      aria-label="Download Aitronics First Floor EB tracker report"
+                      title="Download Aitronics report"
+                    >
+                      <img src={downloadIcon} alt="" aria-hidden="true" />
+                      <span>Download</span>
+                    </button>
                   </div>
                 </div>
 
@@ -1608,62 +1783,69 @@ export default function EbTrackerPage() {
                       <p>Fetching EB tracker records from the backend.</p>
                     </div>
                   ) : firstFloorEntries.length > 0 ? (
-                    <>
-                      <table className="asset-admin-table">
-                        <thead>
-                          <tr>
-                            <th>Date</th>
-                            <th>Remarks</th>
-                            <th>Start Time</th>
-                            <th>Reading</th>
-                            <th>End Time</th>
-                            <th>Reading</th>
-                            <th>Total Units</th>
-                            <th>Actions</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {firstFloorPaginatedEntries.paginatedRows.map((entry) => (
-                            <tr key={entry.id}>
-                              <td>{entry.entryDate}</td>
-                              <td>{entry.remarks?.trim() ? entry.remarks : "--"}</td>
-                              <td>{entry.startTime || "--"}</td>
-                              <td>{formatNullableUnits(entry.startReading)}</td>
-                              <td>{entry.endTime || "--"}</td>
-                              <td>{formatNullableUnits(entry.endReading)}</td>
-                              <td>{formatNullableUnits(entry.totalUnits)}</td>
-                              <td>
-                                <div className="eb-tracker-row-actions">
-                                  <button
-                                    type="button"
-                                    className="asset-admin-secondary-btn"
-                                    onClick={() => handleFirstFloorEdit(entry)}
-                                    disabled={isFirstFloorSaving || isFirstFloorDeleting || !entry.apiId}
-                                  >
-                                    Edit
-                                  </button>
-                                  <button
-                                    type="button"
-                                    className="asset-admin-danger-btn"
-                                    onClick={() => openFirstFloorDeleteModal(entry)}
-                                    disabled={isFirstFloorSaving || isFirstFloorDeleting || !entry.apiId}
-                                  >
-                                    Delete
-                                  </button>
-                                </div>
-                              </td>
+                    firstFloorMonthFilteredEntries.length > 0 ? (
+                      <>
+                        <table className="asset-admin-table">
+                          <thead>
+                            <tr>
+                              <th>Date</th>
+                              <th>Remarks</th>
+                              <th>Start Time</th>
+                              <th>Reading</th>
+                              <th>End Time</th>
+                              <th>Reading</th>
+                              <th>Total Units</th>
+                              <th>Actions</th>
                             </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                      <TablePagination
-                        currentPage={firstFloorPaginatedEntries.currentPage}
-                        pageSize={firstFloorPaginatedEntries.pageSize}
-                        totalItems={firstFloorPaginatedEntries.totalItems}
-                        itemLabel="entries"
-                        onPageChange={firstFloorPaginatedEntries.setCurrentPage}
-                      />
-                    </>
+                          </thead>
+                          <tbody>
+                            {firstFloorPaginatedEntries.paginatedRows.map((entry) => (
+                              <tr key={entry.id}>
+                                <td>{entry.entryDate}</td>
+                                <td>{entry.remarks?.trim() ? entry.remarks : "--"}</td>
+                                <td>{entry.startTime || "--"}</td>
+                                <td>{formatNullableUnits(entry.startReading)}</td>
+                                <td>{entry.endTime || "--"}</td>
+                                <td>{formatNullableUnits(entry.endReading)}</td>
+                                <td>{formatNullableUnits(entry.totalUnits)}</td>
+                                <td>
+                                  <div className="eb-tracker-row-actions">
+                                    <button
+                                      type="button"
+                                      className="asset-admin-secondary-btn"
+                                      onClick={() => handleFirstFloorEdit(entry)}
+                                      disabled={isFirstFloorSaving || isFirstFloorDeleting || !entry.apiId}
+                                    >
+                                      Edit
+                                    </button>
+                                    <button
+                                      type="button"
+                                      className="asset-admin-danger-btn"
+                                      onClick={() => openFirstFloorDeleteModal(entry)}
+                                      disabled={isFirstFloorSaving || isFirstFloorDeleting || !entry.apiId}
+                                    >
+                                      Delete
+                                    </button>
+                                  </div>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                        <TablePagination
+                          currentPage={firstFloorPaginatedEntries.currentPage}
+                          pageSize={firstFloorPaginatedEntries.pageSize}
+                          totalItems={firstFloorPaginatedEntries.totalItems}
+                          itemLabel="entries"
+                          onPageChange={firstFloorPaginatedEntries.setCurrentPage}
+                        />
+                      </>
+                    ) : (
+                      <div className="asset-admin-empty-state">
+                        <h4>No Aitronics entries in {formatMonthLabel(selectedFirstFloorMonth)}</h4>
+                        <p>Choose another month or switch back to all months to see the complete history.</p>
+                      </div>
+                    )
                   ) : (
                     <div className="asset-admin-empty-state">
                       <h4>No Aitronics First Floor entries yet</h4>

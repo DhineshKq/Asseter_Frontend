@@ -283,12 +283,19 @@ export default function AssetMappingPage() {
           matchedAsset?.deviceId ??
           mapping?.deviceId ??
           "",
-        serialNumber:
-          mapping?.asset?.serialNumber ??
-          mapping?.assetDetails?.serialNumber ??
-          matchedAsset?.serialNumber ??
-          mapping?.serialNumber ??
-          "",
+        serialNumber: (() => {
+          const raw =
+            mapping?.asset?.serialNumber ??
+            mapping?.assetDetails?.serialNumber ??
+            matchedAsset?.serialNumber ??
+            mapping?.serialNumber ??
+            "";
+          return Array.isArray(raw)
+            ? raw.join(", ")
+            : raw != null
+            ? String(raw)
+            : "";
+        })(),
         employeeId:
           mapping?.employeeId ??
           mapping?.employee?.employeeId ??
@@ -389,7 +396,11 @@ export default function AssetMappingPage() {
               id: asset.id,
               assetName: asset.assetName ?? "",
               deviceId: asset.deviceId ?? "",
-              serialNumber: asset.serialNumber ?? "",
+              serialNumber: Array.isArray(asset.serialNumber)
+                ? asset.serialNumber.join(", ")
+                : asset.serialNumber != null
+                ? String(asset.serialNumber)
+                : "",
               availableQuantity: getAvailableQuantity(asset),
             },
           ])
@@ -469,7 +480,11 @@ export default function AssetMappingPage() {
           id: asset.id,
           assetName: asset.assetName ?? "",
           deviceId: asset.deviceId ?? "",
-          serialNumber: asset.serialNumber ?? "",
+          serialNumber: Array.isArray(asset.serialNumber)
+            ? asset.serialNumber.join(", ")
+            : asset.serialNumber != null
+            ? String(asset.serialNumber)
+            : "",
           availableQuantity: getAvailableQuantity(asset),
         }))
       );
